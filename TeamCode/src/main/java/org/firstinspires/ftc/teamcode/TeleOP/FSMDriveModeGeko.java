@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
 
-import static java.lang.Math.abs;
-
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @TeleOp(name = "FSM DRIVE MODE", group = "0. TeleOp")
-public class FSMDriveMode extends OpMode {
+public class FSMDriveModeGeko extends OpMode {
     private Robot robot;
 //    private Follower follower;
 
@@ -38,12 +36,10 @@ public class FSMDriveMode extends OpMode {
 
     private boolean resetLaunch;
 
-    private boolean isLoading;
-
     private void updateFollower(double power) {
-        double y = gamepad1.left_stick_y*power; // Remember, this is reversed!
-        double x = -gamepad1.left_stick_x*power; // this is strafing
-        double rx = -gamepad1.right_stick_x*power;
+        double y = gamepad1.left_stick_y * power; // Remember, this is reversed!
+        double x = -gamepad1.left_stick_x * power; // this is strafing
+        double rx = -gamepad1.right_stick_x * power;
 
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio, but only when
@@ -102,57 +98,48 @@ public class FSMDriveMode extends OpMode {
         // launch sequence
         if (launchSingleton) {
 
-            robot.lp.StartLaunchTrain();
-            if (motorTimer.seconds() > 2)
-            {
-                robot.lp.Launch();
-                // TODO: adjust timer below according to ball falling speed
-                if (motorTimer.seconds() > 3)
-                {
-                    robot.lp.Reset();
-                    if (motorTimer.seconds() > 3.1) {
-                        launchSingleton = false;
+
+            if (motorTimer.seconds() > .5) {
+                robot.lp.StartLaunchTrain();
+
+                if (motorTimer.seconds() > 2.5) {
+                    robot.lp.Load();
+                    robot.lp.Launch();
+                    // TODO: adjust timer below according to ball falling speed
+                    if (motorTimer.seconds() > 3.2) {
+                        robot.lp.Reset();
+                        robot.lp.StopLoad();
+                        if (motorTimer.seconds() > 6) {
+                            launchSingleton = false;
+                            robot.lp.StopLaunchTrain();
+                        }
+                    }
+                }
+            } else if (gamepad1.right_bumper) {
+                launchSingleton = true;
+                motorTimer.reset();
+            } else {
+                motorTimer.reset();
+            }
+
+            if (gamepad1.left_bumper) {
+                if (loadSingleton) {
+                    loadTimer.reset();
+                    loadSingleton = false;
+                }
+                robot.lp.StartGekoIntake();
+                if (loadTimer.seconds() > 2) {
+                    robot.lp.OpenGate();
+                    if (loadTimer.seconds() > 2.5) {
+                        robot.lp.CloseGate();
+                        loadSingleton = true;
                         robot.lp.StopLaunchTrain();
                     }
                 }
             }
-        } else if (gamepad1.right_bumper) {
-            launchSingleton=true;
-            motorTimer.reset();
-        } else {
-            motorTimer.reset();
+
+
+            telemetry.update();
         }
-
-        if (gamepad1.left_bumper)
-        {
-           isLoading = true;
-        }
-        if (isLoading)
-        {
-            if (loadSingleton)
-            {
-                loadTimer.reset();
-                loadSingleton = false;
-            }
-            robot.lp.Load();
-            if (loadTimer.seconds() > 1.3)
-            {
-                if (loadTimer.seconds() > 1.7)
-                {
-                    loadSingleton = true;
-                    robot.lp.StopLaunchTrain();
-                    robot.lp.StopLoad();
-                    isLoading= false;
-                }
-            }
-        }
-
-
-
-
-
-
-
-        telemetry.update();
     }
 }
