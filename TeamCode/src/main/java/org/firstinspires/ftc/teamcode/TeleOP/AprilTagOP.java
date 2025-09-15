@@ -42,6 +42,9 @@ public class AprilTagOP extends OpMode {
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTag)
+                .enableLiveView(true)
+                .setAutoStartStreamOnBuild(true)
+                .setShowStatsOverlay(true)
                 .build();
 
         telemetry.addLine("AprilTag Op Initialized");
@@ -60,25 +63,27 @@ public class AprilTagOP extends OpMode {
             // In this case it goes to the first april tag detected
             // TODO: sort by tag ids corresponding to goals
             AprilTagDetection tag = detections.get(0);
-            double pos_x = tag.center.x;
-            // calculate the error
-            double error = reference - pos_x;
-            if (Math.abs(error) > 20) {
-                // rate of change of the error
-                double derivative = (error - lastError) / timer.seconds();
+            if(tag.id == 20) {
+                double pos_x = tag.center.x;
+                // calculate the error
+                double error = reference - pos_x;
+                if (Math.abs(error) > 20) {
+                    // rate of change of the error
+                    double derivative = (error - lastError) / timer.seconds();
 
-                // sum of all error over time
-                integralSum = integralSum + (error * timer.seconds());
+                    // sum of all error over time
+                    integralSum = integralSum + (error * timer.seconds());
 
-                double out = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+                    double out = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
 
-                pivotMotor.setPower(out);
+                    pivotMotor.setPower(out);
 
-                lastError = error;
+                    lastError = error;
 
-                // reset the timer for next time
-                timer.reset();
-            } else pivotMotor.setPower(0);
+                    // reset the timer for next time
+                    timer.reset();
+                }
+            }   else pivotMotor.setPower(0);
         }
     }
 
