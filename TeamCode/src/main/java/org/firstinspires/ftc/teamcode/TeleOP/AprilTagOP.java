@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.TeleOP;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -18,10 +19,23 @@ public class AprilTagOP extends OpMode {
     private VisionPortal visionPortal;
     private AprilTagProcessor aprilTag;
     private DcMotorEx pivotMotor;
+    //PID Variables
+    double Kp = 0;
+    double Ki = 0;
+    double Kd = 0;
 
+    double reference = 320;
+
+    double integralSum = 0;
+
+    double lastError = 0;
+
+    ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void init() {
+
+
         pivotMotor = hardwareMap.get(DcMotorEx.class, "CamPivot");
         aprilTag = new AprilTagProcessor.Builder().build();
 
@@ -39,33 +53,33 @@ public class AprilTagOP extends OpMode {
         moveToTag();
     }
 
-    public void moveToTag()
-    {
+    public void moveToTag() {
         List<AprilTagDetection> detections = aprilTag.getDetections();
-
-        double CENTER_X = 320;
-        double tolerance = 20;
 
         if (!detections.isEmpty()) {
             // In this case it goes to the first april tag detected
             // TODO: sort by tag ids corresponding to goals
             AprilTagDetection tag = detections.get(0);
-            double error = tag.center.x - CENTER_X;
+            double pos_x = tag.center.x;
+            // calculate the error
+            double error = reference - pos_x;
+            if (Math.abs(error) > 20) {
+                // rate of change of the error
+                double derivative = (error - lastError) / timer.seconds();
 
-            // TODO: check this crap logic that makes no sense
-            if (Math.abs(error) > tolerance) {
+                // sum of all error over time
+                integralSum = integralSum + (error * timer.seconds());
 
-                double power = error / CENTER_X;
-                power = Math.max(-0.5, Math.min(0.5, power));
+                double out = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
 
-                pivotMotor.setPower(power);
-            } else {
-                pivotMotor.setPower(0);
-            }
-        } else {
-            pivotMotor.setPower(0);
+                pivotMotor.setPower(out);
+
+                lastError = error;
+
+                // reset the timer for next time
+                timer.reset();
+            } else pivotMotor.setPower(0);
         }
-
     }
 
     public void spewTelemetry()
