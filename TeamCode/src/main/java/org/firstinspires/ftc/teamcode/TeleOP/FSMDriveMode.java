@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.TeleOP;
 
 import static java.lang.Math.abs;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,7 +16,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.Arrays;
 import java.util.List;
-
+@Configurable
 @TeleOp(name = "FSM DRIVE MODE", group = "0. TeleOp")
 public class FSMDriveMode extends OpMode {
     private Robot robot;
