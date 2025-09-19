@@ -39,12 +39,14 @@ public class AprilIndian extends OpMode {
 
         vBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
         vBuilder.addProcessor(tagProcessor);
-        vBuilder.setCameraResolution(new Size(frameWidth, 480));
+        vBuilder.setCameraResolution(new Size(frameWidth, 720));
         vBuilder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
 
         VisionPortal vision = vBuilder.build();
 
         vision.resumeStreaming();
+
+
 
     }
 

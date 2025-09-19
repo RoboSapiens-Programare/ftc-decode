@@ -1,32 +1,39 @@
-package org.firstinspires.ftc.teamcode.Auto;
+package org.firstinspires.ftc.teamcode.TeleOP;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "Motor test", group = "1. Auto Tests")
-public class MotorTest extends OpMode {
+@Configurable
+@TeleOp(name = "unga bunga", group = "0. TeleOp")
+public class PizdelDrive extends OpMode {
+    private Robot robot;
+//    private Follower follower;
+
+    private ElapsedTime speedChangeTimer = new ElapsedTime();
+    private boolean slowMode = false;
+
     private DcMotorEx leftFront;
     private DcMotorEx leftRear;
     private DcMotorEx rightFront;
     private DcMotorEx rightRear;
     private List<DcMotorEx> motors;
 
-    private DcMotorEx geko;
-
-
-    private void updateFollower(double power, double gx, double gy, double gr) {
-        double y = -gy*power; // Remember, this is reversed!
-        double x = gx*power; // this is strafing
-        double rx = gr*power;
+    private void updateFollower(double power) {
+        double y = gamepad1.left_stick_y*power; // Remember, this is reversed!
+        double x = -gamepad1.left_stick_x*power; // this is strafing
+        double rx = -gamepad1.right_stick_x*power;
 
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio, but only when
@@ -41,10 +48,15 @@ public class MotorTest extends OpMode {
         leftRear.setPower(leftRearPower);
         rightFront.setPower(rightFrontPower);
         rightRear.setPower(rightRearPower);
+
+        speedChangeTimer.reset();
     }
 
     @Override
     public void init() {
+
+        //robot = new Robot(hardwareMap);
+
         leftFront = hardwareMap.get(DcMotorEx.class, Constants.mecanumConstants.leftFrontMotorName);
         leftRear = hardwareMap.get(DcMotorEx.class, Constants.mecanumConstants.leftRearMotorName);
         rightRear = hardwareMap.get(DcMotorEx.class, Constants.mecanumConstants.rightRearMotorName);
@@ -66,13 +78,17 @@ public class MotorTest extends OpMode {
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
-        geko = hardwareMap.get(DcMotorEx.class, "gekoMotor");
-        geko.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     @Override
     public void loop() {
-        updateFollower(1, 0, 1, 0);
-        geko.setPower(1);
+        if (gamepad1.touchpad && speedChangeTimer.seconds() > .5){
+            slowMode = !slowMode;
+            speedChangeTimer.reset();
+        }
+
+        updateFollower(1);
+
+        telemetry.update();
     }
 }
