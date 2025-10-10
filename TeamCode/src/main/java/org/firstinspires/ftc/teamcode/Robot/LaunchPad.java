@@ -7,63 +7,87 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class LaunchPad {
-    private DcMotorEx gekoLauncherFinal;
-    private DcMotorEx gekoLoader;
+    private DcMotorEx geckoLauncherFinal;
+    private DcMotorEx geckoLoader;
     private Servo outtakeServo;
     private Servo gateServo;
 
+    private Servo leftRoomPush;
+    private Servo rightRoomPush;
+
+    private Servo roomGate;
+
+
+
     public LaunchPad(HardwareMap hardwareMap) {
-        gekoLauncherFinal = hardwareMap.get(DcMotorEx.class, "gekoMotor");
-        gekoLoader = hardwareMap.get(DcMotorEx.class, "gekoLoader");
+        geckoLauncherFinal = hardwareMap.get(DcMotorEx.class, "geckoMotor");
+        geckoLoader = hardwareMap.get(DcMotorEx.class, "geckoLoader");
         outtakeServo = hardwareMap.get(Servo.class, "outtakeServo");
         gateServo = hardwareMap.get(Servo.class, "gateServo");
 
-        gekoLauncherFinal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        gekoLoader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftRoomPush = hardwareMap.get(Servo.class, "leftRoomPush");
+        rightRoomPush = hardwareMap.get(Servo.class, "rightRoomPush");
 
-        gekoLauncherFinal.setDirection(DcMotorSimple.Direction.FORWARD);
-        gekoLoader.setDirection(DcMotorSimple.Direction.FORWARD);
+        roomGate = hardwareMap.get(Servo.class, "roomGate");
 
-        gekoLauncherFinal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        gekoLoader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        geckoLauncherFinal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        geckoLoader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        geckoLauncherFinal.setDirection(DcMotorSimple.Direction.FORWARD);
+        geckoLoader.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        geckoLauncherFinal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        geckoLoader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void StartLaunchTrain() {
-        gekoLauncherFinal.setPower(RobotConstants.gekoLauncherPower);
+        geckoLauncherFinal.setPower(uV.outtakePower);
     }
 
     public void StartGekoIntake()
     {
-        gekoLauncherFinal.setPower(RobotConstants.gekoIntakePower);
+        geckoLauncherFinal.setPower(uV.intakePower);
     }
 
     public void StopLaunchTrain() {
-        gekoLauncherFinal.setPower(0);
+        geckoLauncherFinal.setPower(0);
     }
 
     public void Launch() {
-        outtakeServo.setPosition(RobotConstants.outtakeServoOpen);
+        outtakeServo.setPosition(uV.outtakeServoOpen);
     }
 
     public void Reset() {
-        outtakeServo.setPosition(RobotConstants.outtakeServoClose);
+        outtakeServo.setPosition(uV.outtakeServoClose);
     }
 
     public void OpenGate()
     {
-        gateServo.setPosition(RobotConstants.openGate);
+        gateServo.setPosition(uV.camLeversUp);
+    }
+
+    public void    OpenLeftRoom()
+    {
+        leftRoomPush.setPosition(1);
+        roomGate.setPosition(1);
+    }
+
+    public void CloseLeftRoom()
+    {
+        leftRoomPush.setPosition(0);
+        roomGate.setPosition(0);
     }
 
     public void Load() {
-        gekoLoader.setPower(0.6);
-        gekoLauncherFinal.setPower(0.7);
+        geckoLoader.setPower(0.6);
+        geckoLauncherFinal.setPower(0.7);
     }
 
     public void StopLoad() {
-        gekoLoader.setPower(0);
+        geckoLoader.setPower(0);
     }
     public void CloseGate()
     {
-        gateServo.setPosition(RobotConstants.closeGate);
+        gateServo.setPosition(uV.camLeversUp);
     }
 }
