@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @Autonomous(name = "Full test", group = "1. Auto Tests")
-public class IclesTest extends OpMode { ;
+public class FullTest extends OpMode { ;
 
     private DcMotorEx intakeMotor;
     private DcMotorEx outtakeMotor;
@@ -42,9 +42,7 @@ public class IclesTest extends OpMode { ;
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        // TODO: change outtake motor hardwaremap name to correct name
-
-        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtakeMotor");
+        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtakeMotor7");
         outtakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         servoCamLeft = hardwareMap.get(Servo.class, "servoCamLeft");
@@ -88,8 +86,8 @@ public class IclesTest extends OpMode { ;
         }
 
         if (timer.milliseconds() > 4500 && step == 2) {
-            servoGeckoLeft.setPower(uV.geckoLiftPower);
-            servoGeckoRight.setPower(uV.geckoLiftPower);
+            servoGeckoLeft.setPower(0);
+            servoGeckoRight.setPower(0);
 
             ++step;
         }
@@ -101,5 +99,7 @@ public class IclesTest extends OpMode { ;
             step = 0;
             timer.reset();
         }
+
+        // TODO: review logic
     }
 }
