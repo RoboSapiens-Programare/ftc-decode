@@ -14,8 +14,7 @@ import org.firstinspires.ftc.teamcode.Robot.uV;
 public class IclesTest extends OpMode { ;
 
     private DcMotorEx intakeMotor;
-    private DcMotorEx outtakeMotor1;
-    private DcMotorEx outtakeMotor2;
+    private DcMotorEx outtakeMotor;
 
     private Servo servoCamLeft;
     private Servo servoCamRight;
@@ -43,11 +42,10 @@ public class IclesTest extends OpMode { ;
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        outtakeMotor1 = hardwareMap.get(DcMotorEx.class, "outtakeMotor1");
-        outtakeMotor1.setDirection(DcMotorSimple.Direction.FORWARD);
+        // TODO: change outtake motor hardwaremap name to correct name
 
-        outtakeMotor2 = hardwareMap.get(DcMotorEx.class, "outtakeMotor2");
-        outtakeMotor2.setDirection(DcMotorSimple.Direction.FORWARD);
+        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtakeMotor");
+        outtakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         servoCamLeft = hardwareMap.get(Servo.class, "servoCamLeft");
         servoCamRight = hardwareMap.get(Servo.class, "servoCamRight");
@@ -73,8 +71,7 @@ public class IclesTest extends OpMode { ;
     @Override
     public void loop() {
         intakeMotor.setPower(uV.intakePower);
-        outtakeMotor1.setPower(uV.outtakePower);
-        outtakeMotor2.setPower(uV.outtakePower);
+        outtakeMotor.setPower(uV.outtakePower);
 
         if (step == 0) {
             servoGeckoLeft.setPower(uV.geckoLiftPower);
