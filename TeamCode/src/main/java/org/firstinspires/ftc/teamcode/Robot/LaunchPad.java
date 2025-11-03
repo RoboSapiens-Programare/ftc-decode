@@ -63,7 +63,7 @@ public class LaunchPad {
 
     public void OpenGate()
     {
-        gateServo.setPosition(uV.camLeversUp);
+        gateServo.setPosition(uV.camLeversUp1);
     }
 
     public void    OpenLeftRoom()
@@ -88,6 +88,6 @@ public class LaunchPad {
     }
     public void CloseGate()
     {
-        gateServo.setPosition(uV.camLeversUp);
+        gateServo.setPosition(uV.camLeversUp1);
     }
 }
