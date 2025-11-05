@@ -105,10 +105,10 @@ public class SebiOP extends OpMode { ;
         }
 
 
-//        if (gamepad1.circle)
-//        {
-//            lift = true;
-//        }
+        if (gamepad1.circle)
+        {
+            lift = true;
+        }
 
         if (gamepad1.cross)
         {
@@ -141,20 +141,20 @@ public class SebiOP extends OpMode { ;
         }
 
 
-//        if (lift) {
-//            if (step == 0) {
-//                uppies.setPosition(uV.liftUp);
-//                ++step;
-//            }
-//
-//            if (step == 1 && lifttimer.milliseconds() > 1000) {
-//                uppies.setPositio0n(uV.uppiesDown);
-//                step = 0;
-//                lift = false;
-//            }
-//        }
+        if (lift) {
+            if (step == 0) {
+                uppies.setPosition(uV.liftUp);
+                ++step;
+            }
+
+            if (step == 1 && lifttimer.milliseconds() > 1000) {
+                uppies.setPosition(uV.uppiesDown);
+                step = 0;
+                lift = false;
+            }
+        }
 
 
-        //updateFollower(1);
+        updateFollower(1);
     }
 }

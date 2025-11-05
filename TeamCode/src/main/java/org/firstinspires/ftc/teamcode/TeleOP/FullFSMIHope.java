@@ -1,26 +1,30 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Robot.Revolver;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @TeleOp(name = "Drive", group = "0. TeleOp")
 public class FullFSMIHope extends OpMode { ;
 
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    Telemetry dashboardTelemetry = dashboard.getTelemetry();
     private DcMotorEx intakeMotor;
-    private DcMotorEx outtakeMotor;
+
+
 
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
 
-    private State state = State.DRIVE;
+    private State STATE = State.INTAKE;
 
     private Robot robot;
 
@@ -30,20 +34,14 @@ public class FullFSMIHope extends OpMode { ;
 
     enum State {
         INTAKE,
-        OUTTAKE,
-        DRIVE
+        OUTTAKE
     };
 
     // change state and reset timers
     private void changeState(State newState) {
-        state = newState;
+        STATE = newState;
         inputTimer.reset();
         stateTimer.reset();
-    }
-
-    // clamp value between min and max
-    private double clamp(double x, double min, double max) {
-        return Math.min(Math.max(x, min), max);
     }
 
 
@@ -68,24 +66,26 @@ public class FullFSMIHope extends OpMode { ;
     }
 
     private void handleIntake() {
+        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
         intakeMotor.setPower(uV.intakePower);
-        robot.revolver.setMode(Revolver.Mode.INTAKE);
+        robot.revolver.mode = Revolver.Mode.INTAKE;
 
-        // power off intake and switch back to drive state
-        if (gamepad1.left_bumper) {
+
+
+        // power off intake and switch back to outtake state
+        if (gamepad1.cross && stateTimer.milliseconds() > 200) {
             intakeMotor.setPower(0);
-
-            changeState(State.DRIVE);
+            changeState(State.OUTTAKE);
         }
     }
 
     private void handleOuttake() {
-        outtakeMotor.setPower(uV.outtakePower);
-        robot.revolver.setMode(Revolver.Mode.OUTTAKE);
-
+        robot.turret.startMotor();
+        robot.revolver.mode = Revolver.Mode.INTAKE;
+        robot.revolver.setPosition();
         // shoot ball
         // wait 500 ms to let motor speed up
-        if (gamepad1.right_trigger > .5 && stateTimer.milliseconds() > 200) {
+        if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 200) {
             robot.revolver.load();
         } else {
             robot.revolver.retract();
@@ -93,40 +93,22 @@ public class FullFSMIHope extends OpMode { ;
 
         // go to next slot
         if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
-            robot.revolver.nextSlot();
-
+            robot.revolver.prevSlot();
             inputTimer.reset();
         }
 
         // go to previous slot
         if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
-            robot.revolver.prevSlot();
-
+            robot.revolver.nextSlot();
             inputTimer.reset();
         }
 
         // go back to drive mode
-        if (gamepad1.square) {
-            outtakeMotor.setPower(0);
-
-            changeState(State.DRIVE);
-        }
-    }
-
-    private void handleDrive() {
-        // leave motor in semi-active state to reduce ramp up time
-        outtakeMotor.setPower(.3 * uV.outtakePower);
-
-        // switch to intake state
-        if (gamepad1.cross) {
+        if (gamepad1.cross && stateTimer.milliseconds() > 200) {
             changeState(State.INTAKE);
         }
-
-        // switch to outtake state
-        if (gamepad1.square) {
-            changeState(State.OUTTAKE);
-        }
     }
+
 
     @Override
     public void init() {
@@ -135,24 +117,21 @@ public class FullFSMIHope extends OpMode { ;
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtakeMotor");
-        outtakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        robot.revolver.setMode(Revolver.Mode.INTAKE);
+
+        robot.revolver.mode = Revolver.Mode.INTAKE;
     }
 
     @Override
     public  void start() {
         // start in drive mode
-        changeState(State.DRIVE);
+        changeState(State.INTAKE);
     }
 
     @Override
     public void loop() {
 
-        // FSM :>
-
-        switch (state) {
+        switch (STATE) {
             case INTAKE:
                 handleIntake();
                 break;
@@ -161,17 +140,19 @@ public class FullFSMIHope extends OpMode { ;
                 handleOuttake();
                 break;
 
-            case DRIVE:
-                handleDrive();
-                break;
         }
 
 //        updateFollower(1);
 
-        robot.revolver.update();
 
-        telemetry.addData("current position", robot.revolver.getCurrentPosition());
-        telemetry.addData("target position", robot.revolver.getTargetPosition());
-        telemetry.addData("state", state);
+        dashboardTelemetry.addData("target position", robot.revolver.getTargetSlot());
+        dashboardTelemetry.addData("state", STATE);
+
+        dashboardTelemetry.addData( "encoder", robot.revolver.encoder.getVoltage());
+        telemetry.addData( "encoder", robot.revolver.encoder.getVoltage());
+
+        telemetry.addData("target position", robot.revolver.getTargetSlot());
+        telemetry.addData("state", STATE);
         telemetry.update();
+        dashboardTelemetry.update();
     }}
