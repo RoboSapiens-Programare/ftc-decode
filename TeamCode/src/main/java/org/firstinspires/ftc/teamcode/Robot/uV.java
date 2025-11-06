@@ -17,6 +17,7 @@ public class uV {
     public static double camLeversUp2 = 0.39;
     public static double camLeversUp1 = 0.45;
 
+    public static double revolverPower = 0.08;
 
     public static double revolverPositonIntake0 = 0;
 
