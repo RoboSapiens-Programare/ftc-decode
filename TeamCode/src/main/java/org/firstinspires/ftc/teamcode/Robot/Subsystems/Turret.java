@@ -13,8 +13,8 @@ public class Turret {
     private float turretAngle;
 
     public Turret(HardwareMap hwMap) {
-        turretMotor = hwMap.get(DcMotorEx.class, "turretMotor");
-        turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+//        turretMotor = hwMap.get(DcMotorEx.class, "turretMotor");
+//        turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 //        turretServo = hwMap.get(Servo.class, "turretServo");
 //        pivotServo = hwMap.get(Servo.class, "pivotServo");
     }

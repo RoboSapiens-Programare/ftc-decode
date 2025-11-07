@@ -19,10 +19,13 @@ public class FullFSMIHope extends OpMode { ;
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     private DcMotorEx intakeMotor;
+    Thread t1;
 
 
-
-    private DcMotorEx leftFront, leftRear, rightFront, rightRear;
+//    private DcMotorEx leftFront;
+    private DcMotorEx leftRear;
+    private DcMotorEx rightFront;
+    private DcMotorEx rightRear;
 
     private State STATE = State.INTAKE;
 
@@ -59,28 +62,28 @@ public class FullFSMIHope extends OpMode { ;
         double rightFrontPower = (y - x - rx) / denominator;
         double rightRearPower = (y + x - rx) / denominator;
 
-        leftFront.setPower(leftFrontPower);
+        robot.revolver.leftFront.setPower(leftFrontPower);
         leftRear.setPower(leftRearPower);
         rightFront.setPower(rightFrontPower);
         rightRear.setPower(rightRearPower);
     }
 
     private void handleIntake() {
-        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
-        intakeMotor.setPower(uV.intakePower);
+//        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
+//        intakeMotor.setPower(uV.intakePower);
         robot.revolver.mode = Revolver.Mode.INTAKE;
 
 
 
         // power off intake and switch back to outtake state
         if (gamepad1.cross && stateTimer.milliseconds() > 200) {
-            intakeMotor.setPower(0);
+//            intakeMotor.setPower(0);
             changeState(State.OUTTAKE);
         }
     }
 
     private void handleOuttake() {
-        robot.turret.startMotor();
+//        robot.turret.startMotor();
         robot.revolver.mode = Revolver.Mode.INTAKE;
         robot.revolver.setPosition();
         // shoot ball
@@ -107,6 +110,7 @@ public class FullFSMIHope extends OpMode { ;
         if (gamepad1.cross && stateTimer.milliseconds() > 200) {
             changeState(State.INTAKE);
         }
+
     }
 
 
@@ -114,8 +118,8 @@ public class FullFSMIHope extends OpMode { ;
     public void init() {
         robot = new Robot(hardwareMap);
 
-        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
-        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+//        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
+//        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
 
@@ -126,6 +130,11 @@ public class FullFSMIHope extends OpMode { ;
     public  void start() {
         // start in drive mode
         changeState(State.INTAKE);
+
+        t1 = new Thread(robot.revolver);
+
+        t1.start();
+
     }
 
     @Override
@@ -148,12 +157,21 @@ public class FullFSMIHope extends OpMode { ;
 
         dashboardTelemetry.addData("target position", robot.revolver.getTargetSlot());
         dashboardTelemetry.addData("state", STATE);
-
-        dashboardTelemetry.addData( "encoder", robot.revolver.encoder.getVoltage());
-        telemetry.addData( "encoder", robot.revolver.encoder.getVoltage());
+        dashboardTelemetry.addData("target pos: ", robot.revolver.target);
+        dashboardTelemetry.addData("current pos: ", robot.revolver.leftFront.getCurrentPosition());
 
         telemetry.addData("target position", robot.revolver.getTargetSlot());
         telemetry.addData("state", STATE);
         telemetry.update();
         dashboardTelemetry.update();
-    }}
+    }
+
+    @Override
+    public void stop() {
+        try {
+            t1.interrupt();
+        } catch (RuntimeException e) {
+            // ma ta
+        }
+    }
+}
