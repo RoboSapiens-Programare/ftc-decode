@@ -24,4 +24,9 @@ public class uV {
     public static double revolverPositonOuttake0 = 0;
 
 
+    public static double revolverKp = 0.0;
+    public static double revolverKi = 0.0;
+    public static double revolverKd = 0.0;
+
+
 }
