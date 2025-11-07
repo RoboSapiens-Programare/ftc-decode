@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.TeleOP;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -30,6 +29,7 @@ public class FullFSMIHope extends OpMode { ;
 
     private final ElapsedTime inputTimer = new ElapsedTime();
     private final ElapsedTime stateTimer = new ElapsedTime();
+    private boolean stateSingleton = true;
 
 
     enum State {
@@ -42,6 +42,8 @@ public class FullFSMIHope extends OpMode { ;
         STATE = newState;
         inputTimer.reset();
         stateTimer.reset();
+
+        stateSingleton = true;
     }
 
 
@@ -81,8 +83,10 @@ public class FullFSMIHope extends OpMode { ;
 
     private void handleOuttake() {
         robot.turret.startMotor();
-        robot.revolver.mode = Revolver.Mode.INTAKE;
-        robot.revolver.setPosition();
+
+        // set revolver in outtake mode
+        robot.revolver.mode = Revolver.Mode.OUTTAKE;
+
         // shoot ball
         // wait 500 ms to let motor speed up
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 200) {
@@ -125,6 +129,8 @@ public class FullFSMIHope extends OpMode { ;
     @Override
     public  void start() {
         // start in drive mode
+        robot.revolver.setTargetSlot((byte) 0);
+        robot.revolver.mode = Revolver.Mode.INTAKE;
         changeState(State.INTAKE);
     }
 
@@ -139,7 +145,6 @@ public class FullFSMIHope extends OpMode { ;
             case OUTTAKE:
                 handleOuttake();
                 break;
-
         }
 
 
@@ -154,6 +159,9 @@ public class FullFSMIHope extends OpMode { ;
 
         telemetry.addData("target position", robot.revolver.getTargetSlot());
         telemetry.addData("state", STATE);
+
+        robot.revolver.telemetryDump();
+
         telemetry.update();
         dashboardTelemetry.update();
     }}
