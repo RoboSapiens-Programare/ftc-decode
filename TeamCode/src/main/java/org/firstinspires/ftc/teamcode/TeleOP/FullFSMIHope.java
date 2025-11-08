@@ -27,7 +27,7 @@ public class FullFSMIHope extends OpMode { ;
     private DcMotorEx rightFront;
     private DcMotorEx rightRear;
 
-    private State STATE = State.INTAKE;
+    private State state = State.INTAKE;
 
     private Robot robot;
 
@@ -42,9 +42,13 @@ public class FullFSMIHope extends OpMode { ;
 
     // change state and reset timers
     private void changeState(State newState) {
-        STATE = newState;
+        state = newState;
+
         inputTimer.reset();
         stateTimer.reset();
+
+        // go to pos 0 always
+        robot.revolver.setTargetSlot(0);
     }
 
 
@@ -69,45 +73,60 @@ public class FullFSMIHope extends OpMode { ;
     }
 
     private void handleIntake() {
-//        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
-//        intakeMotor.setPower(uV.intakePower);
+        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
+
+        robot.intake.startMotor();
         robot.revolver.mode = Revolver.Mode.INTAKE;
 
+        // go to previous slot
+        if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
+            robot.revolver.prevSlot();
 
+            inputTimer.reset();
+        }
 
-        // power off intake and switch back to outtake state
-        if (gamepad1.cross && stateTimer.milliseconds() > 200) {
-//            intakeMotor.setPower(0);
+        // go to next slot
+        if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
+            robot.revolver.nextSlot();
+            
+            inputTimer.reset();
+        }
+
+        // power off intake and switch to outtake state
+        if (gamepad1.cross && stateTimer.milliseconds() > 400) {
+            robot.intake.stopMotor();
             changeState(State.OUTTAKE);
         }
     }
 
     private void handleOuttake() {
-//        robot.turret.startMotor();
-        robot.revolver.mode = Revolver.Mode.INTAKE;
-        robot.revolver.setPosition();
+        robot.turret.startMotor();
+        robot.revolver.mode = Revolver.Mode.OUTTAKE;
+
         // shoot ball
-        // wait 500 ms to let motor speed up
-        if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 200) {
+        // wait at least 300 ms to let motor speed up
+        if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300) {
             robot.revolver.load();
         } else {
             robot.revolver.retract();
         }
 
-        // go to next slot
+        // go to previous slot
         if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
             robot.revolver.prevSlot();
+
             inputTimer.reset();
         }
 
-        // go to previous slot
+        // go to next slot
         if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
             robot.revolver.nextSlot();
+            
             inputTimer.reset();
         }
 
-        // go back to drive mode
-        if (gamepad1.cross && stateTimer.milliseconds() > 200) {
+        // go to intake state
+        if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             changeState(State.INTAKE);
         }
 
@@ -117,19 +136,14 @@ public class FullFSMIHope extends OpMode { ;
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-
 //        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
 //        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-
-
-        robot.revolver.mode = Revolver.Mode.INTAKE;
     }
 
     @Override
     public  void start() {
-        // start in drive mode
         changeState(State.INTAKE);
+        robot.revolver.mode = Revolver.Mode.INTKE;
 
         t1 = new Thread(robot.revolver);
 
@@ -140,7 +154,7 @@ public class FullFSMIHope extends OpMode { ;
     @Override
     public void loop() {
 
-        switch (STATE) {
+        switch (state) {
             case INTAKE:
                 handleIntake();
                 break;
@@ -156,22 +170,23 @@ public class FullFSMIHope extends OpMode { ;
 
 
         dashboardTelemetry.addData("target position", robot.revolver.getTargetSlot());
-        dashboardTelemetry.addData("state", STATE);
+        dashboardTelemetry.addData("state", state);
         dashboardTelemetry.addData("target pos: ", robot.revolver.target);
         dashboardTelemetry.addData("current pos: ", robot.revolver.leftFront.getCurrentPosition());
 
         telemetry.addData("target position", robot.revolver.getTargetSlot());
-        telemetry.addData("state", STATE);
+        telemetry.addData("state", state);
         telemetry.update();
         dashboardTelemetry.update();
     }
 
     @Override
     public void stop() {
+        // stop thread so it resets between restarts
         try {
             t1.interrupt();
         } catch (RuntimeException e) {
-            // ma ta
+            // pass
         }
     }
 }
