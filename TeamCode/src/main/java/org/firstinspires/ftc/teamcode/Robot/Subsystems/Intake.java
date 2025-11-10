@@ -1,16 +1,16 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+import android.graphics.Color;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 public class Intake {
     public DcMotorEx intakeMotor;
-    private ColorSensor colorSensorLeft, colorSensorRight;
-    private Revolver r;
+    private final ColorSensor colorSensorLeft;
+    private final ColorSensor colorSensorRight;
 
     enum ColorEnum {
         GREEN,
@@ -20,10 +20,11 @@ public class Intake {
 
 
     public Intake(HardwareMap hwMap, Revolver revolver) {
-        r = revolver;
 
-        colorSensorLeft = hardwareMap.get(ColorSensor.class, "colorSensorLeft");
-        colorSensorRight = hardwareMap.get(ColorSensor.class, "colorSensorRight");
+        intakeMotor =  hwMap.get(DcMotorEx.class, "intakeMotor");
+
+        colorSensorLeft = hwMap.get(ColorSensor.class, "colorSensorLeft");
+        colorSensorRight = hwMap.get(ColorSensor.class, "colorSensorRight");
     }
 
 
@@ -54,11 +55,11 @@ public class Intake {
         }
 
         switch (getColor(colorSensorLeft)) {
-            case ColorEnum.GREEN:
+            case GREEN:
                 handleGreen();
                 break;
         
-            case ColorEnum.PURPLE:
+            case PURPLE:
                 handlePurple();
                 break;
 

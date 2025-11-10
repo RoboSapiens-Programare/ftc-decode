@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -48,7 +50,7 @@ public class FullFSMIHope extends OpMode { ;
         stateTimer.reset();
 
         // go to pos 0 always
-        robot.revolver.setTargetSlot(0);
+        robot.revolver.setTargetSlot((byte) 0);
     }
 
 
@@ -88,7 +90,7 @@ public class FullFSMIHope extends OpMode { ;
         // go to next slot
         if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
             robot.revolver.nextSlot();
-            
+
             inputTimer.reset();
         }
 
@@ -143,7 +145,7 @@ public class FullFSMIHope extends OpMode { ;
     @Override
     public  void start() {
         changeState(State.INTAKE);
-        robot.revolver.mode = Revolver.Mode.INTKE;
+        robot.revolver.mode = Revolver.Mode.INTAKE;
 
         t1 = new Thread(robot.revolver);
 
@@ -171,8 +173,14 @@ public class FullFSMIHope extends OpMode { ;
 
         dashboardTelemetry.addData("target position", robot.revolver.getTargetSlot());
         dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target pos: ", robot.revolver.target);
+        dashboardTelemetry.addData("target pos: ", Revolver.target);
         dashboardTelemetry.addData("current pos: ", robot.revolver.leftFront.getCurrentPosition());
+        dashboardTelemetry.addData("input timer", inputTimer.milliseconds());
+
+        dashboardTelemetry.addData("dpad l", gamepad1.dpad_left);
+        dashboardTelemetry.addData("dpad r", gamepad1.dpad_right);
+
+        dashboardTelemetry.addData("distance to walk", robot.revolver.distanceToWalk);
 
         telemetry.addData("target position", robot.revolver.getTargetSlot());
         telemetry.addData("state", state);
