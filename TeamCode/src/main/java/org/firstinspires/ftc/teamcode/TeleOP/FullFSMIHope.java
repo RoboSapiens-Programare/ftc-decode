@@ -140,6 +140,8 @@ public class FullFSMIHope extends OpMode { ;
         robot = new Robot(hardwareMap);
 //        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
 //        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        robot.revolver.retract();
     }
 
     @Override
@@ -180,7 +182,7 @@ public class FullFSMIHope extends OpMode { ;
         dashboardTelemetry.addData("dpad l", gamepad1.dpad_left);
         dashboardTelemetry.addData("dpad r", gamepad1.dpad_right);
 
-        dashboardTelemetry.addData("distance to walk", robot.revolver.distanceToWalk);
+        dashboardTelemetry.addData("distance to walk", robot.revolver.distance);
 
         telemetry.addData("target position", robot.revolver.getTargetSlot());
         telemetry.addData("state", state);

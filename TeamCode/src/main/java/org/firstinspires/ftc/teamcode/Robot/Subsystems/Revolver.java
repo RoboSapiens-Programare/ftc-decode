@@ -43,7 +43,7 @@ public class Revolver implements Runnable {
 
     // TODO: implement map of slot position - color
 
-    public int distanceToWalk;
+    public int distance;
 
     public Revolver(HardwareMap hwMap) {
         revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
@@ -100,23 +100,17 @@ public class Revolver implements Runnable {
     * choose fastest way there (hope it works) 
     */
     public void setTargetSlot(byte n) {
-//        distanceToWalk = n - targetSlot;
+       distance = (n - targetSlot + 3) % 3;
+
+        // determine shortest path (2 steps means 1 step backwards)
+        if (distance == 2) distance = -1;
+        else if (distance == -2) distance = 1;
 
         // determine if aligning for intake or outtake
         target = mode == Mode.INTAKE
                 ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
 
-        target += uV.ticksPerRevolution / 3 * ((int)(n) - 1);
-
-        // determine fastest way there
-//        if (Math.abs(distanceToWalk) == 1) {
-//            target += uV.ticksPerRevolution / 3 * distanceToWalk;
-//        }
-
-        // fastest way for 2 slots in a 3 slot system is just one step in opposite direction
-//        else if(Math.abs(distanceToWalk) == 2) {
-//            target += uV.ticksPerRevolution / 3 * distanceToWalk > 0 ? -1 : 1;
-//        }
+        target += uV.ticksPerRevolution / 3 * distance;
 
 
         targetSlot = n;
