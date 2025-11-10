@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @Config
@@ -14,6 +16,12 @@ public class Revolver implements Runnable {
     private final CRServo revolverSpin;
     private final Servo lift;
     public DcMotorEx leftFront;
+
+    public ColorEnum[] colorList = {
+            ColorEnum.UNDEFINED,
+            ColorEnum.UNDEFINED,
+            ColorEnum.UNDEFINED
+    };
 
     // target slot and encoder position
     public static byte targetSlot = 0;
@@ -95,22 +103,13 @@ public class Revolver implements Runnable {
         Revolver.target = target;
     }
 
-    
-    /*
-    * choose fastest way there (hope it works) 
-    */
+
     public void setTargetSlot(byte n) {
-       distance = (n - targetSlot + 3) % 3;
-
-        // determine shortest path (2 steps means 1 step backwards)
-        if (distance == 2) distance = -1;
-        else if (distance == -2) distance = 1;
-
         // determine if aligning for intake or outtake
         target = mode == Mode.INTAKE
                 ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
 
-        target += uV.ticksPerRevolution / 3 * distance;
+        target += uV.ticksPerRevolution / 3 * (n - 1);
 
 
         targetSlot = n;
@@ -159,5 +158,31 @@ public class Revolver implements Runnable {
         }
     }
 
+    public void setSlotColor(byte i, ColorEnum color) {
+        colorList[i] = color;
+    }
 
+    public ColorEnum getSlotColor(byte i) {
+        return  colorList[i];
+    }
+
+    public byte getFreeSlot() {
+        for (byte b = 0; b < colorList.length; ++b) {
+            if (colorList[b] == ColorEnum.UNDEFINED) {
+                return b;
+            }
+        }
+
+        return 5;
+    }
+
+    public byte getBallCount() {
+        byte count = 0;
+        for (ColorEnum color : colorList) {
+            if (color != ColorEnum.UNDEFINED) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

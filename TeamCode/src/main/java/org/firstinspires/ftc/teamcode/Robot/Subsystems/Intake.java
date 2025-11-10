@@ -5,18 +5,16 @@ import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 public class Intake {
     public DcMotorEx intakeMotor;
     private final ColorSensor colorSensorLeft;
     private final ColorSensor colorSensorRight;
+    private Revolver revolver;
 
-    enum ColorEnum {
-        GREEN,
-        PURPLE,
-        UNDEFINED
-    };
 
 
     public Intake(HardwareMap hwMap, Revolver revolver) {
@@ -25,6 +23,8 @@ public class Intake {
 
         colorSensorLeft = hwMap.get(ColorSensor.class, "colorSensorLeft");
         colorSensorRight = hwMap.get(ColorSensor.class, "colorSensorRight");
+
+        this.revolver = revolver;
     }
 
 
@@ -37,7 +37,7 @@ public class Intake {
         Color.RGBToHSV(r, g, b, hsv);
         float h = hsv[0]; // convert hue to degrees
 
-        telemetry.addData("hue", hsv[0]);
+//        telemetry.addData("hue", hsv[0]);
 
         if (h >= 180 && h <= 220) {
             return ColorEnum.PURPLE;
@@ -54,6 +54,16 @@ public class Intake {
             return;
         }
 
+        if (revolver.getBallCount() >= 3)
+            return;
+
+        byte b = revolver.getFreeSlot();
+        if (b == 5)
+            return;
+
+        revolver.setTargetSlot(b);
+
+
         switch (getColor(colorSensorLeft)) {
             case GREEN:
                 handleGreen();
@@ -69,11 +79,17 @@ public class Intake {
     }
 
     public void handleGreen() {
-        // placeholder
+        byte b = revolver.getFreeSlot();
+        if (b != 5) {
+            revolver.setSlotColor(b, ColorEnum.GREEN);
+        }
     }
 
     public void handlePurple() {
-        // placeholder
+        byte b = revolver.getFreeSlot();
+        if (b != 5) {
+            revolver.setSlotColor(b, ColorEnum.PURPLE);
+        }
     }
 
     public void setPower(float power) {

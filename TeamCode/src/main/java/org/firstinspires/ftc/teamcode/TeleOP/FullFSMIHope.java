@@ -99,6 +99,8 @@ public class FullFSMIHope extends OpMode { ;
             robot.intake.stopMotor();
             changeState(State.OUTTAKE);
         }
+
+        robot.intake.update();
     }
 
     private void handleOuttake() {
