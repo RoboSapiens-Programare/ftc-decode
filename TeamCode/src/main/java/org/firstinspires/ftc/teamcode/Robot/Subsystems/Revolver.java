@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -55,7 +56,7 @@ public class Revolver implements Runnable {
 
     public Revolver(HardwareMap hwMap) {
         revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
-        revolverSpin.setDirection(CRServo.Direction.FORWARD);
+        revolverSpin.setDirection(CRServo.Direction.REVERSE);
     
         lift = hwMap.get(Servo.class, "lift");
     
@@ -106,6 +107,9 @@ public class Revolver implements Runnable {
 
     public void setTargetSlot(byte n) {
         // determine if aligning for intake or outtake
+
+        // TODO: mabye change syntax to if elif just for consistency; should be just as fast
+
         target = mode == Mode.INTAKE
                 ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
 

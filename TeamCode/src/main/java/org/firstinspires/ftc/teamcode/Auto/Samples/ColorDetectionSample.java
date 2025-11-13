@@ -2,13 +2,19 @@ package org.firstinspires.ftc.teamcode.Auto.Samples;
 
 import android.graphics.Color;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 @Autonomous(name="Color Detection Sample", group="1. Autonomous Samples")
 public class ColorDetectionSample extends OpMode {
-    private ColorSensor sensor1, sensor2;
+
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    Telemetry dashboardTelemetry = dashboard.getTelemetry();
+    private ColorSensor sensor;
 
     enum ColorEnum {
         GREEN,
@@ -17,6 +23,7 @@ public class ColorDetectionSample extends OpMode {
     };
 
     private ColorEnum getColor(ColorSensor sensor) {
+        int argb = sensor.argb();
         int r = sensor.red();
         int g = sensor.green();
         int b = sensor.blue();
@@ -25,11 +32,11 @@ public class ColorDetectionSample extends OpMode {
         Color.RGBToHSV(r, g, b, hsv);
         float h = hsv[0]; // convert hue to degrees
 
-        telemetry.addData("hue", hsv[0]);
+        dashboardTelemetry.addData("hue", hsv[0]);
 
-        if (h >= 180 && h <= 220) {
+        if (h >= 200 && h <= 255 && argb > 300000000) {
             return ColorEnum.PURPLE;
-        } else if (h >= 90 && h <= 160) {
+        } else if (h >= 120 && h <= 200 && argb > 300000000) {
             return ColorEnum.GREEN;
         } else {
             return ColorEnum.UNDEFINED;
@@ -38,22 +45,19 @@ public class ColorDetectionSample extends OpMode {
 
     @Override
     public void init() {
-        sensor1 = hardwareMap.get(ColorSensor.class, "colorSensorLeft");
-        sensor2 = hardwareMap.get(ColorSensor.class, "colorSensorRight");
+        sensor = hardwareMap.get(ColorSensor.class, "colorSensor");
     }
 
     @Override
     public void loop() {
-        sensor1.enableLed(true);
-        sensor2.enableLed(false);
 
-        telemetry.addData("sensor1", getColor(sensor1));
-        telemetry.addData("sensor2", getColor(sensor2));
+        dashboardTelemetry.addData("sensor", getColor(sensor));
 
-        telemetry.addData("sensor1 rgb", String.format("%d %d %d", sensor1.red(), sensor1.green(), sensor1.blue()));
-        telemetry.addData("sensor2 rgb", String.format("%d %d %d", sensor2.red(), sensor2.green(), sensor2.blue()));
+        dashboardTelemetry.addData("argb", sensor.argb());
 
-        telemetry.update();
+        dashboardTelemetry.addData("sensor rgb", String.format("%d %d %d", sensor.red(), sensor.green(), sensor.blue()));
+
+        dashboardTelemetry.update();
 
     }
 }
