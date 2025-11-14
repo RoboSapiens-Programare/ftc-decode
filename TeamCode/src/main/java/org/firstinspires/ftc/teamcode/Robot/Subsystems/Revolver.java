@@ -12,17 +12,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
+import org.firstinspires.ftc.teamcode.Robot.Utils.PIDController;
+
 @Config
-public class Revolver implements Runnable {
+public class Revolver {
     private final CRServo revolverSpin;
     private final Servo lift;
-    public DcMotorEx leftFront;
+    public DcMotorEx encoder;
+    public Thread t;
 
-    public ColorEnum[] colorList = {
-            ColorEnum.UNDEFINED,
-            ColorEnum.UNDEFINED,
-            ColorEnum.UNDEFINED
-    };
+    public ColorEnum[] colorList = {ColorEnum.UNDEFINED, ColorEnum.UNDEFINED, ColorEnum.UNDEFINED};
 
     // target slot and encoder position
     public static byte targetSlot = 0;
@@ -37,6 +36,10 @@ public class Revolver implements Runnable {
     // Minimal power so servo does not move
     public static double kms = 0.031;
 
+    // NO Ki
+    // Ki = fucky
+    private PIDController pidController = new PIDController(Kp, 0, Kd, kms);
+
     // PID
     double lastError = 0;
 
@@ -44,74 +47,36 @@ public class Revolver implements Runnable {
 
     // Align with INTAKE / OUTTAKE
     public enum Mode {
-        INTAKE,
-        OUTTAKE
+        INTAKE, OUTTAKE
     };
 
     public Mode mode = Mode.INTAKE;
-
-    // TODO: implement map of slot position - color
 
     public int distance;
 
     public Revolver(HardwareMap hwMap) {
         revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
         revolverSpin.setDirection(CRServo.Direction.REVERSE);
-    
+
         lift = hwMap.get(Servo.class, "lift");
-    
+
         // TODO: replace to dedicated motor
-        leftFront = hwMap.get(DcMotorEx.class, "leftFront");
-        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        encoder = hwMap.get(DcMotorEx.class, "leftFront");
+        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
 
-    @Override
-    public void run() {
-        // declare only once for memory efficiency
-        double encoderPosition, error, derivative, out;
-
-        while (!Thread.currentThread().isInterrupted()) {
-            // obtain the encoder position
-            encoderPosition = leftFront.getCurrentPosition();
-
-            // calculate the error
-            error = target - encoderPosition;
-
-            // rate of change of the error
-            derivative = (error - lastError) / timer.seconds();
-
-            // pid formula
-            out = (Kp * error) + (Kd * derivative);
-
-            // add kms so the out value is significant for the motor
-            if (out <= 0) {
-                revolverSpin.setPower(-kms + out);
-            } else {
-                revolverSpin.setPower(kms + out);
-            }
-
-
-            // reset for next iteration
-            lastError = error;
-            timer.reset();
-
-        }
-    }
-
-
-    public void setTarget(int target){
+    public void setTarget(int target) {
         Revolver.target = target;
+
+        pidController.setSetpoint(target);
     }
 
 
     public void setTargetSlot(byte n) {
         // determine if aligning for intake or outtake
 
-        // TODO: mabye change syntax to if elif just for consistency; should be just as fast
-
-        target = mode == Mode.INTAKE
-                ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
+        target = mode == Mode.INTAKE ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
 
         target += uV.ticksPerRevolution / 3 * (n - 1);
 
@@ -137,28 +102,26 @@ public class Revolver implements Runnable {
     }
 
     /*
-     * increments target slot by one, clamping it's max value to 2
-     * and resetting at 0 when needed
+     * increments target slot by one, clamping it's max value to 2 and resetting at 0 when needed
      */
     public void nextSlot() {
 
         if (targetSlot == 2)
             setTargetSlot((byte) 0);
         else {
-            setTargetSlot((byte) ( (targetSlot) + (byte)(1)));
+            setTargetSlot((byte) ((targetSlot) + (byte) (1)));
         }
 
     }
 
     /*
-     * decrements target slot by one, clamping it's min value to 0
-     * and resetting at 2 when needed
+     * decrements target slot by one, clamping it's min value to 0 and resetting at 2 when needed
      */
     public void prevSlot() {
         if (targetSlot == 0) {
             setTargetSlot((byte) 2);
         } else {
-            setTargetSlot((byte) ( (targetSlot) - (byte)(1)));
+            setTargetSlot((byte) ((targetSlot) - (byte) (1)));
         }
     }
 
@@ -167,7 +130,7 @@ public class Revolver implements Runnable {
     }
 
     public ColorEnum getSlotColor(byte i) {
-        return  colorList[i];
+        return colorList[i];
     }
 
     public byte getFreeSlot() {
@@ -188,5 +151,14 @@ public class Revolver implements Runnable {
             }
         }
         return count;
+    }
+
+    public void update() {
+        pidController.update(encoder.getCurrentPosition());
+    }
+
+    public void start() {
+        t = new Thread(pidController);
+        t.start();
     }
 }

@@ -27,4 +27,12 @@ public class Robot {
     public boolean isInitialize() {
         return initialize;
     }
+
+    public void threadKill() {
+        try {
+            revolver.t.interrupt();
+        } catch (RuntimeException e) {
+            // pass
+        }
+    }
 }
