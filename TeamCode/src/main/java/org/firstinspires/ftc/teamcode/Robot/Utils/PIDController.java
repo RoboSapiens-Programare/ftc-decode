@@ -15,7 +15,7 @@ public class PIDController implements Runnable {
 
     private double outputMin = Double.NEGATIVE_INFINITY;
     private double outputMax = Double.POSITIVE_INFINITY;
-    private double relevanceValue = 0;
+    private double Kmin = 0;
 
     private ElapsedTime timer = new ElapsedTime();
 
@@ -25,11 +25,11 @@ public class PIDController implements Runnable {
         this.kd = kd;
     }
 
-    public PIDController(double kp, double ki, double kd, double relevanceValue) {
+    public PIDController(double kp, double ki, double kd, double Kmin) {
         this.kp = kp;
         this.ki = ki;
         this.kd = kd;
-        this.relevanceValue = relevanceValue;
+        this.Kmin = Kmin;
     }
 
     public void setSetpoint(double setpoint) {
@@ -70,9 +70,9 @@ public class PIDController implements Runnable {
             output = kp * error + ki * integral + kd * derivative;
 
             if (output <= 0) {
-                output -= relevanceValue;
+                output -= Kmin;
             } else {
-                output += relevanceValue;
+                output += Kmin;
             }
 
 
