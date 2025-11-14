@@ -92,7 +92,7 @@ public class Intake {
     }
     
     public void startMotor() {
-        intakeMotor.setPower(uV.intakePower);
+//        intakeMotor.setPower(uV.intakePower);
     }
 
     public void stopMotor() {

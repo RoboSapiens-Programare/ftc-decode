@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -13,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@TeleOp(name = "poula")
+@TeleOp(name = "TeleOp")
 public class FSM extends OpMode {
 
     private Robot robot;
@@ -141,7 +142,11 @@ public class FSM extends OpMode {
         }
 
 
-        robot.drive.updateDrive();
+        robot.drive.updateDrive(
+        -gamepad1.left_stick_y,
+        gamepad1.left_stick_x,
+        gamepad1.right_stick_x);
+
         robot.revolver.update();
 
 

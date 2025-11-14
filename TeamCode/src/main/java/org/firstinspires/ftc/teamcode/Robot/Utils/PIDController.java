@@ -1,11 +1,19 @@
 package org.firstinspires.ftc.teamcode.Robot.Utils;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+@Config
 public class PIDController implements Runnable {
-    private double kp; // Proportional gain
-    private double ki; // Integral gain
-    private double kd; // Derivative gain
+    public static double kp; // Proportional gain
+    public static double ki; // Integral gain
+    public static double kd; // Derivative gain
+    double error = 0, derivative = 0;
+
 
     private double integral;
     private double previousError;
@@ -15,20 +23,15 @@ public class PIDController implements Runnable {
 
     private double outputMin = Double.NEGATIVE_INFINITY;
     private double outputMax = Double.POSITIVE_INFINITY;
-    private double Kmin = 0;
+    public static double Kmin = 0;
 
     private ElapsedTime timer = new ElapsedTime();
 
-    public PIDController(double kp, double ki, double kd) {
-        this.kp = kp;
-        this.ki = ki;
-        this.kd = kd;
-    }
 
     public PIDController(double kp, double ki, double kd, double Kmin) {
-        this.kp = kp;
-        this.ki = ki;
-        this.kd = kd;
+        PIDController.kp = kp;
+        PIDController.ki = ki;
+        PIDController.kd = kd;
         this.Kmin = Kmin;
     }
 
@@ -55,19 +58,26 @@ public class PIDController implements Runnable {
 
     @Override
     public void run() {
-        double error, derivative;
 
         while (!Thread.currentThread().isInterrupted()) {
+            // Delay for slowing down thread to calculate derivative
+            if (timer.milliseconds() > 150) {
+                derivative = (error - previousError) / timer.milliseconds();
+                timer.reset();
+            }
+
             error = setpoint - currentValue;
 
             // Integral term
             integral += error * timer.milliseconds();
 
             // Derivative term
-            derivative = (error - previousError) / timer.milliseconds();
+
 
             // PID output
-            output = kp * error + ki * integral + kd * derivative;
+            //output = kp * error + ki * integral + kd * derivative;
+
+            output = kp * error + kd * derivative;
 
             if (output <= 0) {
                 output -= Kmin;
@@ -77,7 +87,7 @@ public class PIDController implements Runnable {
 
 
             // Clamp output
-            output = Math.max(outputMin, Math.min(output, outputMax));
+            //output = Math.max(outputMin, Math.min(output, outputMax));
 
             // Save for next iteration
             previousError = error;

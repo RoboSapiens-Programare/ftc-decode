@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -20,11 +21,11 @@ public Drive(HardwareMap hwMap){
     rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 }
-public void updateDrive() {
-        double y = -gamepad1.left_stick_y*uV.drivePower; // Remember, this is reversed!
-        double x = gamepad1.left_stick_x*uV.drivePower; // this is strafing
-        double rx = gamepad1.right_stick_x*uV.drivePower;
 
+public void updateDrive(double y, double x,double rx) {
+        y *= uV.drivePower;
+        x *= uV.drivePower;
+        rx *= uV.drivePower;
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio, but only when
         // at least one is out of the range [-1, 1]

@@ -44,8 +44,8 @@ public class Revolver{
     // PID values for empty revolver
     // NOTE: should implement a 2D array for 4 PID tunes
     // (tuned for 0, 1, 2 and 3 loaded game elements)
-    public static double Kp = 0.000285775;
-    public static double Kd = 0.000022344;
+    public static double Kp = 0.000048;
+    public static double Kd = 0.008;
 
     // Minimal power so servo does not move
     public static double Kmin = 0.031;
@@ -157,7 +157,11 @@ public class Revolver{
     }
 
     public void update() {
-        pidController.update(encoderRevolver.getCurrentPosition());
+        revolverSpin.setPower(
+            pidController.update(encoderRevolver.getCurrentPosition())
+        );
+
+        pidController.setSetpoint(target);
     }
 
     public void start() {
