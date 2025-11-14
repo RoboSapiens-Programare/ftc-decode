@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Auto.Samples.ColorDetectionSample;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
@@ -33,24 +34,28 @@ public class Intake {
 
 
     private ColorEnum getColor(ColorSensor sensor) {
-        int r = sensor.red() / 4;
-        int g = sensor.green() / 4;
-        int b = sensor.blue() / 4;
+        int argb = sensor.argb();
+        int r = sensor.red();
+        int g = sensor.green();
+        int b = sensor.blue();
 
         float[] hsv = {0, 0, 0};
         Color.RGBToHSV(r, g, b, hsv);
         float h = hsv[0]; // convert hue to degrees
 
-//        telemetry.addData("hue", hsv[0]);
+//        dashboardTelemetry.addData("hue", hsv[0]);
 
-        if (h >= 180 && h <= 220) {
+        // works only at a specific distance, change when remounting sensor :D
+
+        if (h >= 200 && h <= 255 && argb > 300000000) {
             return ColorEnum.PURPLE;
-        } else if (h >= 90 && h <= 160) {
+        } else if (h >= 120 && h <= 200 && argb > 300000000) {
             return ColorEnum.GREEN;
         } else {
             return ColorEnum.UNDEFINED;
         }
     }
+
 
     public void update() {
         // check both are equal in order to ignore false positives

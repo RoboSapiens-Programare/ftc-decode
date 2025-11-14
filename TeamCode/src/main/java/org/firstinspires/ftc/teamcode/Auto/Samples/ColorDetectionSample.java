@@ -34,6 +34,8 @@ public class ColorDetectionSample extends OpMode {
 
         dashboardTelemetry.addData("hue", hsv[0]);
 
+        // works only at a specific distance, change when remounting sensor :D
+
         if (h >= 200 && h <= 255 && argb > 300000000) {
             return ColorEnum.PURPLE;
         } else if (h >= 120 && h <= 200 && argb > 300000000) {
