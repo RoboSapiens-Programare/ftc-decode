@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@TeleOp(name = "TeleOp", group = "0. TeleOp")
-public class FSM extends OpMode { ;
+@TeleOp(name = "poula")
+public class FSM extends OpMode {
 
     private Robot robot;
 
