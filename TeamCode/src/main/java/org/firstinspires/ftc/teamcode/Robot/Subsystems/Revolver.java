@@ -16,12 +16,13 @@ import org.firstinspires.ftc.teamcode.Robot.uV;
 public class Revolver{
     private final CRServo revolverSpin;
     private final Servo lift;
-    public DcMotorEx encoderRevolver;
+    public DcMotor encoderRevolver;
     public Thread t;
 
     public Revolver(HardwareMap hwMap) {
-        encoderRevolver = hwMap.get(DcMotorEx.class, "encoderRevolver");
-        encoderRevolver.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        encoderRevolver = hwMap.get(DcMotor.class, "encoderRevolver");
+        encoderRevolver.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
         revolverSpin.setDirection(CRServo.Direction.REVERSE);

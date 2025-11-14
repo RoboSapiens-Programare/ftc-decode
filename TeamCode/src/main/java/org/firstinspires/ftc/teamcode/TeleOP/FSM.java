@@ -21,7 +21,6 @@ public class FSM extends OpMode { ;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
-    Thread t1;
 
 
     private State state = State.INTAKE;
@@ -123,9 +122,8 @@ public class FSM extends OpMode { ;
     public  void start() {
         changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
-
+        robot.revolver.setTargetSlot((byte) 0);
         robot.revolver.start();
-
     }
 
     @Override
@@ -143,7 +141,8 @@ public class FSM extends OpMode { ;
         }
 
 
-       robot.drive.updateDrive();
+        robot.drive.updateDrive();
+        robot.revolver.update();
 
 
         dashboardTelemetry.addData("target position", robot.revolver.getTargetSlot());
@@ -151,7 +150,6 @@ public class FSM extends OpMode { ;
         dashboardTelemetry.addData("target pos: ", Revolver.target);
         dashboardTelemetry.addData("current pos: ", robot.revolver.encoderRevolver.getCurrentPosition());
         dashboardTelemetry.addData("input timer", inputTimer.milliseconds());
-
         dashboardTelemetry.addData("dpad l", gamepad1.dpad_left);
         dashboardTelemetry.addData("dpad r", gamepad1.dpad_right);
 

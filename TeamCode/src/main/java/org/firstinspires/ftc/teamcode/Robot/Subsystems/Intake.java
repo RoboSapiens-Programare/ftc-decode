@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Robot.uV;
 public class Intake {
     public DcMotorEx intakeMotor;
     private final ColorSensor colorSensor;
-    private final Revolver revolver;
+    private Revolver revolver;
     private final ElapsedTime cooldown = new ElapsedTime();
 
     public Intake(HardwareMap hwMap, Revolver revolver) {
