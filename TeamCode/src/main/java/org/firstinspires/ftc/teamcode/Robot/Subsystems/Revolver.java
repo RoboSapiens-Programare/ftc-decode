@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,13 +15,24 @@ import org.firstinspires.ftc.teamcode.Robot.uV;
 public class Revolver implements Runnable {
     private final CRServo revolverSpin;
     private final Servo lift;
-    public DcMotorEx leftFront;
+    public DcMotorEx encoderRevolver;
+
+    public Revolver(HardwareMap hwMap) {
+        encoderRevolver = hwMap.get(DcMotorEx.class, "encoderRevolver");
+        encoderRevolver.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
+        revolverSpin.setDirection(CRServo.Direction.REVERSE);
+
+        lift = hwMap.get(Servo.class, "lift");
+    }
 
     public ColorEnum[] colorList = {
             ColorEnum.UNDEFINED,
             ColorEnum.UNDEFINED,
             ColorEnum.UNDEFINED
     };
+
 
     // target slot and encoder position
     public static byte targetSlot = 0;
@@ -35,7 +45,7 @@ public class Revolver implements Runnable {
     public static double Kd = 0.000022344;
 
     // Minimal power so servo does not move
-    public static double kms = 0.031;
+    public static double Kmin = 0.031;
 
     // PID
     double lastError = 0;
@@ -50,20 +60,9 @@ public class Revolver implements Runnable {
 
     public Mode mode = Mode.INTAKE;
 
-    // TODO: implement map of slot position - color
-
     public int distance;
 
-    public Revolver(HardwareMap hwMap) {
-        revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
-        revolverSpin.setDirection(CRServo.Direction.REVERSE);
-    
-        lift = hwMap.get(Servo.class, "lift");
-    
-        // TODO: replace to dedicated motor
-        leftFront = hwMap.get(DcMotorEx.class, "leftFront");
-        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
+
 
 
     @Override
@@ -73,7 +72,7 @@ public class Revolver implements Runnable {
 
         while (!Thread.currentThread().isInterrupted()) {
             // obtain the encoder position
-            encoderPosition = leftFront.getCurrentPosition();
+            encoderPosition = encoderRevolver.getCurrentPosition();
 
             // calculate the error
             error = target - encoderPosition;
@@ -84,11 +83,11 @@ public class Revolver implements Runnable {
             // pid formula
             out = (Kp * error) + (Kd * derivative);
 
-            // add kms so the out value is significant for the motor
+            // add Kmin so the out value is significant for the motor
             if (out <= 0) {
-                revolverSpin.setPower(-kms + out);
+                revolverSpin.setPower(-Kmin + out);
             } else {
-                revolverSpin.setPower(kms + out);
+                revolverSpin.setPower(Kmin + out);
             }
 
 
@@ -107,9 +106,6 @@ public class Revolver implements Runnable {
 
     public void setTargetSlot(byte n) {
         // determine if aligning for intake or outtake
-
-        // TODO: mabye change syntax to if elif just for consistency; should be just as fast
-
         target = mode == Mode.INTAKE
                 ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
 
@@ -127,13 +123,13 @@ public class Revolver implements Runnable {
     }
 
     // load game element into turret via lift
-    public void load() {
+    public void liftLoad() {
         lift.setPosition(uV.liftUp);
     }
 
     // retract lift back to normal
-    public void retract() {
-        lift.setPosition(uV.uppiesDown);
+    public void liftReset() {
+        lift.setPosition(uV.liftDown);
     }
 
     /*

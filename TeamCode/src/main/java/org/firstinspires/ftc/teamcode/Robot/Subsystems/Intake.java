@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -9,29 +8,22 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Auto.Samples.ColorDetectionSample;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 public class Intake {
     public DcMotorEx intakeMotor;
-//    private final ColorSensor colorSensorLeft;
-    private final ColorSensor colorSensorRight;
-    private Revolver revolver;
+    private final ColorSensor colorSensor;
+    private final Revolver revolver;
     private final ElapsedTime cooldown = new ElapsedTime();
 
-
-
     public Intake(HardwareMap hwMap, Revolver revolver) {
-
         intakeMotor =  hwMap.get(DcMotorEx.class, "intakeMotor");
 
-//        colorSensorLeft = hwMap.get(ColorSensor.class, "colorSensorLeft");
-        colorSensorRight = hwMap.get(ColorSensor.class, "colorSensor");
+        colorSensor = hwMap.get(ColorSensor.class, "colorSensor");
 
         this.revolver = revolver;
     }
-
 
     private ColorEnum getColor(ColorSensor sensor) {
         int argb = sensor.argb();
@@ -42,8 +34,6 @@ public class Intake {
         float[] hsv = {0, 0, 0};
         Color.RGBToHSV(r, g, b, hsv);
         float h = hsv[0]; // convert hue to degrees
-
-//        dashboardTelemetry.addData("hue", hsv[0]);
 
         // works only at a specific distance, change when remounting sensor :D
 
@@ -56,18 +46,13 @@ public class Intake {
         }
     }
 
-
     public void update() {
         // check both are equal in order to ignore false positives
-//        ColorEnum col = getColor(colorSensorLeft);
-
-//        FtcDashboard.getInstance().getTelemetry().addData("left", getColor(colorSensorLeft));
 
         if (revolver.getBallCount() >= 3)
             return;
-        FtcDashboard.getInstance().getTelemetry().addData("right", getColor(colorSensorRight));
-//        FtcDashboard.getInstance().getTelemetry().addData("should add? ", col == getColor(colorSensorRight) && col != ColorEnum.UNDEFINED);
-        ColorEnum col = getColor(colorSensorRight);
+        FtcDashboard.getInstance().getTelemetry().addData("colorSensor: ", getColor(colorSensor));
+        ColorEnum col = getColor(colorSensor);
         if (col == ColorEnum.UNDEFINED) {
             return;
         }

@@ -15,23 +15,17 @@ import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@TeleOp(name = "Drive", group = "0. TeleOp")
-public class FullFSMIHope extends OpMode { ;
+@TeleOp(name = "TeleOp", group = "0. TeleOp")
+public class FSM extends OpMode { ;
+
+    private Robot robot;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
-    private DcMotorEx intakeMotor;
     Thread t1;
 
 
-//    private DcMotorEx leftFront;
-    private DcMotorEx leftRear;
-    private DcMotorEx rightFront;
-    private DcMotorEx rightRear;
-
     private State state = State.INTAKE;
-
-    private Robot robot;
 
     private final ElapsedTime inputTimer = new ElapsedTime();
     private final ElapsedTime stateTimer = new ElapsedTime();
@@ -54,25 +48,7 @@ public class FullFSMIHope extends OpMode { ;
     }
 
 
-    private void updateFollower(double power) {
-        double y = -gamepad1.left_stick_y*power; // Remember, this is reversed!
-        double x = gamepad1.left_stick_x*power; // this is strafing
-        double rx = gamepad1.right_stick_x*power;
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio, but only when
-        // at least one is out of the range [-1, 1]
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double leftFrontPower = (y + x + rx) / denominator;
-        double leftRearPower = (y - x + rx) / denominator;
-        double rightFrontPower = (y - x - rx) / denominator;
-        double rightRearPower = (y + x - rx) / denominator;
-
-        robot.revolver.leftFront.setPower(leftFrontPower);
-        leftRear.setPower(leftRearPower);
-        rightFront.setPower(rightFrontPower);
-        rightRear.setPower(rightRearPower);
-    }
+    
 
     private void handleIntake() {
         robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
@@ -110,9 +86,9 @@ public class FullFSMIHope extends OpMode { ;
         // shoot ball
         // wait at least 300 ms to let motor speed up
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300) {
-            robot.revolver.load();
+            robot.revolver.liftLoad();
         } else {
-            robot.revolver.retract();
+            robot.revolver.liftReset();
         }
 
         // go to previous slot
@@ -140,10 +116,8 @@ public class FullFSMIHope extends OpMode { ;
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-//        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
-//        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        robot.revolver.retract();
+        robot.revolver.liftReset();
     }
 
     @Override
@@ -172,13 +146,13 @@ public class FullFSMIHope extends OpMode { ;
         }
 
 
-//        updateFollower(1);
+       robot.drive.updateDrive();
 
 
         dashboardTelemetry.addData("target position", robot.revolver.getTargetSlot());
         dashboardTelemetry.addData("state", state);
         dashboardTelemetry.addData("target pos: ", Revolver.target);
-        dashboardTelemetry.addData("current pos: ", robot.revolver.leftFront.getCurrentPosition());
+        dashboardTelemetry.addData("current pos: ", robot.revolver.encoderRevolver.getCurrentPosition());
         dashboardTelemetry.addData("input timer", inputTimer.milliseconds());
 
         dashboardTelemetry.addData("dpad l", gamepad1.dpad_left);
