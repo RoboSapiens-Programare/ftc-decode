@@ -9,13 +9,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
+import org.firstinspires.ftc.teamcode.Robot.Utils.PIDController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @Config
-public class Revolver implements Runnable {
+public class Revolver{
     private final CRServo revolverSpin;
     private final Servo lift;
     public DcMotorEx encoderRevolver;
+    public Thread t;
 
     public Revolver(HardwareMap hwMap) {
         encoderRevolver = hwMap.get(DcMotorEx.class, "encoderRevolver");
@@ -47,6 +49,8 @@ public class Revolver implements Runnable {
     // Minimal power so servo does not move
     public static double Kmin = 0.031;
 
+    private PIDController pidController = new PIDController(Kp, 0, Kd, Kmin);
+
     // PID
     double lastError = 0;
 
@@ -62,45 +66,10 @@ public class Revolver implements Runnable {
 
     public int distance;
 
-
-
-
-    @Override
-    public void run() {
-        // declare only once for memory efficiency
-        double encoderPosition, error, derivative, out;
-
-        while (!Thread.currentThread().isInterrupted()) {
-            // obtain the encoder position
-            encoderPosition = encoderRevolver.getCurrentPosition();
-
-            // calculate the error
-            error = target - encoderPosition;
-
-            // rate of change of the error
-            derivative = (error - lastError) / timer.seconds();
-
-            // pid formula
-            out = (Kp * error) + (Kd * derivative);
-
-            // add Kmin so the out value is significant for the motor
-            if (out <= 0) {
-                revolverSpin.setPower(-Kmin + out);
-            } else {
-                revolverSpin.setPower(Kmin + out);
-            }
-
-
-            // reset for next iteration
-            lastError = error;
-            timer.reset();
-
-        }
-    }
-
-
     public void setTarget(int target){
         Revolver.target = target;
+
+        pidController.setSetpoint(target);
     }
 
 
@@ -184,5 +153,14 @@ public class Revolver implements Runnable {
             }
         }
         return count;
+    }
+
+    public void update() {
+        pidController.update(encoderRevolver.getCurrentPosition());
+    }
+
+    public void start() {
+        t = new Thread(pidController);
+        t.start();
     }
 }

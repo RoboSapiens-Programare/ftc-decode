@@ -5,9 +5,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -19,6 +17,7 @@ import org.firstinspires.ftc.teamcode.Robot.uV;
 public class FSM extends OpMode { ;
 
     private Robot robot;
+
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
@@ -125,9 +124,7 @@ public class FSM extends OpMode { ;
         changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
 
-        t1 = new Thread(robot.revolver);
-
-        t1.start();
+        robot.revolver.start();
 
     }
 
@@ -169,10 +166,6 @@ public class FSM extends OpMode { ;
     @Override
     public void stop() {
         // stop thread so it resets between restarts
-        try {
-            t1.interrupt();
-        } catch (RuntimeException e) {
-            // pass
-        }
+        robot.threadKill();
     }
 }
