@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @TeleOp(name = "TeleOp")
@@ -19,21 +20,29 @@ public class FSM extends OpMode {
 
     private Robot robot;
 
+    enum State {
+        INTAKE,
+        OUTTAKE
+    };
+
+    enum SortingMode{
+        AUTO,
+        MANUAL
+    };
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
 
     private State state = State.INTAKE;
+    private SortingMode sortingMode = SortingMode.AUTO;
+
 
     private final ElapsedTime inputTimer = new ElapsedTime();
     private final ElapsedTime stateTimer = new ElapsedTime();
 
 
-    enum State {
-        INTAKE,
-        OUTTAKE
-    };
+
 
     // change state and reset timers
     private void changeState(State newState) {
@@ -55,18 +64,37 @@ public class FSM extends OpMode {
         robot.intake.startMotor();
         robot.revolver.mode = Revolver.Mode.INTAKE;
 
-        // go to previous slot
-        if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
-            robot.revolver.prevSlot();
+        switch(sortingMode) {
+            case AUTO:
 
-            inputTimer.reset();
-        }
+                if(robot.revolver.isSlotFull(robot.revolver.getTargetSlot())){
+                    robot.revolver.setTargetSlot(robot.revolver.getFreeSlot());
+                }
+                else robot.revolver.setTargetSlot(robot.revolver.getTargetSlot());
 
-        // go to next slot
-        if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
-            robot.revolver.nextSlot();
+                if(gamepad1.dpad_right || gamepad1.dpad_left){
+                    sortingMode = SortingMode.MANUAL;
+                }
+                break;
 
-            inputTimer.reset();
+            case MANUAL:
+                // go to previous slot
+                if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
+                    robot.revolver.prevSlot();
+
+                    inputTimer.reset();
+                }
+
+                // go to next slot
+                if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
+                    robot.revolver.nextSlot();
+
+                    inputTimer.reset();
+                }
+
+                if(gamepad1.right_bumper) {
+                    sortingMode = SortingMode.AUTO;
+                }
         }
 
         // power off intake and switch to outtake state
@@ -82,27 +110,51 @@ public class FSM extends OpMode {
         robot.turret.startMotor();
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
 
+        switch(sortingMode) {
+            case AUTO:
+
+                if(robot.revolver.getFullSlot() != 0){
+                    robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
+                    robot.intake.update();
+
+                }
+                else robot.revolver.setTargetSlot((byte) 0);
+
+                if(gamepad1.dpad_right || gamepad1.dpad_left){
+                    sortingMode = SortingMode.MANUAL;
+                }
+                break;
+
+            case MANUAL:
+                // go to previous slot
+                if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
+                    robot.revolver.prevSlot();
+
+                    inputTimer.reset();
+                }
+
+                // go to next slot
+                if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
+                    robot.revolver.nextSlot();
+
+                    inputTimer.reset();
+                }
+
+                if(gamepad1.right_bumper) {
+                    sortingMode = SortingMode.AUTO;
+                }
+        }
+
         // shoot ball
         // wait at least 300 ms to let motor speed up
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300) {
             robot.revolver.liftLoad();
+            robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
+            //TODO TREBUIE ADAUGAT WAIT AICI DA NU IMI VINE ACUM CUM
         } else {
             robot.revolver.liftReset();
         }
 
-        // go to previous slot
-        if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
-            robot.revolver.prevSlot();
-
-            inputTimer.reset();
-        }
-
-        // go to next slot
-        if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
-            robot.revolver.nextSlot();
-            
-            inputTimer.reset();
-        }
 
         // go to intake state
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
@@ -123,7 +175,7 @@ public class FSM extends OpMode {
     public  void start() {
         changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
-        robot.revolver.setTargetSlot((byte) 0);
+        sortingMode = SortingMode.AUTO;
         robot.revolver.start();
     }
 
@@ -157,13 +209,19 @@ public class FSM extends OpMode {
         dashboardTelemetry.addData("input timer", inputTimer.milliseconds());
         dashboardTelemetry.addData("dpad l", gamepad1.dpad_left);
         dashboardTelemetry.addData("dpad r", gamepad1.dpad_right);
-
         dashboardTelemetry.addData("distance to walk", robot.revolver.distance);
 
         telemetry.addData("target position", robot.revolver.getTargetSlot());
         telemetry.addData("state", state);
-        telemetry.update();
+        telemetry.addData("target pos: ", Revolver.target);
+        telemetry.addData("current pos: ", robot.revolver.encoderRevolver.getCurrentPosition());
+        telemetry.addData("input timer", inputTimer.milliseconds());
+        telemetry.addData("dpad l", gamepad1.dpad_left);
+        telemetry.addData("dpad r", gamepad1.dpad_right);
+        telemetry.addData("distance to walk", robot.revolver.distance);
+
         dashboardTelemetry.update();
+        telemetry.update();
     }
 
     @Override

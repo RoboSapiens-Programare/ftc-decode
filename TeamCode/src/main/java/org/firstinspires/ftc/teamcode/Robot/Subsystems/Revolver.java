@@ -76,8 +76,7 @@ public class Revolver{
 
     public void setTargetSlot(byte n) {
         // determine if aligning for intake or outtake
-        target = mode == Mode.INTAKE
-                ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
+        target = mode == Mode.INTAKE ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
 
         target += uV.ticksPerRevolution / 3 * (n - 1);
 
@@ -134,6 +133,21 @@ public class Revolver{
 
     public ColorEnum getSlotColor(byte i) {
         return  colorList[i];
+    }
+
+    public byte getFullSlot(){
+        byte b = -1;
+        while(colorList[b] == ColorEnum.UNDEFINED){
+            b++;
+        }
+        return b;
+    }
+
+    public boolean isSlotFull(byte targetSlot){
+        if(colorList[targetSlot] != ColorEnum.UNDEFINED){
+            return true;
+        }
+        else return false;
     }
 
     public byte getFreeSlot() {

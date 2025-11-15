@@ -65,11 +65,11 @@ public class Intake {
 
         revolver.setSlotColor(revolver.getTargetSlot(), col);
 
-        byte b = revolver.getFreeSlot();
-        if (b == 5)
-            return;
-
-        revolver.setTargetSlot(b);
+//        byte b = revolver.getFreeSlot();
+//        if (b == 5)
+//            return;
+//
+//        revolver.setTargetSlot(b);
 
     }
 
