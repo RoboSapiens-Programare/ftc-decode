@@ -49,11 +49,13 @@ public class Revolver{
     public static double Kd = 0;
     public static double Ki = 0.00000005;
 
-    // Minimal power so servo does not move
-    public static double Kmin = 0.031;
+    // Minimal power so servo moves at low output power
+    public static double kStaticEmpty = 0; // Power to move 0 balls
+    public static double kStatic1 = 0;     // Power to move 1 ball
+    public static double kStatic2 = 0;     // Power to move 2 balls
+    public static double kStatic3 = 0;         // Power to move 3 balls
 
-    private PIDController pidController = new PIDController(Kp, Ki, Kd, Kmin);
-
+    private PIDController pidController = new PIDController(Kp, Ki, Kd, kStaticEmpty);
     // PID
     double lastError = 0;
 
@@ -80,7 +82,7 @@ public class Revolver{
         // determine if aligning for intake or outtake
         target = mode == Mode.INTAKE ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
 
-        target += uV.ticksPerRevolution / 3 * (n - 1);
+        target += (uV.ticksPerRevolution / 3) * n;
 
 
         targetSlot = n;
@@ -138,11 +140,12 @@ public class Revolver{
     }
 
     public byte getFullSlot(){
-        byte b = -1;
-        while(colorList[b] == ColorEnum.UNDEFINED){
-            b++;
+        for (byte b = 0; b < colorList.length; b++) {
+            if (colorList[b] != ColorEnum.UNDEFINED) {
+                return b;
+            }
         }
-        return b;
+        return -1;
     }
 
     public boolean isSlotFull(byte targetSlot){
@@ -150,12 +153,11 @@ public class Revolver{
     }
 
     public byte getFreeSlot() {
-        for (byte b = 0; b < colorList.length; ++b) {
+        for (byte b = 0; b < colorList.length; b++) {
             if (colorList[b] == ColorEnum.UNDEFINED) {
                 return b;
             }
         }
-
         return -1;
     }
 
@@ -170,20 +172,30 @@ public class Revolver{
     }
 
     public void update() {
-        double out = pidController.update(encoderRevolver.getCurrentPosition());
-        FtcDashboard.getInstance().getTelemetry().addData("out", out);
-        FtcDashboard.getInstance().getTelemetry().addData("err", PIDController.error);
-        FtcDashboard.getInstance().getTelemetry().addData("der", PIDController.derivative);
-        FtcDashboard.getInstance().getTelemetry().update();
-        revolverSpin.setPower(
-            out
-        );
+        PIDController.kP = Kp;
+        PIDController.kI = Ki;
+        PIDController.kD = Kd;
+
+        byte ballCount = getBallCount();
+
+        switch(ballCount){
+            case 0: PIDController.kStatic = kStaticEmpty; break;
+            case 1: PIDController.kStatic = kStatic1; break;
+            case 2: PIDController.kStatic = kStatic2; break;
+            case 3: PIDController.kStatic = kStatic3; break;
+        }
 
         pidController.setSetpoint(target);
+
+        double out = pidController.updatePID(encoderRevolver.getCurrentPosition());
+
+        revolverSpin.setPower(out);
+
+        FtcDashboard.getInstance().getTelemetry().addData("out", out);
+        FtcDashboard.getInstance().getTelemetry().addData("err", PIDController.error);
+        FtcDashboard.getInstance().getTelemetry().update();
     }
 
     public void start() {
-        t = new Thread(pidController);
-        t.start();
     }
 }

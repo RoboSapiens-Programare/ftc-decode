@@ -40,6 +40,8 @@ public class FSM extends OpMode {
 
     private final ElapsedTime inputTimer = new ElapsedTime();
     private final ElapsedTime stateTimer = new ElapsedTime();
+    private final ElapsedTime changeRevolverSlotTimer = new ElapsedTime();
+    private boolean revolverSingleton = true;
 
 
 
@@ -50,6 +52,7 @@ public class FSM extends OpMode {
 
         inputTimer.reset();
         stateTimer.reset();
+        changeRevolverSlotTimer.reset();
 
         // go to pos 0 always
         robot.revolver.setTargetSlot((byte) 0);
@@ -113,10 +116,9 @@ public class FSM extends OpMode {
         switch(sortingMode) {
             case AUTO:
 
-                if(robot.revolver.getFullSlot() != 0){
+                if(robot.revolver.getFullSlot() != -1){
                     robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
                     robot.intake.update();
-
                 }
                 else robot.revolver.setTargetSlot((byte) 0);
 
@@ -148,9 +150,7 @@ public class FSM extends OpMode {
         // shoot ball
         // wait at least 300 ms to let motor speed up
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300) {
-            robot.revolver.liftLoad();
-            robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
-            //TODO TREBUIE ADAUGAT WAIT AICI DA NU IMI VINE ACUM CUM
+            //TODO CHANGE WITH THE LOGIC FROM THE LAPTOP(I FORGOT)
         } else {
             robot.revolver.liftReset();
         }
@@ -223,11 +223,5 @@ public class FSM extends OpMode {
 
         dashboardTelemetry.update();
         telemetry.update();
-    }
-
-    @Override
-    public void stop() {
-        // stop thread so it resets between restarts
-        robot.threadKill();
     }
 }
