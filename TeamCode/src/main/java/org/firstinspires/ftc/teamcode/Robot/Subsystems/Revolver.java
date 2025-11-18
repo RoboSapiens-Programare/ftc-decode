@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -44,13 +45,14 @@ public class Revolver{
     // PID values for empty revolver
     // NOTE: should implement a 2D array for 4 PID tunes
     // (tuned for 0, 1, 2 and 3 loaded game elements)
-    public static double Kp = 0.000048;
-    public static double Kd = 0.008;
+    public static double Kp = 0.000044;
+    public static double Kd = 0;
+    public static double Ki = 0.00000005;
 
     // Minimal power so servo does not move
     public static double Kmin = 0.031;
 
-    private PIDController pidController = new PIDController(Kp, 0, Kd, Kmin);
+    private PIDController pidController = new PIDController(Kp, Ki, Kd, Kmin);
 
     // PID
     double lastError = 0;
@@ -144,10 +146,7 @@ public class Revolver{
     }
 
     public boolean isSlotFull(byte targetSlot){
-        if(colorList[targetSlot] != ColorEnum.UNDEFINED){
-            return true;
-        }
-        else return false;
+        return colorList[targetSlot] != ColorEnum.UNDEFINED;
     }
 
     public byte getFreeSlot() {
@@ -157,7 +156,7 @@ public class Revolver{
             }
         }
 
-        return 5;
+        return -1;
     }
 
     public byte getBallCount() {
@@ -171,8 +170,13 @@ public class Revolver{
     }
 
     public void update() {
+        double out = pidController.update(encoderRevolver.getCurrentPosition());
+        FtcDashboard.getInstance().getTelemetry().addData("out", out);
+        FtcDashboard.getInstance().getTelemetry().addData("err", PIDController.error);
+        FtcDashboard.getInstance().getTelemetry().addData("der", PIDController.derivative);
+        FtcDashboard.getInstance().getTelemetry().update();
         revolverSpin.setPower(
-            pidController.update(encoderRevolver.getCurrentPosition())
+            out
         );
 
         pidController.setSetpoint(target);

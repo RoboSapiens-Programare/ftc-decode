@@ -175,7 +175,8 @@ public class FSM extends OpMode {
     public  void start() {
         changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
-        sortingMode = SortingMode.AUTO;
+        robot.revolver.setTargetSlot((byte) 0);
+        sortingMode = SortingMode.MANUAL;
         robot.revolver.start();
     }
 

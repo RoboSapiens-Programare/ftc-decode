@@ -6,13 +6,14 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.opencv.core.Mat;
 
 @Config
 public class PIDController implements Runnable {
     public static double kp; // Proportional gain
     public static double ki; // Integral gain
     public static double kd; // Derivative gain
-    double error = 0, derivative = 0;
+    public static double error = 0, derivative = 0;
 
 
     private double integral;
@@ -25,7 +26,8 @@ public class PIDController implements Runnable {
     private double outputMax = Double.POSITIVE_INFINITY;
     public static double Kmin = 0;
 
-    private ElapsedTime timer = new ElapsedTime();
+    private ElapsedTime timer1 = new ElapsedTime();
+    private ElapsedTime timer2 = new ElapsedTime();
 
 
     public PIDController(double kp, double ki, double kd, double Kmin) {
@@ -53,7 +55,7 @@ public class PIDController implements Runnable {
     public void reset() {
         integral = 0;
         previousError = 0;
-        timer.reset();
+        timer1.reset();
     }
 
     @Override
@@ -61,38 +63,51 @@ public class PIDController implements Runnable {
 
         while (!Thread.currentThread().isInterrupted()) {
             // Delay for slowing down thread to calculate derivative
-            if (timer.milliseconds() > 150) {
-                derivative = (error - previousError) / timer.milliseconds();
-                timer.reset();
+            if (timer1.milliseconds() > 100) {
+                derivative = (error - previousError) / timer1.milliseconds();
+                timer1.reset();
+                previousError = error;
+
             }
 
             error = setpoint - currentValue;
 
             // Integral term
-            integral += error * timer.milliseconds();
+
+            integral += error * timer2.milliseconds();
 
             // Derivative term
+//P: 0.000042
 
+//            timer1.reset();
 
             // PID output
-            //output = kp * error + ki * integral + kd * derivative;
+            output = kp * error + ki * integral + kd * derivative;
 
-            output = kp * error + kd * derivative;
+//            output = kp * error + kd * derivative;
 
-            if (output <= 0) {
+
+
+            if (output < 0) {
                 output -= Kmin;
-            } else {
+            } else if (output > 0) {
                 output += Kmin;
             }
+
+//            if (Math.abs(error) > 300)
+//            {
+//                output += Kmin * error / Math.abs(error);
+//            }
+
+
 
 
             // Clamp output
             //output = Math.max(outputMin, Math.min(output, outputMax));
 
             // Save for next iteration
-            previousError = error;
+            timer2.reset();
 
-            timer.reset();
 
         }
     }
