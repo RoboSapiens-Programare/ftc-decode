@@ -69,14 +69,8 @@ public class PIDController {
         // This adds the constant force needed to overcome friction
 
         // Only apply if we are NOT at the target (outside 10 tick tolerance)
-        if (Math.abs(error) > 50) {
-            if (output > 0) {
-                // Moving forward: Add positive static friction
-                output += kStatic;
-            } else {
-                // Moving backward: Subtract static friction (add negative)
-                output -= kStatic;
-            }
+        if (Math.abs(error) > 55) {
+            output += kStatic * Math.signum(error);
         } else {
             // If inside tolerance, shut off everything to prevent jitter
             output = 0;

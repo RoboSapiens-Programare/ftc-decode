@@ -42,6 +42,7 @@ public class FSM extends OpMode {
     private final ElapsedTime stateTimer = new ElapsedTime();
     private final ElapsedTime changeRevolverSlotTimer = new ElapsedTime();
     private boolean singletonRevolverChange = true;
+    private boolean singletonShoot = true;
 
 
 
@@ -114,59 +115,68 @@ public class FSM extends OpMode {
     private void handleOuttake() {
         robot.turret.startMotor();
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
+        robot.revolver.update();
 
-        switch(sortingMode) {
-            case AUTO:
+        if (singletonShoot) {
+            switch (sortingMode) {
+                case AUTO:
 
-                if(robot.revolver.getFullSlot() != -1){
-                    robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
-                    robot.intake.update();
+                    if (robot.revolver.getFullSlot() != -1) {
+                        robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
+                        robot.intake.update();
 
-                }
-                else robot.revolver.setTargetSlot((byte) 0);
+                    } else robot.revolver.setTargetSlot((byte) 0);
 
-                if(gamepad1.dpad_right || gamepad1.dpad_left){
-                    sortingMode = SortingMode.MANUAL;
-                }
-                break;
+                    if (gamepad1.dpad_right || gamepad1.dpad_left) {
+                        sortingMode = SortingMode.MANUAL;
+                    }
+                    break;
 
-            case MANUAL:
-                // go to previous slot
-                if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
-                    robot.revolver.prevSlot();
+                case MANUAL:
+                    // go to previous slot
+                    if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
+                        robot.revolver.prevSlot();
 
-                    inputTimer.reset();
-                }
+                        inputTimer.reset();
+                    }
 
-                // go to next slot
-                if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
-                    robot.revolver.nextSlot();
+                    // go to next slot
+                    if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
+                        robot.revolver.nextSlot();
 
-                    inputTimer.reset();
-                }
+                        inputTimer.reset();
+                    }
 
-                if(gamepad1.right_bumper) {
-                    sortingMode = SortingMode.AUTO;
-                }
-                break;
+                    if (gamepad1.right_bumper) {
+                        sortingMode = SortingMode.AUTO;
+                    }
+                    break;
+            }
         }
 
         // shoot ball
         // wait at least 300 ms to let motor speed up
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300) {
+            singletonShoot = false;
+        }
+
+        if (!singletonShoot) {
             if(singletonRevolverChange){
                 robot.revolver.liftLoad();
                 changeRevolverSlotTimer.reset();
                 singletonRevolverChange = false;
             }
-            if(changeRevolverSlotTimer.milliseconds() > 500 && !singletonRevolverChange) {
+
+            if(changeRevolverSlotTimer.milliseconds() > 1500 && !singletonRevolverChange) {
                 robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
                 robot.revolver.liftReset();
-                singletonRevolverChange = true;
-            }
 
+                singletonRevolverChange = true;
+                singletonShoot = true;
+            }
         }
 
+        robot.turret.setAngle((float) (gamepad2.left_stick_x));
 
         // go to intake state
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
@@ -208,33 +218,19 @@ public class FSM extends OpMode {
 
 
         robot.drive.updateDrive(
-        -gamepad1.left_stick_y,
-        gamepad1.left_stick_x,
-        gamepad1.right_stick_x);
+            -gamepad1.left_stick_y,
+            gamepad1.left_stick_x,
+            gamepad1.right_stick_x
+        );
 
         robot.revolver.update();
 
 
-        dashboardTelemetry.addData("target position", robot.revolver.getTargetSlot());
         dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target pos: ", Revolver.target);
-        dashboardTelemetry.addData("current pos: ", robot.revolver.encoderRevolver.getCurrentPosition());
-        dashboardTelemetry.addData("input timer", inputTimer.milliseconds());
-        dashboardTelemetry.addData("dpad l", gamepad1.dpad_left);
-        dashboardTelemetry.addData("dpad r", gamepad1.dpad_right);
-        dashboardTelemetry.addData("distance to walk", robot.revolver.distance);
-
-        telemetry.addData("target position", robot.revolver.getTargetSlot());
-        telemetry.addData("state", state);
-        telemetry.addData("target pos: ", Revolver.target);
-        telemetry.addData("current pos: ", robot.revolver.encoderRevolver.getCurrentPosition());
-        telemetry.addData("input timer", inputTimer.milliseconds());
-        telemetry.addData("dpad l", gamepad1.dpad_left);
-        telemetry.addData("dpad r", gamepad1.dpad_right);
-        telemetry.addData("distance to walk", robot.revolver.distance);
+        dashboardTelemetry.addData("target position", Revolver.target);
+        dashboardTelemetry.addData("current position", robot.revolver.encoderRevolver.getCurrentPosition());
 
         dashboardTelemetry.update();
-        telemetry.update();
     }
 
     @Override

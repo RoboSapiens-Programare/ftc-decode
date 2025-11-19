@@ -46,17 +46,19 @@ public class Revolver{
     // PID values for empty revolver
     // NOTE: should implement a 2D array for 4 PID tunes
     // (tuned for 0, 1, 2 and 3 loaded game elements)
-    public static double Kp = 0.000044;
-    public static double Kd = 0;
-    public static double Ki = 0.00000005;
+    public static double Kp = 0.0001625;
+    public static double Kd = 0.0000375;
+    public static double Ki = 0.000265;
 
     // Minimal power so servo moves at low output power
-    public static double kStaticEmpty = 0; // Power to move 0 balls
+    public static double kStaticEmpty = 0.055; // Power to move 0 balls
     public static double kStatic1 = 0;     // Power to move 1 ball
     public static double kStatic2 = 0;     // Power to move 2 balls
     public static double kStatic3 = 0;         // Power to move 3 balls
 
     private PIDController pidController = new PIDController(Kp, Ki, Kd, kStaticEmpty);
+
+    private int prevBallCount = -1;
     // PID
     double lastError = 0;
 
@@ -175,18 +177,31 @@ public class Revolver{
     }
 
     public void update() {
-        PIDController.kP = Kp;
-        PIDController.kI = Ki;
-        PIDController.kD = Kd;
-
         byte ballCount = getBallCount();
 
-        switch(ballCount){
-            case 0: PIDController.kStatic = kStaticEmpty; break;
-            case 1: PIDController.kStatic = kStatic1; break;
-            case 2: PIDController.kStatic = kStatic2; break;
-            case 3: PIDController.kStatic = kStatic3; break;
+        if (ballCount != prevBallCount) {
+            PIDController.kP = Kp;
+            PIDController.kI = Ki;
+            PIDController.kD = Kd;
+
+            prevBallCount = ballCount;
         }
+
+        // TODO: uncomment after tuning
+//        switch(ballCount){
+//            case 0:
+//                PIDController.kStatic = kStaticEmpty;
+//                break;
+//            case 1:
+//                PIDController.kStatic = kStatic1;
+//                break;
+//            case 2:
+//                PIDController.kStatic = kStatic2;
+//                break;
+//            case 3:
+//                PIDController.kStatic = kStatic3;
+//                break;
+//        }
 
         pidController.setSetpoint(target);
 
@@ -196,6 +211,7 @@ public class Revolver{
 
         FtcDashboard.getInstance().getTelemetry().addData("out", out);
         FtcDashboard.getInstance().getTelemetry().addData("err", PIDController.error);
+        FtcDashboard.getInstance().getTelemetry().addData("kS", PIDController.kStatic);
         FtcDashboard.getInstance().getTelemetry().update();
     }
 
