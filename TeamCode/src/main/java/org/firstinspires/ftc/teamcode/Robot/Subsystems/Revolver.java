@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
-import org.firstinspires.ftc.teamcode.Robot.Utils.PIDController;
+import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @Config
@@ -43,26 +43,16 @@ public class Revolver{
     public static int target = 0;
 
 
-    // PID values for empty revolver
-    // NOTE: should implement a 2D array for 4 PID tunes
-    // (tuned for 0, 1, 2 and 3 loaded game elements)
+    // PID values for revolver
+    // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
+    // IT WAS MADE FOR THIS
+    // LITERALLY FOR THIS
     public static double Kp = 0.0001625;
     public static double Kd = 0.0000375;
     public static double Ki = 0.000265;
+    public static double Kf = 0.055; // Power to overcome inertia and friction
 
-    // Minimal power so servo moves at low output power
-    public static double kStaticEmpty = 0.055; // Power to move 0 balls
-    public static double kStatic1 = 0;     // Power to move 1 ball
-    public static double kStatic2 = 0;     // Power to move 2 balls
-    public static double kStatic3 = 0;         // Power to move 3 balls
-
-    private PIDController pidController = new PIDController(Kp, Ki, Kd, kStaticEmpty);
-
-    private int prevBallCount = -1;
-    // PID
-    double lastError = 0;
-
-    ElapsedTime timer = new ElapsedTime();
+    private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
     // Align with INTAKE / OUTTAKE
     public enum Mode {
@@ -76,8 +66,6 @@ public class Revolver{
 
     public void setTarget(int target){
         Revolver.target = target;
-
-        pidController.setSetpoint(target);
     }
 
 
@@ -177,42 +165,15 @@ public class Revolver{
     }
 
     public void update() {
-        byte ballCount = getBallCount();
+        pidfController.setSetpoint(target);
 
-        if (ballCount != prevBallCount) {
-            PIDController.kP = Kp;
-            PIDController.kI = Ki;
-            PIDController.kD = Kd;
-
-            prevBallCount = ballCount;
-        }
-
-        // TODO: uncomment after tuning
-//        switch(ballCount){
-//            case 0:
-//                PIDController.kStatic = kStaticEmpty;
-//                break;
-//            case 1:
-//                PIDController.kStatic = kStatic1;
-//                break;
-//            case 2:
-//                PIDController.kStatic = kStatic2;
-//                break;
-//            case 3:
-//                PIDController.kStatic = kStatic3;
-//                break;
-//        }
-
-        pidController.setSetpoint(target);
-
-        double out = pidController.updatePID(encoderRevolver.getCurrentPosition());
+        double out = pidCfontroller.updatePID(encoderRevolver.getCurrentPosition());
 
         revolverSpin.setPower(out);
 
-        FtcDashboard.getInstance().getTelemetry().addData("out", out);
-        FtcDashboard.getInstance().getTelemetry().addData("err", PIDController.error);
-        FtcDashboard.getInstance().getTelemetry().addData("kS", PIDController.kStatic);
-        FtcDashboard.getInstance().getTelemetry().update();
+        // FtcDashboard.getInstance().getTelemetry().addData("out", out);
+        // FtcDashboard.getInstance().getTelemetry().addData("err", pidfController.error);
+        // FtcDashboard.getInstance().getTelemetry().update();
     }
 
     public void start() {

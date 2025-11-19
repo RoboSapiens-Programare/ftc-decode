@@ -3,35 +3,34 @@ package org.firstinspires.ftc.teamcode.Robot.Utils;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
+// import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Mat;
 
-@Config
-public class PIDController {
+public class PIDFController {
     // 1. TUNING VARIABLES (Not static, so you can have multiple PIDs)
-    public static double kP;
-    public static double kI;
-    public static double kD;
-    public static double kStatic;
+    public double kP;
+    public double kI;
+    public double kD;
+    public double kF;
 
     // 2. STATE VARIABLES
-    public static double error = 0;
-    private static double previousError = 0;
-    private static double integral = 0;
-    private static double setpoint = 0;
+    public double error = 0;
+    private double previousError = 0;
+    private double integral = 0;
+    private double setpoint = 0;
     private double maxIntegral = 1.0; // Cap for the "I" term
 
     private ElapsedTime timer = new ElapsedTime();
 
-    public PIDController(double kP, double kI, double kD, double kStatic) {
-        PIDController.kP = kP;
-        PIDController.kI = kI;
-        PIDController.kD = kD;
-        PIDController.kStatic = kStatic;
+    public PIDFController(double kP, double kI, double kD, double kF) {
+        this.kP = kP;
+        this.kI = kI;
+        this.kD = kD;
+        this.kF = kF;
         timer.reset();
     }
 
@@ -65,12 +64,12 @@ public class PIDController {
         // Calculate PID Output
         double output = (kP * error) + (kI * integral) + (kD * derivative);
 
-        // 4. Apply kStatic
+        // 4. Apply kF
         // This adds the constant force needed to overcome friction
 
-        // Only apply if we are NOT at the target (outside 10 tick tolerance)
+        // Only apply if we are NOT at the target (outside 55 ticks tolerance)
         if (Math.abs(error) > 55) {
-            output += kStatic * Math.signum(error);
+            output += kF * Math.signum(error);
         } else {
             // If inside tolerance, shut off everything to prevent jitter
             output = 0;
