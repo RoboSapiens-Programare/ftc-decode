@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.robocol.TelemetryMessage;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Auto.Samples.ColorDetectionSample;
@@ -36,7 +37,7 @@ public class Intake {
         Color.RGBToHSV(r, g, b, hsv);
         float h = hsv[0]; // convert hue to degrees
 
-        dashboardTelemetry.addData("hue", hsv[0]);
+        FtcDashboard.getInstance().getTelemetry().addData("hue", hsv[0]);
 
         // works only at a specific distance, change when remounting sensor :D
 
