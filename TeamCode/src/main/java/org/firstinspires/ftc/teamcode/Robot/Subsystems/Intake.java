@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Auto.Samples.ColorDetectionSample;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
@@ -35,11 +36,12 @@ public class Intake {
         Color.RGBToHSV(r, g, b, hsv);
         float h = hsv[0]; // convert hue to degrees
 
+
         // works only at a specific distance, change when remounting sensor :D
 
-        if (h >= 200 && h <= 255 && argb > 300000000) {
+        if (h >= 170 && h <= 255 && argb > 300000000) {
             return ColorEnum.PURPLE;
-        } else if (h >= 120 && h <= 200 && argb > 300000000) {
+        } else if (h >= 120 && h <= 170 && argb > 800000000) {
             return ColorEnum.GREEN;
         } else {
             return ColorEnum.UNDEFINED;

@@ -40,6 +40,8 @@ public class FSM extends OpMode {
 
     private final ElapsedTime inputTimer = new ElapsedTime();
     private final ElapsedTime stateTimer = new ElapsedTime();
+    private final ElapsedTime changeRevolverSlotTimer = new ElapsedTime();
+    private boolean singletonRevolverChange = true;
 
 
 
@@ -50,7 +52,7 @@ public class FSM extends OpMode {
 
         inputTimer.reset();
         stateTimer.reset();
-
+        changeRevolverSlotTimer.reset();
         // go to pos 0 always
         robot.revolver.setTargetSlot((byte) 0);
     }
@@ -68,7 +70,9 @@ public class FSM extends OpMode {
             case AUTO:
 
                 if(robot.revolver.isSlotFull(robot.revolver.getTargetSlot())){
-                    robot.revolver.setTargetSlot(robot.revolver.getFreeSlot());
+                    if(robot.revolver.getFreeSlot() != -1) {
+                        robot.revolver.setTargetSlot(robot.revolver.getFreeSlot());
+                    }
                 }
                 else robot.revolver.setTargetSlot(robot.revolver.getTargetSlot());
 
@@ -95,6 +99,7 @@ public class FSM extends OpMode {
                 if(gamepad1.right_bumper) {
                     sortingMode = SortingMode.AUTO;
                 }
+                break;
         }
 
         // power off intake and switch to outtake state
@@ -113,7 +118,7 @@ public class FSM extends OpMode {
         switch(sortingMode) {
             case AUTO:
 
-                if(robot.revolver.getFullSlot() != 0){
+                if(robot.revolver.getFullSlot() != -1){
                     robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
                     robot.intake.update();
 
@@ -143,16 +148,23 @@ public class FSM extends OpMode {
                 if(gamepad1.right_bumper) {
                     sortingMode = SortingMode.AUTO;
                 }
+                break;
         }
 
         // shoot ball
         // wait at least 300 ms to let motor speed up
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300) {
-            robot.revolver.liftLoad();
-            robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
-            //TODO TREBUIE ADAUGAT WAIT AICI DA NU IMI VINE ACUM CUM
-        } else {
-            robot.revolver.liftReset();
+            if(singletonRevolverChange){
+                robot.revolver.liftLoad();
+                changeRevolverSlotTimer.reset();
+                singletonRevolverChange = false;
+            }
+            if(changeRevolverSlotTimer.milliseconds() > 500 && !singletonRevolverChange) {
+                robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
+                robot.revolver.liftReset();
+                singletonRevolverChange = true;
+            }
+
         }
 
 
@@ -175,8 +187,8 @@ public class FSM extends OpMode {
     public  void start() {
         changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
-        robot.revolver.setTargetSlot((byte) 0);
-        sortingMode = SortingMode.MANUAL;
+        robot.revolver.setTargetSlot((byte) 1);
+        sortingMode = SortingMode.AUTO;
         robot.revolver.start();
     }
 

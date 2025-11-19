@@ -51,4 +51,6 @@ dependencies {
     implementation("com.pedropathing:ftc:2.0.4") {
         exclude group: "com.acmerobotics.dashboard"
     }
+    implementation 'org.ftclib.ftclib:core:2.1.1'
+
 }

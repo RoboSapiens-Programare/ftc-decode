@@ -49,6 +49,47 @@ public class PIDController implements Runnable {
     public double update(double currentValue) {
         this.currentValue = currentValue;
 
+        error = setpoint - currentValue;
+
+        derivative = (error - previousError) / timer1.milliseconds();
+
+
+        // Integral term
+
+        integral += error * timer1.milliseconds();
+
+        // Derivative term
+//P: 0.000042
+
+//            timer1.reset();
+
+        // PID output
+        output = kp * error + ki * integral + kd * derivative;
+
+//            output = kp * error + kd * derivative;
+
+
+
+        if (output < 0) {
+            output -= Kmin;
+        } else if (output > 0) {
+            output += Kmin;
+        }
+
+//            if (Math.abs(error) > 300)
+//            {
+//                output += Kmin * error / Math.abs(error);
+//            }
+
+
+
+
+        // Clamp output
+        //output = Math.max(outputMin, Math.min(output, outputMax));
+
+        // Save for next iteration
+        timer1.reset();
+        previousError = error;
         return output;
     }
 
@@ -62,51 +103,7 @@ public class PIDController implements Runnable {
     public void run() {
 
         while (!Thread.currentThread().isInterrupted()) {
-            // Delay for slowing down thread to calculate derivative
-            if (timer1.milliseconds() > 100) {
-                derivative = (error - previousError) / timer1.milliseconds();
-                timer1.reset();
-                previousError = error;
 
-            }
-
-            error = setpoint - currentValue;
-
-            // Integral term
-
-            integral += error * timer2.milliseconds();
-
-            // Derivative term
-//P: 0.000042
-
-//            timer1.reset();
-
-            // PID output
-            output = kp * error + ki * integral + kd * derivative;
-
-//            output = kp * error + kd * derivative;
-
-
-
-            if (output < 0) {
-                output -= Kmin;
-            } else if (output > 0) {
-                output += Kmin;
-            }
-
-//            if (Math.abs(error) > 300)
-//            {
-//                output += Kmin * error / Math.abs(error);
-//            }
-
-
-
-
-            // Clamp output
-            //output = Math.max(outputMin, Math.min(output, outputMax));
-
-            // Save for next iteration
-            timer2.reset();
 
 
         }

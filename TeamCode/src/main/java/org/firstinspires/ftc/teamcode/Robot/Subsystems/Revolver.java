@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -42,15 +43,15 @@ public class Revolver{
     public static byte targetSlot = 0;
     public static int target = 0;
 
+
     // PID values for empty revolver
     // NOTE: should implement a 2D array for 4 PID tunes
     // (tuned for 0, 1, 2 and 3 loaded game elements)
-    public static double Kp = 0.000044;
-    public static double Kd = 0;
-    public static double Ki = 0.00000005;
-
+    public static double Kp = 0.00011;
+    public static double Kd = 0.0000009;
+    public static double Ki = 0;
     // Minimal power so servo does not move
-    public static double Kmin = 0.031;
+    public static double Kmin = 0.025;
 
     private PIDController pidController = new PIDController(Kp, Ki, Kd, Kmin);
 
@@ -138,11 +139,13 @@ public class Revolver{
     }
 
     public byte getFullSlot(){
-        byte b = -1;
-        while(colorList[b] == ColorEnum.UNDEFINED){
-            b++;
+        for (byte b = 0; b < colorList.length; ++b) {
+            if (colorList[b] != ColorEnum.UNDEFINED) {
+                return b;
+            }
         }
-        return b;
+
+        return -1;
     }
 
     public boolean isSlotFull(byte targetSlot){
@@ -183,7 +186,5 @@ public class Revolver{
     }
 
     public void start() {
-        t = new Thread(pidController);
-        t.start();
     }
 }
