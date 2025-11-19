@@ -26,7 +26,7 @@ public class Turret {
 
     private final int TAGID = 20;
     private final int frameWidth = 640;
-    private boolean tracking = true;
+    public boolean tracking = true;
 
     private AprilTagProcessor tagProcessor;
 
@@ -99,6 +99,11 @@ public class Turret {
         if (vision != null) {
             vision.stopStreaming();     // fully stops camera pipeline
         }
+    }
+
+    public void toggleTracking() {
+        if (tracking) disableTracking();
+        else enableTracking();
     }
 
     public void update() {

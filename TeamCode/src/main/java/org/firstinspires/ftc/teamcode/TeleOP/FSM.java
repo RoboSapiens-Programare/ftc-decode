@@ -164,6 +164,16 @@ public class FSM extends OpMode {
 
         robot.turret.setAngle((float) (gamepad2.left_stick_x));
 
+        // turret tracking
+        if (gamepad2.touchpad && inputTimer.milliseconds() > 100) {
+            robot.turret.toggleTracking();
+            inputTimer.reset();
+        }
+
+        if (!robot.turret.tracking) {
+            robot.turret.turretRotationServo.setPower(gamepad2.left_stick_x);
+        }
+
         // go to intake state
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             changeState(State.INTAKE);
