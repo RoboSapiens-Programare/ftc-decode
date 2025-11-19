@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Autonomous(name="Color Detection Sample", group="1. Autonomous Samples")
+
+//TODO MODIFICAT DIN LAPTOP CA NU STIU VALORILE
 public class ColorDetectionSample extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();

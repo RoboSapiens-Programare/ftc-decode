@@ -36,6 +36,7 @@ public class Intake {
         Color.RGBToHSV(r, g, b, hsv);
         float h = hsv[0]; // convert hue to degrees
 
+        dashboardTelemetry.addData("hue", hsv[0]);
 
         // works only at a specific distance, change when remounting sensor :D
 
