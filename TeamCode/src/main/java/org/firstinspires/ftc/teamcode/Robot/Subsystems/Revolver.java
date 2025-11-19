@@ -20,17 +20,6 @@ public class Revolver{
     public DcMotor encoderRevolver;
     public Thread t;
 
-    public Revolver(HardwareMap hwMap) {
-        encoderRevolver = hwMap.get(DcMotor.class, "encoderRevolver");
-        encoderRevolver.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
-        revolverSpin.setDirection(CRServo.Direction.REVERSE);
-
-        lift = hwMap.get(Servo.class, "lift");
-    }
-
     public ColorEnum[] colorList = {
             ColorEnum.UNDEFINED,
             ColorEnum.UNDEFINED,
@@ -62,7 +51,16 @@ public class Revolver{
 
     public Mode mode = Mode.INTAKE;
 
-    public int distance;
+    public Revolver(HardwareMap hwMap) {
+        encoderRevolver = hwMap.get(DcMotor.class, "encoderRevolver");
+        encoderRevolver.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
+        revolverSpin.setDirection(CRServo.Direction.REVERSE);
+
+        lift = hwMap.get(Servo.class, "lift");
+    }
 
     public void setTarget(int target){
         Revolver.target = target;

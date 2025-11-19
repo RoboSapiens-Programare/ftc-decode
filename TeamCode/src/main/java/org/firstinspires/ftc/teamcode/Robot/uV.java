@@ -26,9 +26,5 @@ public class uV {
     public static int revolverPositonOuttake0 = ticksPerRevolution / 2;
 
 
-    public static double revolverKp = 0.0;
-    public static double revolverKi = 0.0;
-    public static double revolverKd = 0.0;
-
-
+    public static double searchSpeedMultiplier = 0.5;
 }
