@@ -81,4 +81,4 @@ lint/tmp/
 # lint/reports/
 
 # vscode
-.vscode
+.vscode/
