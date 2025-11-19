@@ -35,11 +35,9 @@ public class FSM extends OpMode {
 
     private final ElapsedTime inputTimer = new ElapsedTime();
     private final ElapsedTime stateTimer = new ElapsedTime();
-    private final ElapsedTime changeRevolverSlotTimer = new ElapsedTime();
-    private boolean singletonRevolverChange = true;
-    private boolean singletonShoot = true;
-
-
+    private final ElapsedTime loadBallTimer = new ElapsedTime();
+    private boolean singletonLoad = true;
+    private boolean singletonShoot = false;
 
 
     // change state and reset timers
@@ -48,7 +46,7 @@ public class FSM extends OpMode {
 
         inputTimer.reset();
         stateTimer.reset();
-        changeRevolverSlotTimer.reset();
+        loadBallTimer.reset();
         // go to pos 0 always
         robot.revolver.setTargetSlot((byte) 0);
     }
@@ -112,62 +110,55 @@ public class FSM extends OpMode {
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
         robot.revolver.update();
 
-        if (singletonShoot) {
-            switch (sortingMode) {
-                case AUTO:
+        if (sortingMode == SortingMode.AUTO && !singletonShoot) {
+            if (robot.revolver.getFullSlot() != -1) {
+                robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
+                robot.intake.update();
 
-                    if (robot.revolver.getFullSlot() != -1) {
-                        robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
-                        robot.intake.update();
+            } else robot.revolver.setTargetSlot((byte) 0);
 
-                    } else robot.revolver.setTargetSlot((byte) 0);
+            if (gamepad1.dpad_right || gamepad1.dpad_left) {
+                sortingMode = SortingMode.MANUAL;
+            }
+        } else if (sortingMode == SortingMode.MANUAL && !singletonShoot) {
+            // go to previous slot
+            if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
+                robot.revolver.prevSlot();
 
-                    if (gamepad1.dpad_right || gamepad1.dpad_left) {
-                        sortingMode = SortingMode.MANUAL;
-                    }
-                    break;
+                inputTimer.reset();
+            }
 
-                case MANUAL:
-                    // go to previous slot
-                    if (gamepad1.dpad_left && inputTimer.milliseconds() > 300) {
-                        robot.revolver.prevSlot();
+            // go to next slot
+            if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
+                robot.revolver.nextSlot();
 
-                        inputTimer.reset();
-                    }
+                inputTimer.reset();
+            }
 
-                    // go to next slot
-                    if (gamepad1.dpad_right && inputTimer.milliseconds() > 300) {
-                        robot.revolver.nextSlot();
-
-                        inputTimer.reset();
-                    }
-
-                    if (gamepad1.right_bumper) {
-                        sortingMode = SortingMode.AUTO;
-                    }
-                    break;
+            if (gamepad1.right_bumper) {
+                sortingMode = SortingMode.AUTO;
             }
         }
 
         // shoot ball
         // wait at least 300 ms to let motor speed up
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300) {
-            singletonShoot = false;
+            singletonShoot = true;
         }
 
-        if (!singletonShoot) {
-            if(singletonRevolverChange){
+        if (singletonShoot) {
+            if(singletonLoad){
                 robot.revolver.liftLoad();
-                changeRevolverSlotTimer.reset();
-                singletonRevolverChange = false;
+                loadBallTimer.reset();
+                singletonLoad = false;
             }
 
-            if(changeRevolverSlotTimer.milliseconds() > 1500 && !singletonRevolverChange) {
+            if(loadBallTimer.milliseconds() > 1500 && !singletonLoad) {
                 robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
                 robot.revolver.liftReset();
 
-                singletonRevolverChange = true;
-                singletonShoot = true;
+                singletonLoad = true;
+                singletonShoot = false;
             }
         }
 
