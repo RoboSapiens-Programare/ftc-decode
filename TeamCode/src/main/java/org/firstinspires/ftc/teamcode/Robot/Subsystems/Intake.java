@@ -41,7 +41,7 @@ public class Intake {
 
         // works only at a specific distance, change when remounting sensor :D
 
-        if (h >= 170 && h <= 255 && argb > 300000000) {
+        if (h >= 145 && h <= 200 && argb > 300000000) {
             return ColorEnum.PURPLE;
         } else if (h >= 120 && h <= 170 && argb > 800000000) {
             return ColorEnum.GREEN;

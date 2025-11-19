@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -34,7 +35,7 @@ public class AprilTagOP extends OpMode {
 //    private VisionPortal visionPortal;
     private OpenCvWebcam camera;
     private AprilTagDetectionPipeline aprilTagDetectionPipeline;
-    private DcMotorEx pivotMotor;
+    private CRServo pivotMotor;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry telemetry = dashboard.getTelemetry();
@@ -68,7 +69,7 @@ public class AprilTagOP extends OpMode {
     public void init() {
 
 
-        pivotMotor = hardwareMap.get(DcMotorEx.class, "CamPivot");
+        pivotMotor = hardwareMap.get(CRServo.class, "CamPivot");
 
         // visionPortal = new VisionPortal.Builder()
         //         .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))

@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Robot.uV;
 
 public class Turret {
     public DcMotorEx turretMotor;
-    private CRServo turretRotationServo;
+    public CRServo turretRotationServo;
     private float turretRotation;
 
     public Turret(HardwareMap hwMap) {
