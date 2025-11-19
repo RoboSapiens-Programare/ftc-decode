@@ -36,11 +36,30 @@ public class ColorDetectionSample extends OpMode {
 
         dashboardTelemetry.addData("hue", hsv[0]);
 
-        // works only at a specific distance, change when remounting sensor :D
+        // IMPORTANT
+        // PLEASE USE THESE VALUES AS A BASIS FOR THE NEXT COLOR SENSOR "CALIBRATION"
+
+        /*
+        averages of the sensor argb values on 19/11
+
+        1644167168 nothing in front
+
+        ^^ observe how this value is 1 digit more than the others
+
+        201326592 green hole
+        150994944 purple hole
+        -285015291 purple flush
+        -117307130 green flush
+
+         */
 
         if (h >= 180 && argb < 369762048) {
             return ColorEnum.PURPLE;
         } else if (h <= 180 && argb < 369762048 ) {
+            return ColorEnum.GREEN;
+        } else if (argb < 1044167168)
+        {   // defaults to green if it just sees something in front of it
+            // this happens if it's a purple hole because you can not differentiate
             return ColorEnum.GREEN;
         } else {
             return ColorEnum.UNDEFINED;

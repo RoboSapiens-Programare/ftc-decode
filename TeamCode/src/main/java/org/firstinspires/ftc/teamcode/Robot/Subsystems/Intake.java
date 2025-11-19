@@ -41,9 +41,9 @@ public class Intake {
 
         // works only at a specific distance, change when remounting sensor :D
 
-        if (h >= 145 && h <= 200 && argb > 300000000) {
+        if (h >= 180 && argb < 369762048) {
             return ColorEnum.PURPLE;
-        } else if (h >= 120 && h <= 170 && argb > 800000000) {
+        } else if (h <= 180 && argb < 369762048 ) {
             return ColorEnum.GREEN;
         } else {
             return ColorEnum.UNDEFINED;
@@ -96,7 +96,7 @@ public class Intake {
     }
     
     public void startMotor() {
-//        intakeMotor.setPower(uV.intakePower);
+        intakeMotor.setPower(uV.intakePower);
     }
 
     public void stopMotor() {
