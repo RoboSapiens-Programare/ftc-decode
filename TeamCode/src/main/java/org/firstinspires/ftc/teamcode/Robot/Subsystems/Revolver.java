@@ -167,7 +167,7 @@ public class Revolver{
     public void update() {
         pidfController.setSetpoint(target);
 
-        double out = pidCfontroller.updatePID(encoderRevolver.getCurrentPosition());
+        double out = pidfController.updatePID(encoderRevolver.getCurrentPosition());
 
         revolverSpin.setPower(out);
 
