@@ -19,7 +19,8 @@ public class FSM extends OpMode {
 
     enum State {
         INTAKE,
-        OUTTAKE
+        OUTTAKE,
+        DRIVE
     };
 
     enum SortingMode{
@@ -41,6 +42,8 @@ public class FSM extends OpMode {
     private boolean singletonLoad = true;
     private boolean singletonShoot = false;
 
+    private int motifPosition = 0;
+
 
     // change state and reset timers
     private void changeState(State newState) {
@@ -57,7 +60,7 @@ public class FSM extends OpMode {
     
 
     private void handleIntake() {
-        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
+//        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
 
         robot.intake.startMotor();
         robot.revolver.mode = Revolver.Mode.INTAKE;
@@ -99,7 +102,7 @@ public class FSM extends OpMode {
         }
 
         // power off intake and switch to outtake state
-        if (gamepad1.cross && stateTimer.milliseconds() > 400) {
+        if (gamepad1.left_bumper && stateTimer.milliseconds() > 400) {
             robot.intake.stopMotor();
             changeState(State.OUTTAKE);
         }
@@ -113,8 +116,9 @@ public class FSM extends OpMode {
         robot.revolver.update();
 
         if (sortingMode == SortingMode.AUTO && !singletonShoot) {
-            if (robot.revolver.getFullSlot() != -1) {
-                robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
+            byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
+            if (t != -1) {
+                robot.revolver.setTargetSlot(t);
                 robot.intake.update();
 
             } else robot.revolver.setTargetSlot((byte) 0);
@@ -137,7 +141,7 @@ public class FSM extends OpMode {
                 inputTimer.reset();
             }
 
-            if (gamepad1.right_bumper) {
+            if (gamepad1.cross) {
                 sortingMode = SortingMode.AUTO;
             }
         }
@@ -159,6 +163,12 @@ public class FSM extends OpMode {
                 robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
                 robot.revolver.liftReset();
 
+                if (motifPosition == 2) {
+                    motifPosition = 0;
+                } else {
+                    ++motifPosition;
+                }
+
                 singletonLoad = true;
                 singletonShoot = false;
             }
@@ -176,13 +186,30 @@ public class FSM extends OpMode {
             robot.turret.turretRotationServo.setPower(gamepad1.left_stick_x);
         }
 
-        // go to intake state
-        if (gamepad1.cross && stateTimer.milliseconds() > 400) {
-            changeState(State.INTAKE);
+        // go to drive state
+        if (gamepad1.right_bumper && stateTimer.milliseconds() > 400) {
+            changeState(State.DRIVE);
         }
 
+        // TODO: change to driver 2
+
+        if (gamepad1.left_bumper && inputTimer.milliseconds() > 400) {
+            robot.revolver.prevMotif();
+            inputTimer.reset();
+
+        } else if (gamepad1.left_bumper && inputTimer.milliseconds() > 400) {
+            robot.revolver.nextMotif();
+            inputTimer.reset();
+        }
     }
 
+    private void handleDrive() {
+        if (gamepad1.right_bumper) {
+            changeState(State.OUTTAKE);
+        } else if (gamepad1.left_bumper) {
+            changeState(State.INTAKE);
+        }
+    }
 
     @Override
     public void init() {
@@ -214,6 +241,10 @@ public class FSM extends OpMode {
                 handleOuttake();
                 break;
 
+            case DRIVE:
+                handleDrive();
+                break;
+
         }
 
 
@@ -228,7 +259,7 @@ public class FSM extends OpMode {
         robot.turret.update();
 
         // TODO: change to driver 2 and rename method
-        robot.turret.setAngle((float) (gamepad1.left_stick_x));
+//        robot.turret.setAngle((float) (gamepad1.left_stick_x));
 
 
         dashboardTelemetry.addData("state", state);

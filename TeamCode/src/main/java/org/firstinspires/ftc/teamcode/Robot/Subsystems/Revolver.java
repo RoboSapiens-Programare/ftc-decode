@@ -17,6 +17,7 @@ public class Revolver{
     private final Servo lift;
     public DcMotor encoderRevolver;
     public Thread t;
+    public int greenPosition = 0;
 
     public ColorEnum[] colorList = {
             ColorEnum.UNDEFINED,
@@ -175,5 +176,38 @@ public class Revolver{
     }
 
     public void start() {
+    }
+
+    public void nextMotif() {
+        if (greenPosition == 2)
+            greenPosition = 0;
+        else {
+            ++greenPosition;
+        }
+
+    }
+    public void prevMotif() {
+        if (greenPosition == 0) {
+            greenPosition = 2;
+        } else {
+            --greenPosition;
+        }
+    }
+
+    public byte getSlotByColor(ColorEnum color) {
+        for (byte b = 0; b < colorList.length; ++b) {
+            if (colorList[b] == color) {
+                return b;
+            }
+        }
+        return -1;
+    }
+
+    public byte getSlotByMotifPosition(int p) {
+        if (p == greenPosition) {
+            return getSlotByColor(ColorEnum.GREEN);
+        } else {
+            return getSlotByColor(ColorEnum.PURPLE);
+        }
     }
 }
