@@ -70,23 +70,17 @@ public class Turret {
         pidfController.setTolerance(0);
     }
 
-    public void setAngle(float rotation) {
-        turretRotation = rotation;
-        turretRotationServo.setPower(rotation);
-    }
-    public float getTurretRotation() {
-        return turretRotation;
-    }
+
     public void setPower(float power) {
         turretMotor.setPower(power);
     }
     public void startMotor() {
         turretMotor.setPower(uV.outtakePower);
     }
-
     public void stopMotor() {
         turretMotor.setPower(0);
     }
+
 
     public void enableTracking() {
         tracking = true;
@@ -108,6 +102,7 @@ public class Turret {
         if (tracking) disableTracking();
         else enableTracking();
     }
+
 
     public void update() {
         if (!tracking)

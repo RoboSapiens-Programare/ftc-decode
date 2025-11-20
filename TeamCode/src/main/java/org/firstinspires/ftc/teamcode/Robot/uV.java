@@ -21,7 +21,7 @@ public class uV {
 
     public static double revolverPower = 0.08;
 
-    public static int ticksPerRevolution = 8192; // TODO: CHECK
+    public static int ticksPerRevolution = 8192;
     public static int revolverPositonIntake0 = 0;
     public static int revolverPositonOuttake0 = ticksPerRevolution / 2;
 

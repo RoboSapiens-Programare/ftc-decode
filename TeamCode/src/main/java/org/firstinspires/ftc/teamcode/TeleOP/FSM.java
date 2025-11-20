@@ -177,10 +177,6 @@ public class FSM extends OpMode {
 
         // turret tracking
         // TODO: change to driver 2
-        if (gamepad1.touchpad && inputTimer.milliseconds() > 100) {
-            robot.turret.toggleTracking();
-            inputTimer.reset();
-        }
 
         if (!robot.turret.tracking) {
             robot.turret.turretRotationServo.setPower(gamepad1.left_stick_x);
@@ -258,8 +254,8 @@ public class FSM extends OpMode {
 
         robot.turret.update();
 
-        // TODO: change to driver 2 and rename method
-//        robot.turret.setAngle((float) (gamepad1.left_stick_x));
+        // TODO: change to driver 2
+//        robot.turret.turretRotationServo.setPower((float) (gamepad1.left_stick_x));
 
 
         dashboardTelemetry.addData("state", state);
