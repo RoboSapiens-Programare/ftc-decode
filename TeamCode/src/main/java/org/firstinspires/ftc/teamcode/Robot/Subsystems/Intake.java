@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
 import android.graphics.Color;
+import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -9,45 +12,47 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.robocol.TelemetryMessage;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Auto.Samples.ColorDetectionSample;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.opencv.ImageRegion;
+import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 public class Intake {
     public DcMotorEx intakeMotor;
-    private final ColorSensor colorSensor;
+//    private final ColorSensor colorSensor;
     private Revolver revolver;
     private final ElapsedTime cooldown = new ElapsedTime();
+
+    private PredominantColorProcessor colorSensor;
+
+    private VisionPortal portal;
 
     public Intake(HardwareMap hwMap, Revolver revolver) {
         intakeMotor =  hwMap.get(DcMotorEx.class, "intakeMotor");
 
-        colorSensor = hwMap.get(ColorSensor.class, "colorSensor");
-
         this.revolver = revolver;
-    }
 
-    private ColorEnum getColor(ColorSensor sensor) {
-        int argb = sensor.argb();
-        int r = sensor.red();
-        int g = sensor.green();
-        int b = sensor.blue();
+        colorSensor = new PredominantColorProcessor.Builder()
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.1, 0.1, 0.1, -0.1))
+                .setSwatches(
+                        PredominantColorProcessor.Swatch.ARTIFACT_GREEN,
+                        PredominantColorProcessor.Swatch.ARTIFACT_PURPLE,
+                        PredominantColorProcessor.Swatch.RED,
+                        PredominantColorProcessor.Swatch.BLUE,
+                        PredominantColorProcessor.Swatch.YELLOW,
+                        PredominantColorProcessor.Swatch.BLACK,
+                        PredominantColorProcessor.Swatch.WHITE)
+                .build();
 
-        float[] hsv = {0, 0, 0};
-        Color.RGBToHSV(r, g, b, hsv);
-        float h = hsv[0]; // convert hue to degrees
-
-        FtcDashboard.getInstance().getTelemetry().addData("hue", hsv[0]);
-
-        // works only at a specific distance, change when remounting sensor :D
-
-        if (h >= 180 && argb < 369762048) {
-            return ColorEnum.PURPLE;
-        } else if (h <= 180 && argb < 369762048 ) {
-            return ColorEnum.GREEN;
-        } else {
-            return ColorEnum.UNDEFINED;
-        }
+        portal = new VisionPortal.Builder()
+                .addProcessor(colorSensor)
+                .setCameraResolution(new Size(320, 240))
+                .setCamera(hwMap.get(WebcamName.class, "IntakeCam"))
+                .enableLiveView(false)
+                .build();
     }
 
     public void update() {
@@ -55,9 +60,11 @@ public class Intake {
 
         if (revolver.getBallCount() >= 3)
             return;
-        FtcDashboard.getInstance().getTelemetry().addData("colorSensor: ", getColor(colorSensor));
-        ColorEnum col = getColor(colorSensor);
-        if (col == ColorEnum.UNDEFINED) {
+
+        PredominantColorProcessor.Result result = colorSensor.getAnalysis();
+
+
+        if (result.closestSwatch != PredominantColorProcessor.Swatch.ARTIFACT_GREEN && result.closestSwatch != PredominantColorProcessor.Swatch.ARTIFACT_PURPLE) {
             return;
         }
 
@@ -67,7 +74,10 @@ public class Intake {
 
         cooldown.reset();
 
-        revolver.setSlotColor(revolver.getTargetSlot(), col);
+        revolver.setSlotColor(
+                revolver.getTargetSlot(),
+                result.closestSwatch == PredominantColorProcessor.Swatch.ARTIFACT_GREEN ? ColorEnum.GREEN : ColorEnum.PURPLE
+        );
 
 //        byte b = revolver.getFreeSlot();
 //        if (b == 5)
@@ -102,4 +112,6 @@ public class Intake {
     public void stopMotor() {
         intakeMotor.setPower(0);
     }
+
+
 }

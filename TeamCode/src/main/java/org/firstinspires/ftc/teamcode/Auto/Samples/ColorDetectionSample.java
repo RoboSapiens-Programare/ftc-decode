@@ -1,86 +1,61 @@
 package org.firstinspires.ftc.teamcode.Auto.Samples;
 
-import android.graphics.Color;
+import android.util.Size;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.opencv.ImageRegion;
+import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
-@Autonomous(name="Color Detection Sample", group="1. Autonomous Samples")
+//@Disabled
+@TeleOp(name = "Concept: Vision Color-Sensor", group = "Concept")
+public class ColorDetectionSample extends LinearOpMode
+{
+    @Override
+    public void runOpMode()
+    {
+        PredominantColorProcessor colorSensor = new PredominantColorProcessor.Builder()
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.1, 0.1, 0.1, -0.1))
+                .setSwatches(
+                        PredominantColorProcessor.Swatch.ARTIFACT_GREEN,
+                        PredominantColorProcessor.Swatch.ARTIFACT_PURPLE,
+                        PredominantColorProcessor.Swatch.RED,
+                        PredominantColorProcessor.Swatch.BLUE,
+                        PredominantColorProcessor.Swatch.YELLOW,
+                        PredominantColorProcessor.Swatch.BLACK,
+                        PredominantColorProcessor.Swatch.WHITE)
+                .build();
 
-//TODO MODIFICAT DIN LAPTOP CA NU STIU VALORILE
-public class ColorDetectionSample extends OpMode {
+        VisionPortal portal = new VisionPortal.Builder()
+                .addProcessor(colorSensor)
+                .setCameraResolution(new Size(320, 240))
+                .setCamera(hardwareMap.get(WebcamName.class, "IntakeCam"))
+                .build();
 
-    FtcDashboard dashboard = FtcDashboard.getInstance();
-    Telemetry dashboardTelemetry = dashboard.getTelemetry();
-    private ColorSensor sensor;
+        telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-    enum ColorEnum {
-        GREEN,
-        PURPLE,
-        UNDEFINED
-    };
+        while (opModeIsActive() || opModeInInit())
+        {
+            telemetry.addLine("Preview on/off: 3 dots, Camera Stream\n");
 
-    private ColorEnum getColor(ColorSensor sensor) {
-        int argb = sensor.argb();
-        int r = sensor.red();
-        int g = sensor.green();
-        int b = sensor.blue();
+            PredominantColorProcessor.Result result = colorSensor.getAnalysis();
 
-        float[] hsv = {0, 0, 0};
-        Color.RGBToHSV(r, g, b, hsv);
-        float h = hsv[0]; // convert hue to degrees
+            telemetry.addData("Best Match", result.closestSwatch);
+            telemetry.addLine(String.format("RGB   (%3d, %3d, %3d)",
+                    result.RGB[0], result.RGB[1], result.RGB[2]));
+            telemetry.addLine(String.format("HSV   (%3d, %3d, %3d)",
+                    result.HSV[0], result.HSV[1], result.HSV[2]));
+            telemetry.addLine(String.format("YCrCb (%3d, %3d, %3d)",
+                    result.YCrCb[0], result.YCrCb[1], result.YCrCb[2]));
+            telemetry.update();
 
-        dashboardTelemetry.addData("hue", hsv[0]);
-
-        // IMPORTANT
-        // PLEASE USE THESE VALUES AS A BASIS FOR THE NEXT COLOR SENSOR "CALIBRATION"
-
-        /*
-        averages of the sensor argb values on 19/11
-
-        1644167168 nothing in front
-
-        ^^ observe how this value is 1 digit more than the others
-
-        201326592 green hole
-        150994944 purple hole
-        -285015291 purple flush
-        -117307130 green flush
-
-         */
-
-        if (h >= 180 && argb < 369762048) {
-            return ColorEnum.PURPLE;
-        } else if (h <= 180 && argb < 369762048 ) {
-            return ColorEnum.GREEN;
-        } else if (argb < 1044167168)
-        {   // defaults to green if it just sees something in front of it
-            // this happens if it's a purple hole because you can not differentiate
-            return ColorEnum.GREEN;
-        } else {
-            return ColorEnum.UNDEFINED;
+            sleep(20);
         }
-    }
-
-    @Override
-    public void init() {
-        sensor = hardwareMap.get(ColorSensor.class, "colorSensor");
-    }
-
-    @Override
-    public void loop() {
-
-        dashboardTelemetry.addData("sensor", getColor(sensor));
-
-        dashboardTelemetry.addData("argb", sensor.argb());
-
-        dashboardTelemetry.addData("sensor rgb", String.format("%d %d %d", sensor.red(), sensor.green(), sensor.blue()));
-
-        dashboardTelemetry.update();
-
     }
 }

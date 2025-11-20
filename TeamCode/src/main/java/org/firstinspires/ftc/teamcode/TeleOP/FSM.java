@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
+@Config
 @TeleOp(name = "TeleOp")
 public class FSM extends OpMode {
 
@@ -162,16 +164,16 @@ public class FSM extends OpMode {
             }
         }
 
-        robot.turret.setAngle((float) (gamepad2.left_stick_x));
 
         // turret tracking
-        if (gamepad2.touchpad && inputTimer.milliseconds() > 100) {
+        // TODO: change to driver 2
+        if (gamepad1.touchpad && inputTimer.milliseconds() > 100) {
             robot.turret.toggleTracking();
             inputTimer.reset();
         }
 
         if (!robot.turret.tracking) {
-            robot.turret.turretRotationServo.setPower(gamepad2.left_stick_x);
+            robot.turret.turretRotationServo.setPower(gamepad1.left_stick_x);
         }
 
         // go to intake state
@@ -196,6 +198,8 @@ public class FSM extends OpMode {
         robot.revolver.setTargetSlot((byte) 1);
         sortingMode = SortingMode.AUTO;
         robot.revolver.start();
+        robot.turret.enableTracking();
+
     }
 
     @Override
@@ -221,10 +225,15 @@ public class FSM extends OpMode {
 
         robot.revolver.update();
 
+        robot.turret.update();
+
+        // TODO: change to driver 2 and rename method
+        robot.turret.setAngle((float) (gamepad1.left_stick_x));
+
 
         dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target position", Revolver.target);
-        dashboardTelemetry.addData("current position", robot.revolver.encoderRevolver.getCurrentPosition());
+        dashboardTelemetry.addData("target position", robot.turret.frameWidth / 2.0);
+        dashboardTelemetry.addData("current position", robot.turret.currentPos);
         dashboardTelemetry.addData("ball count", robot.revolver.getBallCount());
 
         dashboardTelemetry.update();

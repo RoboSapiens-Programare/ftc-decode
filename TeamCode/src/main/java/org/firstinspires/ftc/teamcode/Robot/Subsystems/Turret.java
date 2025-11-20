@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -25,7 +26,8 @@ public class Turret {
     private float turretRotation;
 
     private final int TAGID = 20;
-    private final int frameWidth = 640;
+    public final int frameWidth = 640;
+    public double currentPos = 0;
     public boolean tracking = true;
 
     private AprilTagProcessor tagProcessor;
@@ -34,18 +36,16 @@ public class Turret {
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
-    public static double Kp = 0.0;
-    public static double Kd = 0.0;
-    public static double Ki = 0.0;
-    public static double Kf = 0.0; // Power to overcome inertia and friction
+    public double Kp = 0.000495;
+    public double Ki = 0.00099;
+    public double Kd = 0.000165;
+    public static double Kf = 0.065; // Power to overcome inertia and friction
 
-    private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
+
+
+    public PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
     private VisionPortal vision;
-
-    private ElapsedTime searchTimer = new ElapsedTime();
-    private int searchSign = 1;
-    private int searchStep = 0;
 
     public Turret(HardwareMap hwMap) {
         turretMotor = hwMap.get(DcMotorEx.class, "turretMotor");
@@ -57,14 +57,17 @@ public class Turret {
 
         vBuilder.setCamera(hwMap.get(WebcamName.class, "Webcam 1"));
         vBuilder.addProcessor(tagProcessor);
-        vBuilder.setCameraResolution(new Size(frameWidth, 720));
+        vBuilder.setCameraResolution(new Size(frameWidth, 480));
         vBuilder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
 
         vision = vBuilder.build();
 
         vision.resumeStreaming();
 
+        FtcDashboard.getInstance().startCameraStream(vision, 30);
+
         pidfController.setSetpoint(frameWidth/2);
+        pidfController.setTolerance(0);
     }
 
     public void setAngle(float rotation) {
@@ -116,36 +119,12 @@ public class Turret {
             for (AprilTagDetection tag : result) {
                 if (tag.id == TAGID) {
                     // telemetry.addData("TAG OUT", tag.center.x);
-                    turretMotor.setPower(pidfController.updatePID(tag.center.x));
-                    searchStep = 0;
+                    currentPos = tag.center.x;
+                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x));
                 }
             }
         } else {
-            // motor at almost 60RPM
-            // 5:1 gear ratio
-            // 12 RPM on turret
-            // 5 sec per full rotation
-            // i want to go just...90 deg in each direction
-            // results in 90 * 5 / 360 = 5/4
-            // needed 180 after first iter
-
-            if (searchStep == 0) {
-                ++searchStep;
-                searchTimer.reset();
-            }
-
-            if (searchTimer.milliseconds() > 1250 * (1 / uV.searchSpeedMultiplier) && searchStep == 1) {
-                searchSign *= -1;
-                searchTimer.reset();
-                ++searchStep;
-            }
-
-            if (searchTimer.milliseconds() > 2500 * (1 / uV.searchSpeedMultiplier) && searchStep == 2) {
-                searchSign *= -1;
-                searchTimer.reset();
-            }
-
-            turretMotor.setPower(uV.searchSpeedMultiplier * searchSign);
+            // no more search fuck off driver 2
         }
     }
 }

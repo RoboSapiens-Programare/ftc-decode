@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
+import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 @Config
 public class Revolver{
@@ -60,6 +58,8 @@ public class Revolver{
         revolverSpin.setDirection(CRServo.Direction.REVERSE);
 
         lift = hwMap.get(Servo.class, "lift");
+
+        pidfController.setTolerance(25);
     }
 
     public void setTarget(int target){

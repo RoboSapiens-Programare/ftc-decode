@@ -23,6 +23,7 @@ public class PIDFController {
     private double integral = 0;
     private double setpoint = 0;
     private double maxIntegral = 1.0; // Cap for the "I" term
+    private int tolerance = 0;
 
     private ElapsedTime timer = new ElapsedTime();
 
@@ -68,7 +69,7 @@ public class PIDFController {
         // This adds the constant force needed to overcome friction
 
         // Only apply if we are NOT at the target (outside 55 ticks tolerance)
-        if (Math.abs(error) > 55) {
+        if (Math.abs(error) > tolerance) {
             output += kF * Math.signum(error);
         } else {
             // If inside tolerance, shut off everything to prevent jitter
@@ -87,5 +88,9 @@ public class PIDFController {
         integral = 0;
         previousError = 0;
         timer.reset();
+    }
+
+    public void setTolerance(int tolerance) {
+        this.tolerance = tolerance;
     }
 }

@@ -4,25 +4,30 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gam
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 public class Drive {
     private DcMotorEx leftFront, rightFront, leftRear, rightRear;
-public Drive(HardwareMap hwMap){
-    leftFront = hwMap.get(DcMotorEx.class, "leftFront");
-    leftRear = hwMap.get(DcMotorEx.class, "leftRear");
-    rightFront = hwMap.get(DcMotorEx.class, "rightFront");
-    rightRear = hwMap.get(DcMotorEx.class, "rightRear");
 
-    leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    leftRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-}
+    public Drive(HardwareMap hwMap){
+        leftFront = hwMap.get(DcMotorEx.class, "leftFront");
+        leftRear = hwMap.get(DcMotorEx.class, "leftRear");
+        rightFront = hwMap.get(DcMotorEx.class, "rightFront");
+        rightRear = hwMap.get(DcMotorEx.class, "rightRear");
 
-public void updateDrive(double y, double x,double rx) {
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+
+    public void updateDrive(double y, double x,double rx) {
         y *= uV.drivePower;
         x *= uV.drivePower;
         rx *= uV.drivePower;
