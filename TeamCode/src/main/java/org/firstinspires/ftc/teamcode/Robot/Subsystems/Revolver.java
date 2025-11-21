@@ -72,7 +72,10 @@ public class Revolver{
         // determine if aligning for intake or outtake
         target = mode == Mode.INTAKE ? uV.revolverPositonIntake0 : uV.revolverPositonOuttake0;
 
+
         target += uV.ticksPerRevolution / 3 * n;
+        //TODO SEE IF IT WORKS
+        if(target == 5460) target = -2730;
 
 
         targetSlot = n;

@@ -102,7 +102,7 @@ public class FSM extends OpMode {
         }
 
         // power off intake and switch to outtake state
-        if (gamepad1.left_bumper && stateTimer.milliseconds() > 400) {
+        if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             robot.intake.stopMotor();
             changeState(State.OUTTAKE);
         }
@@ -113,6 +113,11 @@ public class FSM extends OpMode {
     private void handleOuttake() {
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
         robot.revolver.update();
+
+        if (gamepad1.cross && stateTimer.milliseconds() > 400) {
+            robot.intake.stopMotor();
+            changeState(State.INTAKE);
+        }
 
         if (sortingMode == SortingMode.AUTO && !singletonShoot) {
             byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
@@ -181,10 +186,6 @@ public class FSM extends OpMode {
 //            robot.turret.turretRotationServo.setPower(gamepad1.left_stick_x);
 //        }
 
-        // go to drive state
-        if (gamepad1.right_bumper && stateTimer.milliseconds() > 400) {
-            changeState(State.DRIVE);
-        }
 
         // TODO: change to driver 2
 
@@ -198,13 +199,6 @@ public class FSM extends OpMode {
         }
     }
 
-    private void handleDrive() {
-        if (gamepad1.right_bumper) {
-            changeState(State.OUTTAKE);
-        } else if (gamepad1.left_bumper) {
-            changeState(State.INTAKE);
-        }
-    }
 
     @Override
     public void init() {
@@ -238,13 +232,7 @@ public class FSM extends OpMode {
             case OUTTAKE:
                 handleOuttake();
                 break;
-
-            case DRIVE:
-                handleDrive();
-                break;
-
         }
-
 
         robot.drive.updateDrive(
             -gamepad1.left_stick_y,
@@ -270,7 +258,5 @@ public class FSM extends OpMode {
 
     @Override
     public void stop() {
-        // stop thread so it resets between restarts
-        robot.threadKill();
     }
 }

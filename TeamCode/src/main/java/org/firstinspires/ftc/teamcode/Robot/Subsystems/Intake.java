@@ -1,19 +1,12 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
-import android.graphics.Color;
 import android.util.Size;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.robocol.TelemetryMessage;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.Auto.Samples.ColorDetectionSample;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 import org.firstinspires.ftc.vision.VisionPortal;
