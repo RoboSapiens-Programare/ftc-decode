@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class Drive {
     private DcMotorEx leftFront, rightFront, leftRear, rightRear;
 

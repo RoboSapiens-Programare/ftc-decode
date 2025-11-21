@@ -14,6 +14,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class Intake {
     public DcMotorEx intakeMotor;
 //    private final ColorSensor colorSensor;

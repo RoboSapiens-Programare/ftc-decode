@@ -60,7 +60,7 @@ public class FSM extends OpMode {
 
     
 
-    private void handleIntake() {
+    public void handleIntake() {
 //        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
 
         if(gamepad1.right_trigger > 0.5) {
@@ -117,7 +117,7 @@ public class FSM extends OpMode {
         robot.intake.update();
     }
 
-    private void handleOuttake() {
+    public void handleOuttake() {
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {

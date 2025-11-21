@@ -11,12 +11,12 @@ import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
+@SuppressWarnings("FieldCanBeLocal")
 @Config
 public class Revolver{
     private final CRServo revolverSpin;
     private final Servo lift;
     public DcMotor encoderRevolver;
-    public Thread t;
     public int greenPosition = 0;
 
     public ColorEnum[] colorList = {
