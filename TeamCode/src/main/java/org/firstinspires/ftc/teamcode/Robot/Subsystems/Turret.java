@@ -135,7 +135,7 @@ public class Turret {
 //
 //                    }
 
-                    turretMotor.setVelocity(((dist - 52.3) * 375 / 33.15 + 1000) / 2);
+                    turretMotor.setVelocity(((dist - 52.3) * 375 / 33.15 + 1000));
 
 
 //                    FtcDashboard.getInstance().getTelemetry().addData("v", turretMotor.getVelocity());
