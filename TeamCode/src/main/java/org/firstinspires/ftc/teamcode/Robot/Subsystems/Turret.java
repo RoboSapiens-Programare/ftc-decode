@@ -1,14 +1,16 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Robot.uV;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -17,45 +19,58 @@ import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import android.util.Size;
 
 
-import org.firstinspires.ftc.teamcode.Robot.uV;
 import java.util.List;
 
+@Config
 public class Turret {
     public DcMotorEx turretMotor;
     public CRServo turretRotationServo;
     private float turretRotation;
 
-    private final int TAGID = 20;
+    public enum TargetObelisk {
+        RED,
+        BLUE
+    };
+
+    public TargetObelisk targetObelisk = TargetObelisk.BLUE;
+
     public final int frameWidth = 640;
     public double currentPos = 0;
     public boolean tracking = true;
 
-    private AprilTagProcessor tagProcessor;
+    public AprilTagProcessor tagProcessor;
 
     // PID values for turret
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
     public double Kp = 0.000495;
-    public double Ki = 0.00099;
+    public double Ki = 0.001;
     public double Kd = 0.000165;
     public static double Kf = 0.065; // Power to overcome inertia and friction
 
 
+    public static double shootKp = 0;
+    public static double shootKi = 0;
+    public static double shootKd = 0;
+    public static double shootKf = 0;
+
 
     public PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
+    public PIDFController velocitypidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
     private VisionPortal vision;
 
     public Turret(HardwareMap hwMap) {
         turretMotor = hwMap.get(DcMotorEx.class, "turretMotor");
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretRotationServo = hwMap.get(CRServo.class, "turretRotationServo");
 
         tagProcessor = AprilTagProcessor.easyCreateWithDefaults();
         VisionPortal.Builder vBuilder = new VisionPortal.Builder();
 
-        vBuilder.setCamera(hwMap.get(WebcamName.class, "Webcam 1"));
+        vBuilder.setCamera(hwMap.get(WebcamName.class, "webcamTurret"));
         vBuilder.addProcessor(tagProcessor);
         vBuilder.setCameraResolution(new Size(frameWidth, 480));
         vBuilder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
@@ -66,43 +81,22 @@ public class Turret {
 
         FtcDashboard.getInstance().startCameraStream(vision, 30);
 
-        pidfController.setSetpoint(frameWidth/2);
+        pidfController.setSetpoint(frameWidth/2.0);
         pidfController.setTolerance(0);
     }
 
 
-    public void setPower(float power) {
-        turretMotor.setPower(power);
-    }
-    public void startMotor() {
-        turretMotor.setPower(uV.outtakePower);
-    }
-    public void stopMotor() {
-        turretMotor.setPower(0);
-    }
-
-
-    public void enableTracking() {
-        tracking = true;
-
+    public void enableCamera() {
         if (vision != null) {
             vision.resumeStreaming();   // restarts the webcam stream
         }
     }
 
-    public void disableTracking() {
-        tracking = false;
-
+    public void disableCamera() {
         if (vision != null) {
             vision.stopStreaming();     // fully stops camera pipeline
         }
     }
-
-    public void toggleTracking() {
-        if (tracking) disableTracking();
-        else enableTracking();
-    }
-
 
     public void update() {
         if (!tracking)
@@ -112,14 +106,39 @@ public class Turret {
 
         if (!result.isEmpty()) {
             for (AprilTagDetection tag : result) {
-                if (tag.id == TAGID) {
-                    // telemetry.addData("TAG OUT", tag.center.x);
+                if (tag.id == (targetObelisk == TargetObelisk.RED ? 24 : 20)) {
+                    FtcDashboard.getInstance().getTelemetry().addData("tag center", tag.center.x);
+
                     currentPos = tag.center.x;
-                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x));
+                    // -50 is the physical offset, currently aims too much to the right, compensates 50 to the left
+                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x-50));
+
+                    double dist = tag.ftcPose.x * tag.ftcPose.x + tag.ftcPose.y * tag.ftcPose.y +tag.ftcPose.z * tag.ftcPose.z;
+                    dist = Math.sqrt(dist);
+
+                    // TODO: check if this varies maechanically based on battery voltage and than change the power based on it
+
+//                    turretMotor.setPower(0.586767 + 0.0025*(dist - 57));
+
+                    turretMotor.setVelocityPIDFCoefficients(shootKp,shootKi, shootKd, shootKf);
+
+                    if (dist >= 73.5) {
+                        turretMotor.setVelocity((dist - 73.5) * 125 / 23.5 + 1100);
+                    } else {
+                        turretMotor.setVelocity((dist - 73.5) * 140 / 23.5 + 960);
+                    }
+
+
+                    FtcDashboard.getInstance().getTelemetry().addData("v", turretMotor.getVelocity());
+                    FtcDashboard.getInstance().getTelemetry().addData("distance", dist);
+                    FtcDashboard.getInstance().getTelemetry().addData("distance power", dist*0.01);
+                    FtcDashboard.getInstance().getTelemetry().addData("log distance power", 0.586767 + 0.0025*(dist - 57));
                 }
             }
         } else {
             // no more search fuck off driver 2
+            turretRotationServo.setPower(0);
+
         }
     }
 }

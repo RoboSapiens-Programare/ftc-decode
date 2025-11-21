@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
-import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @Config
 @TeleOp(name = "TeleOp")
@@ -111,7 +111,6 @@ public class FSM extends OpMode {
     }
 
     private void handleOuttake() {
-        robot.turret.startMotor();
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
         robot.revolver.update();
 
@@ -178,9 +177,9 @@ public class FSM extends OpMode {
         // turret tracking
         // TODO: change to driver 2
 
-        if (!robot.turret.tracking) {
-            robot.turret.turretRotationServo.setPower(gamepad1.left_stick_x);
-        }
+//        if (!robot.turret.tracking) {
+//            robot.turret.turretRotationServo.setPower(gamepad1.left_stick_x);
+//        }
 
         // go to drive state
         if (gamepad1.right_bumper && stateTimer.milliseconds() > 400) {
@@ -221,7 +220,10 @@ public class FSM extends OpMode {
         robot.revolver.setTargetSlot((byte) 1);
         sortingMode = SortingMode.AUTO;
         robot.revolver.start();
-        robot.turret.enableTracking();
+        robot.turret.enableCamera();
+
+        // TODO: remove
+        robot.turret.targetObelisk = Turret.TargetObelisk.BLUE;
 
     }
 
@@ -246,7 +248,7 @@ public class FSM extends OpMode {
 
         robot.drive.updateDrive(
             -gamepad1.left_stick_y,
-            gamepad1.left_stick_x,
+            -gamepad1.left_stick_x,
             gamepad1.right_stick_x
         );
 

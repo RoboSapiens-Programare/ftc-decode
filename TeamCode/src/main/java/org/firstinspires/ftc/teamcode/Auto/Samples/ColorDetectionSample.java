@@ -12,7 +12,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
-//@Disabled
+@Disabled
 @TeleOp(name = "Concept: Vision Color-Sensor", group = "Concept")
 public class ColorDetectionSample extends LinearOpMode
 {
