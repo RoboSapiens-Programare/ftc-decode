@@ -21,6 +21,7 @@ import android.util.Size;
 
 import java.util.List;
 
+@SuppressWarnings("FieldCanBeLocal")
 @Config
 public class Turret {
     public DcMotorEx turretMotor;
