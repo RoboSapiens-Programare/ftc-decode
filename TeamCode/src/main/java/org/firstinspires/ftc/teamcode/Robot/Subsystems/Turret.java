@@ -114,7 +114,7 @@ public class Turret {
 
                     currentPos = tag.center.x;
                     // -50 is the physical offset, currently aims too much to the right, compensates 50 to the left
-                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x-50));
+                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x));
 
                     double dist = tag.ftcPose.x * tag.ftcPose.x + tag.ftcPose.y * tag.ftcPose.y +tag.ftcPose.z * tag.ftcPose.z;
                     dist = Math.sqrt(dist);
@@ -134,13 +134,13 @@ public class Turret {
 //
 //                    }
 
-                    turretMotor.setVelocity(velo);
+                    turretMotor.setVelocity(((dist - 52.3) * 375 / 33.15 + 1000) / 2);
 
 
-                    FtcDashboard.getInstance().getTelemetry().addData("v", turretMotor.getVelocity());
-                    FtcDashboard.getInstance().getTelemetry().addData("distance", dist);
-                    FtcDashboard.getInstance().getTelemetry().addData("distance power", dist*0.01);
-                    FtcDashboard.getInstance().getTelemetry().addData("log distance power", 0.586767 + 0.0025*(dist - 57));
+//                    FtcDashboard.getInstance().getTelemetry().addData("v", turretMotor.getVelocity());
+//                    FtcDashboard.getInstance().getTelemetry().addData("distance", dist);
+//                    FtcDashboard.getInstance().getTelemetry().addData("distance power", dist*0.01);
+//                    FtcDashboard.getInstance().getTelemetry().addData("log distance power", 0.586767 + 0.0025*(dist - 57));
                 }
             }
         } else {

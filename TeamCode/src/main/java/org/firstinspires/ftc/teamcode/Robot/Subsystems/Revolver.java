@@ -35,9 +35,9 @@ public class Revolver{
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
-    public static double Kp = 0.0001625;
-    public static double Kd = 0.0000375;
-    public static double Ki = 0.000265;
+    public static double Kp = 0.0001725;
+    public static double Kd = 0.0000475;
+    public static double Ki = 0.000255;
     public static double Kf = 0.055; // Power to overcome inertia and friction
 
     private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
