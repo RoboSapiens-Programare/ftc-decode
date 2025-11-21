@@ -50,10 +50,11 @@ public class Turret {
     public static double Kf = 0.065; // Power to overcome inertia and friction
 
 
-    public static double shootKp = 0;
-    public static double shootKi = 0;
-    public static double shootKd = 0;
-    public static double shootKf = 0;
+    public static double shootKp = 1800*0.2;
+    public static double shootKi = 1800*0.4 / (4.0/10);
+    public static double shootKd = 0.066*1800*4/10;
+    public static double shootKf = 9;
+    public static double velo = 0;
 
 
     public PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
@@ -99,6 +100,8 @@ public class Turret {
     }
 
     public void update() {
+        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
+
         if (!tracking)
             return;
 
@@ -120,13 +123,18 @@ public class Turret {
 
 //                    turretMotor.setPower(0.586767 + 0.0025*(dist - 57));
 
-                    turretMotor.setVelocityPIDFCoefficients(shootKp,shootKi, shootKd, shootKf);
 
-                    if (dist >= 73.5) {
-                        turretMotor.setVelocity((dist - 73.5) * 125 / 23.5 + 1100);
-                    } else {
-                        turretMotor.setVelocity((dist - 73.5) * 140 / 23.5 + 960);
-                    }
+
+//                    if (dist >= 73.5) {
+//                        turretMotor.setVelocity((dist - 73.5) * 125 / 23.5 + 1100);
+//                        FtcDashboard.getInstance().getTelemetry().addData("s", (dist - 73.5) * 125 / 23.5 + 1100);
+//                    } else {
+//                        turretMotor.setVelocity((dist - 73.5) * 140 / 23.5 + 960);
+//                        FtcDashboard.getInstance().getTelemetry().addData("s", (dist - 73.5) * 140 / 23.5 + 960);
+//
+//                    }
+
+                    turretMotor.setVelocity(velo);
 
 
                     FtcDashboard.getInstance().getTelemetry().addData("v", turretMotor.getVelocity());

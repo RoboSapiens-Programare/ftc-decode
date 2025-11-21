@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -55,6 +56,8 @@ public class Intake {
             return;
 
         PredominantColorProcessor.Result result = colorSensor.getAnalysis();
+
+        FtcDashboard.getInstance().getTelemetry().addData("color", result.closestSwatch);
 
 
         if (result.closestSwatch != PredominantColorProcessor.Swatch.ARTIFACT_GREEN && result.closestSwatch != PredominantColorProcessor.Swatch.ARTIFACT_PURPLE) {

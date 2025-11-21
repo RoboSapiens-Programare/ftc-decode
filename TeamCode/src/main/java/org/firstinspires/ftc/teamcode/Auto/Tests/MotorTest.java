@@ -20,7 +20,6 @@ public class MotorTest extends OpMode {
     private DcMotorEx rightRear;
     private List<DcMotorEx> motors;
 
-    private DcMotorEx geko;
 
 
     private void updateFollower(double power, double gx, double gy, double gr) {
@@ -37,18 +36,22 @@ public class MotorTest extends OpMode {
         double rightFrontPower = (y - x - rx) / denominator;
         double rightRearPower = (y + x - rx) / denominator;
 
-        leftFront.setPower(leftFrontPower);
-        leftRear.setPower(leftRearPower);
-        rightFront.setPower(rightFrontPower);
-        rightRear.setPower(rightRearPower);
+        leftFront.setPower(1);
+        leftRear.setPower(0);
+        rightFront.setPower(0);
+        rightRear.setPower(0);
     }
 
     @Override
     public void init() {
-        leftFront = hardwareMap.get(DcMotorEx.class, Constants.mecanumConstants.leftFrontMotorName);
-        leftRear = hardwareMap.get(DcMotorEx.class, Constants.mecanumConstants.leftRearMotorName);
-        rightRear = hardwareMap.get(DcMotorEx.class, Constants.mecanumConstants.rightRearMotorName);
-        rightFront = hardwareMap.get(DcMotorEx.class, Constants.mecanumConstants.rightFrontMotorName);
+        //left front = left rear
+        //left rear = right front
+        //right front = right rear
+        //right rear = left front
+        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
+        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
         leftFront.setDirection(Constants.mecanumConstants.leftFrontMotorDirection);
         leftRear.setDirection(Constants.mecanumConstants.leftRearMotorDirection);
         rightFront.setDirection(Constants.mecanumConstants.rightFrontMotorDirection);
@@ -65,14 +68,10 @@ public class MotorTest extends OpMode {
         for (DcMotorEx motor : motors) {
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-
-        geko = hardwareMap.get(DcMotorEx.class, "gekoMotor");
-        geko.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     @Override
     public void loop() {
         updateFollower(1, 0, 1, 0);
-        geko.setPower(1);
     }
 }

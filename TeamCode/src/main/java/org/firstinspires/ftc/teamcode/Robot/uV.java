@@ -22,8 +22,6 @@ public class uV {
     public static double revolverPower = 0.08;
 
     public static int ticksPerRevolution = 8192;
-    public static int revolverPositonIntake0 = 0;
-    public static int revolverPositonOuttake0 = ticksPerRevolution / 2;
 
 
     public static double shootVelocity = 0;

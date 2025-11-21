@@ -62,7 +62,11 @@ public class FSM extends OpMode {
     private void handleIntake() {
 //        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
 
-        robot.intake.startMotor();
+        if(gamepad1.right_trigger > 0.5) {
+            robot.intake.startMotor();
+        }
+        else robot.intake.stopMotor();
+
         robot.revolver.mode = Revolver.Mode.INTAKE;
 
         switch(sortingMode) {
@@ -104,6 +108,7 @@ public class FSM extends OpMode {
         // power off intake and switch to outtake state
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             robot.intake.stopMotor();
+//            robot.turret.turretMotor.setPower(.5);
             changeState(State.OUTTAKE);
         }
 
@@ -112,7 +117,6 @@ public class FSM extends OpMode {
 
     private void handleOuttake() {
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
-        robot.revolver.update();
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             robot.intake.stopMotor();
@@ -235,13 +239,13 @@ public class FSM extends OpMode {
         }
 
         robot.drive.updateDrive(
-            -gamepad1.left_stick_y,
+            gamepad1.left_stick_y,
             -gamepad1.left_stick_x,
-            gamepad1.right_stick_x
+            -gamepad1.right_stick_x
         );
 
         robot.revolver.update();
-
+//        robot.revolver.update();
         robot.turret.update();
 
         // TODO: change to driver 2
@@ -249,9 +253,9 @@ public class FSM extends OpMode {
 
 
         dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target position", robot.turret.frameWidth / 2.0);
-        dashboardTelemetry.addData("current position", robot.turret.currentPos);
-        dashboardTelemetry.addData("ball count", robot.revolver.getBallCount());
+        dashboardTelemetry.addData("target position", Revolver.target);
+        dashboardTelemetry.addData("current position", robot.revolver.encoderRevolver.getCurrentPosition());
+//        dashboardTelemetry.addData("color", robot.intake.);
 
         dashboardTelemetry.update();
     }
