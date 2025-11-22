@@ -68,7 +68,7 @@ public class FSM extends OpMode {
     }
 
 
-    
+
 
     public void handleIntake() {
 
@@ -174,6 +174,8 @@ public class FSM extends OpMode {
             // go to previous slot
             if (gamepad2.dpad_left && inputTimer.milliseconds() > 300) {
                 robot.revolver.prevSlot();
+
+                inputTimer.reset();
             }
 
             // go to next slot
@@ -228,19 +230,23 @@ public class FSM extends OpMode {
             }
 
             if (loadBallTimer.milliseconds() > 800 && shootStep == 2) {
-                    if (gamepad1.left_trigger > 0.5) {
-                        shootStep = 0;
-                    } else {
-                        robot.turret.turretMotor.setPower(0);
-                        shootStep = -1;
-                    }
-                    if (motifPosition == 2) {
-                        motifPosition = 0;
-                    } else {
-                        ++motifPosition;
-                    }
+                if (gamepad1.left_trigger > 0.5) {
+                    shootStep = 0;
+                    singletonLoad = true;
+                    loadBallTimer.reset();
+                } else {
+                    robot.turret.turretMotor.setPower(0);
+                    singletonLoad = true;
+                    loadBallTimer.reset();
+                    shootStep = -1;
+                }
+                if (motifPosition == 2) {
+                    motifPosition = 0;
+                } else {
+                    ++motifPosition;
                 }
             }
+        }
 
 
 
@@ -294,9 +300,9 @@ public class FSM extends OpMode {
         }
 
         robot.drive.updateDrive(
-            applyDeadzone(gamepad1.left_stick_y),
-            applyDeadzone(-gamepad1.left_stick_x),
-            applyDeadzone(-gamepad1.right_stick_x)
+                applyDeadzone(gamepad1.left_stick_y),
+                applyDeadzone(-gamepad1.left_stick_x),
+                applyDeadzone(-gamepad1.right_stick_x)
         );
 
         robot.revolver.update();
@@ -310,7 +316,7 @@ public class FSM extends OpMode {
         }
 
 
-        if (inputTimer.milliseconds() > 500 && gamepad2.touchpad) {
+        if (inputTimer.milliseconds() > 500 && gamepad2.start) {
             sortMotif = !sortMotif;
             inputTimer.reset();
         }
