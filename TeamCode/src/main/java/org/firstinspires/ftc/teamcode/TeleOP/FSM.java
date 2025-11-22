@@ -217,6 +217,7 @@ public class FSM extends OpMode {
                     robot.revolver.liftLoad();
                     shootStep++;
                     loadBallTimer.reset();
+                    singletonLoad = false;
                 }
 
             }
