@@ -1,11 +1,14 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
@@ -27,6 +30,7 @@ public class Turret {
     public DcMotorEx turretMotor;
     public CRServo turretRotationServo;
     private float turretRotation;
+    public boolean found = false;
 
     public enum TargetObelisk {
         RED,
@@ -112,8 +116,10 @@ public class Turret {
     public void update() {
         turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
 
-        if (!tracking)
+        if (!tracking) {
+            found = false;
             return;
+        }
 
         List<AprilTagDetection> result = tagProcessor.getDetections();
 
@@ -121,10 +127,10 @@ public class Turret {
             for (AprilTagDetection tag : result) {
                 if (tag.id == (targetObelisk == TargetObelisk.RED ? 24 : 20)) {
                     FtcDashboard.getInstance().getTelemetry().addData("tag center", tag.center.x);
-
+                    found = true;
                     currentPos = tag.center.x;
                     // -50 is the physical offset, currently aims too much to the right, compensates 50 to the left
-                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x - 30));
+                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x - 50));
 
                     double dist = tag.ftcPose.x * tag.ftcPose.x + tag.ftcPose.y * tag.ftcPose.y +tag.ftcPose.z * tag.ftcPose.z;
                     dist = Math.sqrt(dist);
@@ -156,7 +162,7 @@ public class Turret {
         } else {
             // no more search fuck off driver 2
             turretRotationServo.setPower(0);
-
+            found = false;
         }
     }
 }
