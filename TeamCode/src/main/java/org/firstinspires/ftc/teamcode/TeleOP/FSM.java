@@ -160,6 +160,7 @@ public class FSM extends OpMode {
 
     public void handleOuttake() {
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
+//        robot.intake.update();
 
         if(!robot.turret.tracking){
             robot.turret.turretMotor.setPower(1);
@@ -223,7 +224,7 @@ public class FSM extends OpMode {
         else gamepad2.setLedColor(255,255,0,Gamepad.LED_DURATION_CONTINUOUS);
 
 
-        if(robot.turret.found){
+        if(robot.turret.found && robot.turret.turretMotor.getVelocity() >= robot.turret.targetVelocity - 100){
             gamepad1.setLedColor(0,255,0,Gamepad.LED_DURATION_CONTINUOUS);
         }
         else gamepad1.setLedColor(255,0,0,Gamepad.LED_DURATION_CONTINUOUS);

@@ -71,7 +71,7 @@ public class Turret {
     public PIDFController velocitypidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
     private VisionPortal vision;
-
+    public double targetVelocity;
     public Turret(HardwareMap hwMap) {
         turretMotor = hwMap.get(DcMotorEx.class, "turretMotor");
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -151,6 +151,7 @@ public class Turret {
 //                    }
 
                     turretMotor.setVelocity(((dist - 52.3) * 375 / 33.15 + 1000));
+                    targetVelocity = ((dist - 52.3) * 375 / 33.15 + 1000);
 
 
 //                    FtcDashboard.getInstance().getTelemetry().addData("v", turretMotor.getVelocity());
