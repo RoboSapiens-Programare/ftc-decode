@@ -14,7 +14,7 @@ import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 @SuppressWarnings("FieldCanBeLocal")
 @Config
 public class Revolver{
-    private final CRServo revolverSpin;
+    public final CRServo revolverSpin;
     private final Servo lift;
     public DcMotor encoderRevolver;
     public int greenPosition = 0;
@@ -81,6 +81,7 @@ public class Revolver{
         targetSlot = n;
         setTarget(target);
     }
+
 
 
 

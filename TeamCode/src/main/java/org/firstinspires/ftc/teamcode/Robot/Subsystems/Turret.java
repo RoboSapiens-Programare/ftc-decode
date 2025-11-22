@@ -45,7 +45,12 @@ public class Turret {
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
-    public double Kp = 0.000495;
+
+    //old value that was tested with
+//    public double Kp = 0.000495;
+
+    //new value that wasn't tested
+    public double Kp = 0.000505;
     public double Ki = 0.001;
     public double Kd = 0.000165;
     public static double Kf = 0.065; // Power to overcome inertia and friction
@@ -87,6 +92,10 @@ public class Turret {
         pidfController.setTolerance(0);
     }
 
+    public void toggleTracking(){
+        tracking = !tracking;
+    }
+
 
     public void enableCamera() {
         if (vision != null) {
@@ -115,7 +124,7 @@ public class Turret {
 
                     currentPos = tag.center.x;
                     // -50 is the physical offset, currently aims too much to the right, compensates 50 to the left
-                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x));
+                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x - 30));
 
                     double dist = tag.ftcPose.x * tag.ftcPose.x + tag.ftcPose.y * tag.ftcPose.y +tag.ftcPose.z * tag.ftcPose.z;
                     dist = Math.sqrt(dist);
