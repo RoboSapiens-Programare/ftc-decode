@@ -10,11 +10,17 @@
     "java.project.referencedLibraries": [
         "libs/**/*.jar"
     ],
-    "java.format.settings.url": ".vscode/eclipse-formatter.xml",
-    "java.format.settings.profile": "FTCStyle",
+    "java.project.sourcePaths": [
+        "TeamCode/src/main/java",
+        "FtcRobotController/src/main/java"
+    ],
     "java.import.gradle.enabled": true,
     "java.import.maven.enabled": false,
+    "java.configuration.updateBuildConfiguration": "automatic",
     "java.errors.incompleteClasspath.severity": "warning",
+    "java.format.settings.url": ".vscode/eclipse-formatter.xml",
+    "java.format.settings.profile": "FTCStyle",
+    "android.sdk.path": "/opt/android-sdk",
     "files.exclude": {
         "**/.gradle": true,
         "**/.idea": true,
@@ -22,6 +28,5 @@
         "**/out": true
     },
     "editor.tabSize": 4,
-    "editor.insertSpaces": true,
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "editor.insertSpaces": true
 }

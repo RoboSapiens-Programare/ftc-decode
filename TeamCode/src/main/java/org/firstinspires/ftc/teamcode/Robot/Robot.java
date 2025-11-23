@@ -7,26 +7,26 @@ import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Turret;
 
 public class Robot {
-  public boolean initialize;
-  public Revolver revolver;
-  public Intake intake;
-  public Turret turret;
-  public Drive drive;
+    public boolean initialize;
+    public Revolver revolver;
+    public Intake intake;
+    public Turret turret;
+    public Drive drive;
 
-  public Robot(HardwareMap hwMap) {
-    initialize = true;
+    public Robot(HardwareMap hwMap) {
+        initialize = true;
 
-    drive = new Drive(hwMap);
-    revolver = new Revolver(hwMap);
+        drive = new Drive(hwMap);
+        revolver = new Revolver(hwMap);
 
-    // TODO: make turret and intake acces revolver automatically
-    turret = new Turret(hwMap);
-    intake = new Intake(hwMap, revolver);
+        // TODO: make turret and intake acces revolver automatically
+        turret = new Turret(hwMap);
+        intake = new Intake(hwMap, revolver);
 
-    initialize = false;
-  }
+        initialize = false;
+    }
 
-  public boolean isInitialize() {
-    return initialize;
-  }
+    public boolean isInitialize() {
+        return initialize;
+    }
 }

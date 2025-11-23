@@ -61,7 +61,7 @@ dependencies {
 spotless {
     java {
         target("src/**/*.java")
-        googleJavaFormat()   // default latest, stable
+        googleJavaFormat().aosp()   // default latest, stable
     }
 
     format("misc") {
