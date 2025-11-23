@@ -3,12 +3,15 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @SuppressWarnings("FieldCanBeLocal")
-public class Drive {
+public class Drive extends Subsystem {
     private DcMotorEx leftFront, rightFront, leftRear, rightRear;
+
+    public Gamepad driverGamepad;
 
     public Drive(HardwareMap hwMap) {
         leftFront = hwMap.get(DcMotorEx.class, "leftFront");
@@ -25,10 +28,19 @@ public class Drive {
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void updateDrive(double y, double x, double rx) {
-        y *= uV.drivePower;
-        x *= uV.drivePower;
-        rx *= uV.drivePower;
+    private float applyDeadzone(float input) {
+        // 0.1 is the threshold (10%). Adjust if your controller is older/looser.
+        if (Math.abs(input) < 0.05f) {
+            return 0.0f;
+        }
+        return input;
+    }
+
+    @Override
+    public void update() {
+        double y = uV.drivePower * applyDeadzone(driverGamepad.left_stick_y);
+        double x = uV.drivePower * applyDeadzone(-driverGamepad.left_stick_x);
+        double rx = uV.drivePower * applyDeadzone(-driverGamepad.right_stick_x);
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio, but only when
         // at least one is out of the range [-1, 1]

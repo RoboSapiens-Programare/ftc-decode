@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
-public class Revolver {
+public class Revolver extends Subsystem {
     public final CRServo revolverSpin;
     private final Servo lift;
     public DcMotor encoderRevolver;
@@ -153,6 +153,7 @@ public class Revolver {
         return count;
     }
 
+    @Override
     public void update() {
         pidfController.setSetpoint(target);
 
@@ -164,8 +165,6 @@ public class Revolver {
         // FtcDashboard.getInstance().getTelemetry().addData("err", pidfController.error);
         // FtcDashboard.getInstance().getTelemetry().update();
     }
-
-    public void start() {}
 
     public void nextMotif() {
         if (greenPosition == 2) greenPosition = 0;

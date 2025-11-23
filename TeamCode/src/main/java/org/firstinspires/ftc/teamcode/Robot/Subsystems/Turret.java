@@ -17,7 +17,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
-public class Turret {
+public class Turret extends Subsystem {
     public DcMotorEx turretMotor;
     public CRServo turretRotationServo;
     private float turretRotation;
@@ -108,6 +108,7 @@ public class Turret {
         return velo && found;
     }
 
+    @Override
     public void update() {
         turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
 

@@ -13,7 +13,7 @@ import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 @SuppressWarnings("FieldCanBeLocal")
-public class Intake {
+public class Intake extends Subsystem {
     public DcMotorEx intakeMotor;
     //    private final ColorSensor colorSensor;
     private Revolver revolver;
@@ -50,6 +50,7 @@ public class Intake {
                         .build();
     }
 
+    @Override
     public void update() {
         // check both are equal in order to ignore false positives
 

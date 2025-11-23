@@ -274,6 +274,8 @@ public class FSM extends OpMode {
         robot.turret.enableCamera();
         inputTimer.reset();
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+
+        robot.drive.driverGamepad = gamepad1;
     }
 
     @Override
@@ -293,13 +295,12 @@ public class FSM extends OpMode {
     @Override
     public void start() {
         changeState(State.INTAKE);
-        robot.revolver.mode = Revolver.Mode.INTAKE;
-        robot.revolver.setTargetSlot((byte) 1);
         sortingMode = SortingMode.AUTO;
-        robot.revolver.start();
+
         gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
+        robot.revolver.mode = Revolver.Mode.INTAKE;
         robot.revolver.setTargetSlot((byte) 0);
     }
 
@@ -316,10 +317,7 @@ public class FSM extends OpMode {
                 break;
         }
 
-        robot.drive.updateDrive(
-                applyDeadzone(gamepad1.left_stick_y),
-                applyDeadzone(-gamepad1.left_stick_x),
-                applyDeadzone(-gamepad1.right_stick_x));
+        robot.drive.update();
 
         if (!homeRevolver) robot.revolver.update();
 
