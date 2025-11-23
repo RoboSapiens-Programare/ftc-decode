@@ -19,7 +19,6 @@ public class Robot {
         drive = new Drive(hwMap);
         revolver = new Revolver(hwMap);
 
-        // TODO: make turret and intake acces revolver automatically
         turret = new Turret(hwMap);
         intake = new Intake(hwMap, revolver);
 

@@ -86,4 +86,8 @@ public class PIDFController {
     public void setTolerance(int tolerance) {
         this.tolerance = tolerance;
     }
+
+    public boolean targetReached() {
+        return Math.abs(error) < tolerance;
+    }
 }

@@ -55,6 +55,10 @@ public class Revolver {
         pidfController.setTolerance(25);
     }
 
+    public boolean isReady() {
+        return pidfController.targetReached();
+    }
+
     public void setTarget(int target) {
         Revolver.target = target;
     }
@@ -64,8 +68,6 @@ public class Revolver {
         target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2;
 
         target += uV.ticksPerRevolution / 3 * (n - 1);
-        // TODO SEE IF IT WORKS
-        //        if(target == 5460) target = -2730;
 
         targetSlot = n;
         setTarget(target);
