@@ -66,19 +66,40 @@ public class FSM extends OpMode {
         robot.revolver.setTargetSlot((byte) 0);
     }
 
+    private void manualSort() {
+        // go to previous slot
+        if (gamepad2.dpad_left && inputTimer.milliseconds() > 300) {
+            robot.revolver.prevSlot();
+
+            inputTimer.reset();
+        }
+
+        // go to next slot
+        if (gamepad2.dpad_right && inputTimer.milliseconds() > 300) {
+            robot.revolver.nextSlot();
+
+            inputTimer.reset();
+        }
+
+        if (gamepad2.right_bumper) {
+            sortingMode = SortingMode.AUTO;
+        }
+    }
+
     public void handleIntake() {
         robot.turret.tracking = false;
-
-        //        robot.turret.turretMotor.setPower(0.5 * uV.outtakePower);
+        robot.revolver.mode = Revolver.Mode.INTAKE;
+        robot.turret.turretMotor.setPower(0);
+        robot.intake.update();
 
         if (gamepad1.right_trigger > 0.5) {
             robot.intake.startMotor();
         } else if (gamepad1.left_trigger > 0.5) {
-            robot.intake.setPower((float) -0.7);
+            robot.intake.setPower((float) -0.55);
         } else robot.intake.stopMotor();
 
-        robot.revolver.mode = Revolver.Mode.INTAKE;
 
+        // sort
         switch (sortingMode) {
             case AUTO:
                 if (robot.revolver.isSlotFull(robot.revolver.getTargetSlot())) {
@@ -93,33 +114,17 @@ public class FSM extends OpMode {
                 break;
 
             case MANUAL:
-                // go to previous slot
-                if (gamepad2.dpad_left && inputTimer.milliseconds() > 300) {
-                    robot.revolver.prevSlot();
-
-                    inputTimer.reset();
-                }
-
-                // go to next slot
-                if (gamepad2.dpad_right && inputTimer.milliseconds() > 300) {
-                    robot.revolver.nextSlot();
-
-                    inputTimer.reset();
-                }
-
-                if (gamepad2.right_bumper) {
-                    sortingMode = SortingMode.AUTO;
-                }
+                manualSort();
                 break;
         }
 
         // power off intake and switch to outtake state
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             robot.intake.stopMotor();
-            //            robot.turret.turretMotor.setPower(.5);
             changeState(State.OUTTAKE);
         }
 
+        // change color based on current slot
         if (robot.revolver.getSlotColor(robot.revolver.getTargetSlot()) == ColorEnum.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         } else if (robot.revolver.getSlotColor(robot.revolver.getTargetSlot())
@@ -127,19 +132,19 @@ public class FSM extends OpMode {
             gamepad2.setLedColor(155, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        robot.turret.turretMotor.setPower(0);
-        robot.intake.update();
-
-        if (homeRevolver)
-            robot.revolver.revolverSpin.setPower(applyDeadzone(gamepad2.right_stick_x) * 0.125);
-
+        // home revolver in case of ... fuck up
         if (gamepad2.left_bumper && !homeRevolver && inputTimer.milliseconds() > 500) {
             homeRevolver = true;
             inputTimer.reset();
         }
 
+        if (homeRevolver) {
+            robot.revolver.revolverSpin.setPower(applyDeadzone(gamepad2.right_stick_x) * 0.125);
+        }
+
         if (gamepad2.left_bumper && homeRevolver && inputTimer.milliseconds() > 500) {
             robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            
             homeRevolver = false;
             inputTimer.reset();
         }
@@ -147,7 +152,6 @@ public class FSM extends OpMode {
 
     public void handleOuttake() {
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
-        //        robot.intake.update();
 
         if (!robot.turret.tracking) {
             robot.turret.turretMotor.setPower(1);
@@ -158,46 +162,34 @@ public class FSM extends OpMode {
             changeState(State.INTAKE);
         }
 
-        if (sortingMode == SortingMode.AUTO) {
-
-            if (sortMotif) {
-                byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
-                FtcDashboard.getInstance().getTelemetry().addData("t", (int) t);
-                if (t != -1) {
-                    robot.revolver.setTargetSlot(t);
-                } else robot.revolver.setTargetSlot((byte) 0);
-            } else {
-                if (robot.revolver.getFullSlot() != -1) {
-                    robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
-                } else if (loadBallTimer.milliseconds() > 300) {
-                    changeState(State.INTAKE);
+        switch (sortingMode) {
+            case AUTO:
+                if (sortMotif) {
+                    byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
+                    FtcDashboard.getInstance().getTelemetry().addData("t", (int) t);
+                    if (t != -1) {
+                        robot.revolver.setTargetSlot(t);
+                    } else robot.revolver.setTargetSlot((byte) 0);
+                } else {
+                    if (robot.revolver.getFullSlot() != -1) {
+                        robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
+                    } else if (loadBallTimer.milliseconds() > 300) {
+                        changeState(State.INTAKE);
+                    }
                 }
-            }
 
-            if (gamepad2.dpad_right || gamepad2.dpad_left) {
-                sortingMode = SortingMode.MANUAL;
-            }
+                if (gamepad2.dpad_right || gamepad2.dpad_left) {
+                    sortingMode = SortingMode.MANUAL;
+                }
 
-        } else if (sortingMode == SortingMode.MANUAL) {
-            // go to previous slot
-            if (gamepad2.dpad_left && inputTimer.milliseconds() > 300) {
-                robot.revolver.prevSlot();
+                break;
 
-                inputTimer.reset();
-            }
-
-            // go to next slot
-            if (gamepad2.dpad_right && inputTimer.milliseconds() > 300) {
-                robot.revolver.nextSlot();
-
-                inputTimer.reset();
-            }
-
-            if (gamepad2.right_bumper) {
-                sortingMode = SortingMode.AUTO;
-            }
+            case MANUAL:
+                manualSort();
+                break;
         }
 
+        // change controller color based on current slot color
         if (robot.revolver.getSlotColor(robot.revolver.getTargetSlot()) == ColorEnum.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         } else if (robot.revolver.getSlotColor(robot.revolver.getTargetSlot())
@@ -205,6 +197,8 @@ public class FSM extends OpMode {
             gamepad2.setLedColor(155, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
+
+        // change controller color when turret aligned
         if (robot.turret.isShootReady()) {
             gamepad1.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
@@ -263,6 +257,8 @@ public class FSM extends OpMode {
             }
         }
 
+
+        // cycle through motifs
         if (gamepad2.triangle && inputTimer.milliseconds() > 400) {
             robot.revolver.prevMotif();
             inputTimer.reset();
@@ -331,17 +327,11 @@ public class FSM extends OpMode {
         if (!homeRevolver) robot.revolver.update();
 
         robot.turret.update();
-
         robot.turret.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));
 
         if (gamepad2.touchpad) {
             robot.turret.tracking = true;
         } else robot.turret.tracking = false;
-
-        //        if (inputTimer.milliseconds() > 500 && gamepad2.start) {
-        //            sortMotif = !sortMotif;
-        //            inputTimer.reset();
-        //        }
 
         dashboardTelemetry.addData("state", state);
         dashboardTelemetry.addData("target position", Revolver.target);
