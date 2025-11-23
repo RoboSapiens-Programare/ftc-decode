@@ -98,7 +98,6 @@ public class FSM extends OpMode {
             robot.intake.setPower((float) -0.55);
         } else robot.intake.stopMotor();
 
-
         // sort
         switch (sortingMode) {
             case AUTO:
@@ -144,7 +143,7 @@ public class FSM extends OpMode {
 
         if (gamepad2.left_bumper && homeRevolver && inputTimer.milliseconds() > 500) {
             robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            
+
             homeRevolver = false;
             inputTimer.reset();
         }
@@ -196,7 +195,6 @@ public class FSM extends OpMode {
                 == ColorEnum.PURPLE) {
             gamepad2.setLedColor(155, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-
 
         // change controller color when turret aligned
         if (robot.turret.isShootReady()) {
@@ -256,7 +254,6 @@ public class FSM extends OpMode {
                 }
             }
         }
-
 
         // cycle through motifs
         if (gamepad2.triangle && inputTimer.milliseconds() > 400) {
