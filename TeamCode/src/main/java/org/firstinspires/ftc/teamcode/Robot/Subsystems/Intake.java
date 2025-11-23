@@ -7,15 +7,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
-import org.firstinspires.ftc.teamcode.Robot.uV;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class Intake extends Subsystem {
-    public DcMotorEx intakeMotor;
-    //    private final ColorSensor colorSensor;
+    private DcMotorEx intakeMotor;
     private Revolver revolver;
     private final ElapsedTime cooldown = new ElapsedTime();
 
@@ -76,38 +74,9 @@ public class Intake extends Subsystem {
                 result.closestSwatch == PredominantColorProcessor.Swatch.ARTIFACT_GREEN
                         ? ColorEnum.GREEN
                         : ColorEnum.PURPLE);
-
-        //        byte b = revolver.getFreeSlot();
-        //        if (b == 5)
-        //            return;
-        //
-        //        revolver.setTargetSlot(b);
-
     }
 
-    public void handleGreen() {
-        byte b = revolver.getFreeSlot();
-        if (b != 5) {
-            revolver.setSlotColor(b, ColorEnum.GREEN);
-        }
-    }
-
-    public void handlePurple() {
-        byte b = revolver.getFreeSlot();
-        if (b != 5) {
-            revolver.setSlotColor(b, ColorEnum.PURPLE);
-        }
-    }
-
-    public void setPower(float power) {
+    public void setPower(double power) {
         intakeMotor.setPower(power);
-    }
-
-    public void startMotor() {
-        intakeMotor.setPower(uV.intakePower);
-    }
-
-    public void stopMotor() {
-        intakeMotor.setPower(0);
     }
 }

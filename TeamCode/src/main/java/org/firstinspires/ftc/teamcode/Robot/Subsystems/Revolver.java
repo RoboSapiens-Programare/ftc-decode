@@ -20,17 +20,17 @@ public class Revolver extends Subsystem {
     public ColorEnum[] colorList = {ColorEnum.UNDEFINED, ColorEnum.UNDEFINED, ColorEnum.UNDEFINED};
 
     // target slot and encoder position
-    public static byte targetSlot = 0;
-    public static int target = 0;
+    public byte targetSlot = 0;
+    public int target = 0;
 
     // PID values for revolver
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
-    public static double Kp = 0.0001725;
-    public static double Kd = 0.0000475;
-    public static double Ki = 0.000255;
-    public static double Kf = 0.055; // Power to overcome inertia and friction
+    private final double Kp = 0.0001725;
+    private final double Kd = 0.0000475;
+    private final double Ki = 0.000255;
+    private final double Kf = 0.055; // Power to overcome inertia and friction
 
     private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
@@ -60,7 +60,7 @@ public class Revolver extends Subsystem {
     }
 
     public void setTarget(int target) {
-        Revolver.target = target;
+        this.target = target;
     }
 
     public void setTargetSlot(byte n) {

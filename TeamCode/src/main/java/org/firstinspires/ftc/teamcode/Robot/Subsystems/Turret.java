@@ -41,19 +41,15 @@ public class Turret extends Subsystem {
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
 
-    // old value that was tested with
-    //    public double Kp = 0.000495;
+    private final double Kp = 0.000505;
+    private final double Ki = 0.001;
+    private final double Kd = 0.000165;
+    private final double Kf = 0.065; // Power to overcome inertia and friction
 
-    // new value that wasn't tested
-    public double Kp = 0.000505;
-    public double Ki = 0.001;
-    public double Kd = 0.000165;
-    public static double Kf = 0.065; // Power to overcome inertia and friction
-
-    public static double shootKp = 1800 * 0.2;
-    public static double shootKi = 1800 * 0.4 / (4.0 / 10);
-    public static double shootKd = 0.066 * 1800 * 4 / 10;
-    public static double shootKf = 9;
+    private final double shootKp = 1800 * 0.2;
+    private final double shootKi = 1800 * 0.4 / (4.0 / 10);
+    private final double shootKd = 0.066 * 1800 * 4 / 10;
+    private final double shootKf = 9;
 
     public static double velocityTolerance = 75;
 
@@ -85,10 +81,6 @@ public class Turret extends Subsystem {
 
         pidfController.setSetpoint(frameWidth / 2.0);
         pidfController.setTolerance(0);
-    }
-
-    public void toggleTracking() {
-        tracking = !tracking;
     }
 
     public void enableCamera() {

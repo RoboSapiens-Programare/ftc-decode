@@ -32,6 +32,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.uV;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -131,7 +132,7 @@ public class AutoMotif extends LinearOpMode {
 
     // a place to put your intake and shooting functions
     public void intakeArtifacts() {
-        robot.intake.startMotor();
+        robot.intake.setPower(uV.intakePower);
         robot.intake.update();
         // Put your intake logic/functions here
     }

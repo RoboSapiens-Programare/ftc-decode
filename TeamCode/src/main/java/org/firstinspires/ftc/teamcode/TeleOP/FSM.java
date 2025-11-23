@@ -62,8 +62,8 @@ public class FSM extends OpMode {
         inputTimer.reset();
         stateTimer.reset();
         loadBallTimer.reset();
-        // go to pos 0 always
-        robot.revolver.setTargetSlot((byte) 0);
+
+        robot.intake.setPower(0);
     }
 
     private void manualSort() {
@@ -93,10 +93,10 @@ public class FSM extends OpMode {
         robot.intake.update();
 
         if (gamepad1.right_trigger > 0.5) {
-            robot.intake.startMotor();
+            robot.intake.setPower(1);
         } else if (gamepad1.left_trigger > 0.5) {
             robot.intake.setPower((float) -0.55);
-        } else robot.intake.stopMotor();
+        } else robot.intake.setPower(0);
 
         // sort
         switch (sortingMode) {
@@ -119,7 +119,6 @@ public class FSM extends OpMode {
 
         // power off intake and switch to outtake state
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
-            robot.intake.stopMotor();
             changeState(State.OUTTAKE);
         }
 
@@ -157,7 +156,7 @@ public class FSM extends OpMode {
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
-            robot.intake.stopMotor();
+            robot.intake.setPower(0);
             changeState(State.INTAKE);
         }
 
@@ -329,7 +328,7 @@ public class FSM extends OpMode {
         } else robot.turret.tracking = false;
 
         dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target position", Revolver.target);
+        dashboardTelemetry.addData("target position", robot.revolver.target);
         dashboardTelemetry.addData(
                 "current position", robot.revolver.encoderRevolver.getCurrentPosition());
 
