@@ -59,10 +59,6 @@ public class Revolver extends Subsystem {
         return pidfController.targetReached();
     }
 
-    public void setTarget(int target) {
-        this.target = target;
-    }
-
     public void setTargetSlot(byte n) {
         // determine if aligning for intake or outtake
         target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2;
@@ -70,21 +66,10 @@ public class Revolver extends Subsystem {
         target += uV.ticksPerRevolution / 3 * (n - 1);
 
         targetSlot = n;
-        setTarget(target);
     }
 
     public byte getTargetSlot() {
         return targetSlot;
-    }
-
-    // load game element into turret via lift
-    public void liftLoad() {
-        lift.setPosition(uV.liftUp);
-    }
-
-    // retract lift back to normal
-    public void liftReset() {
-        lift.setPosition(uV.liftDown);
     }
 
     /*
@@ -109,6 +94,16 @@ public class Revolver extends Subsystem {
         } else {
             setTargetSlot((byte) ((targetSlot) - (byte) (1)));
         }
+    }
+
+    // load game element into turret via lift
+    public void liftLoad() {
+        lift.setPosition(uV.liftUp);
+    }
+
+    // retract lift back to normal
+    public void liftReset() {
+        lift.setPosition(uV.liftDown);
     }
 
     public void setSlotColor(byte i, ColorEnum color) {
@@ -153,17 +148,13 @@ public class Revolver extends Subsystem {
         return count;
     }
 
-    @Override
-    public void update() {
-        pidfController.setSetpoint(target);
-
-        double out = pidfController.updatePID(encoderRevolver.getCurrentPosition());
-
-        revolverSpin.setPower(out);
-
-        // FtcDashboard.getInstance().getTelemetry().addData("out", out);
-        // FtcDashboard.getInstance().getTelemetry().addData("err", pidfController.error);
-        // FtcDashboard.getInstance().getTelemetry().update();
+    public byte getSlotByColor(ColorEnum color) {
+        for (byte b = 0; b < colorList.length; ++b) {
+            if (getSlotColor(b) == color) {
+                return b;
+            }
+        }
+        return -1;
     }
 
     public void nextMotif() {
@@ -181,20 +172,20 @@ public class Revolver extends Subsystem {
         }
     }
 
-    public byte getSlotByColor(ColorEnum color) {
-        for (byte b = 0; b < colorList.length; ++b) {
-            if (colorList[b] == color) {
-                return b;
-            }
-        }
-        return -1;
-    }
-
     public byte getSlotByMotifPosition(int p) {
         if (p == greenPosition) {
             return getSlotByColor(ColorEnum.GREEN);
         } else {
             return getSlotByColor(ColorEnum.PURPLE);
         }
+    }
+
+    @Override
+    public void update() {
+        pidfController.setSetpoint(target);
+
+        double out = pidfController.updatePID(encoderRevolver.getCurrentPosition());
+
+        revolverSpin.setPower(out);
     }
 }
