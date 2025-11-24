@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 
+// bag pula coaie il fac maine pe asta fmm de fsm
+
 @Config
 @TeleOp(name = "TeleOp")
 public class FSM extends OpMode {
@@ -88,7 +90,6 @@ public class FSM extends OpMode {
 
     public void handleIntake() {
         robot.turret.tracking = false;
-        robot.revolver.mode = Revolver.Mode.INTAKE;
         robot.turret.turretMotor.setPower(0);
         robot.intake.update();
 
@@ -101,7 +102,7 @@ public class FSM extends OpMode {
         // sort
         switch (sortingMode) {
             case AUTO:
-                if (robot.revolver.isSlotFull(robot.revolver.getTargetSlot())) {
+                if (robot.spindexer.isSlotFull(robot.spindexer.getTargetSlot())) {
                     if (robot.revolver.getFreeSlot() != -1) {
                         robot.revolver.setTargetSlot(robot.revolver.getFreeSlot());
                     }
@@ -272,6 +273,7 @@ public class FSM extends OpMode {
         robot.turret.tracking = false;
         robot.turret.enableCamera();
         inputTimer.reset();
+
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
         robot.drive.driverGamepad = gamepad1;
