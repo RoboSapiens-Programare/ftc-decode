@@ -19,16 +19,17 @@ public class Constants {
                 .build();
     }
 
-    public static MecanumConstants mecanumConstants = new MecanumConstants()
-            .maxPower(1)
-            .rightFrontMotorName("mec_rf")
-            .rightRearMotorName("mec_rr")
-            .leftRearMotorName("mec_lr")
-            .leftFrontMotorName("mec_lf")
-            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
+    public static MecanumConstants mecanumConstants =
+            new MecanumConstants()
+                    .maxPower(1)
+                    .rightFrontMotorName("mec_rf")
+                    .rightRearMotorName("mec_rr")
+                    .leftRearMotorName("mec_lr")
+                    .leftFrontMotorName("mec_lf")
+                    .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+                    .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+                    .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+                    .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
 
     public static Follower createMecanumFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

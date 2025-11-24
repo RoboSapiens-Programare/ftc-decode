@@ -4,13 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
-
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
 import java.util.Arrays;
 import java.util.List;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Motor test", group = "1. Auto Tests")
 public class MotorTest extends OpMode {
@@ -20,12 +17,10 @@ public class MotorTest extends OpMode {
     private DcMotorEx rightRear;
     private List<DcMotorEx> motors;
 
-
-
     private void updateFollower(double power, double gx, double gy, double gr) {
-        double y = -gy*power; // Remember, this is reversed!
-        double x = gx*power; // this is strafing
-        double rx = gr*power;
+        double y = -gy * power; // Remember, this is reversed!
+        double x = gx * power; // this is strafing
+        double rx = gr * power;
 
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio, but only when
@@ -44,10 +39,10 @@ public class MotorTest extends OpMode {
 
     @Override
     public void init() {
-        //left front = left rear
-        //left rear = right front
-        //right front = right rear
-        //right rear = left front
+        // left front = left rear
+        // left rear = right front
+        // right front = right rear
+        // right rear = left front
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");

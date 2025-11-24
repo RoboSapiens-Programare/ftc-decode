@@ -1,32 +1,23 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-
+import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-
+import java.util.List;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.Robot.uV;
+import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
-import android.util.Size;
-
-
-import java.util.List;
-
 @SuppressWarnings("FieldCanBeLocal")
 @Config
-public class Turret {
+public class Turret extends Subsystem {
     public DcMotorEx turretMotor;
     public CRServo turretRotationServo;
     private float turretRotation;
@@ -50,28 +41,24 @@ public class Turret {
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
 
-    //old value that was tested with
-//    public double Kp = 0.000495;
+    private final double Kp = 0.000505;
+    private final double Ki = 0.001;
+    private final double Kd = 0.000165;
+    private final double Kf = 0.065; // Power to overcome inertia and friction
 
-    //new value that wasn't tested
-    public double Kp = 0.000505;
-    public double Ki = 0.001;
-    public double Kd = 0.000165;
-    public static double Kf = 0.065; // Power to overcome inertia and friction
+    private final double shootKp = 1800 * 0.2;
+    private final double shootKi = 1800 * 0.4 / (4.0 / 10);
+    private final double shootKd = 0.066 * 1800 * 4 / 10;
+    private final double shootKf = 9;
 
-
-    public static double shootKp = 1800*0.2;
-    public static double shootKi = 1800*0.4 / (4.0/10);
-    public static double shootKd = 0.066*1800*4/10;
-    public static double shootKf = 9;
-    public static double velo = 0;
-
+    public static double velocityTolerance = 75;
 
     public PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
     public PIDFController velocitypidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
     private VisionPortal vision;
     public double targetVelocity;
+
     public Turret(HardwareMap hwMap) {
         turretMotor = hwMap.get(DcMotorEx.class, "turretMotor");
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -92,27 +79,28 @@ public class Turret {
 
         FtcDashboard.getInstance().startCameraStream(vision, 30);
 
-        pidfController.setSetpoint(frameWidth/2.0);
+        pidfController.setSetpoint(frameWidth / 2.0);
         pidfController.setTolerance(0);
     }
 
-    public void toggleTracking(){
-        tracking = !tracking;
-    }
-
-
     public void enableCamera() {
         if (vision != null) {
-            vision.resumeStreaming();   // restarts the webcam stream
+            vision.resumeStreaming(); // restarts the webcam stream
         }
     }
 
     public void disableCamera() {
         if (vision != null) {
-            vision.stopStreaming();     // fully stops camera pipeline
+            vision.stopStreaming(); // fully stops camera pipeline
         }
     }
 
+    public boolean isShootReady() {
+        boolean velo = Math.abs(turretMotor.getVelocity() - targetVelocity) < velocityTolerance;
+        return velo && found;
+    }
+
+    @Override
     public void update() {
         turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
 
@@ -129,35 +117,19 @@ public class Turret {
                     FtcDashboard.getInstance().getTelemetry().addData("tag center", tag.center.x);
                     found = true;
                     currentPos = tag.center.x;
-                    // -50 is the physical offset, currently aims too much to the right, compensates 50 to the left
+                    // -50 is the physical offset, currently aims too much to the right, compensates
+                    // 50 to the
+                    // left
                     turretRotationServo.setPower(pidfController.updatePID(tag.center.x - 50));
 
-                    double dist = tag.ftcPose.x * tag.ftcPose.x + tag.ftcPose.y * tag.ftcPose.y +tag.ftcPose.z * tag.ftcPose.z;
+                    double dist =
+                            tag.ftcPose.x * tag.ftcPose.x
+                                    + tag.ftcPose.y * tag.ftcPose.y
+                                    + tag.ftcPose.z * tag.ftcPose.z;
                     dist = Math.sqrt(dist);
 
-                    // TODO: check if this varies maechanically based on battery voltage and than change the power based on it
-
-//                    turretMotor.setPower(0.586767 + 0.0025*(dist - 57));
-
-
-
-//                    if (dist >= 73.5) {
-//                        turretMotor.setVelocity((dist - 73.5) * 125 / 23.5 + 1100);
-//                        FtcDashboard.getInstance().getTelemetry().addData("s", (dist - 73.5) * 125 / 23.5 + 1100);
-//                    } else {
-//                        turretMotor.setVelocity((dist - 73.5) * 140 / 23.5 + 960);
-//                        FtcDashboard.getInstance().getTelemetry().addData("s", (dist - 73.5) * 140 / 23.5 + 960);
-//
-//                    }
-
-                    turretMotor.setVelocity(((dist - 52.3) * 375 / 33.15 + 1000));
                     targetVelocity = ((dist - 52.3) * 375 / 33.15 + 1000);
-
-
-//                    FtcDashboard.getInstance().getTelemetry().addData("v", turretMotor.getVelocity());
-//                    FtcDashboard.getInstance().getTelemetry().addData("distance", dist);
-//                    FtcDashboard.getInstance().getTelemetry().addData("distance power", dist*0.01);
-//                    FtcDashboard.getInstance().getTelemetry().addData("log distance power", 0.586767 + 0.0025*(dist - 57));
+                    turretMotor.setVelocity(targetVelocity);
                 }
             }
         } else {

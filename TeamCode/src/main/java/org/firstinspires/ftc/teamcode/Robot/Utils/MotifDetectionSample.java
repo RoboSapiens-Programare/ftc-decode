@@ -2,13 +2,11 @@ package org.firstinspires.ftc.teamcode.Robot.Utils;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
+import java.util.List;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-import java.util.List;
-
-//@Disabled
+// @Disabled
 @TeleOp(name = "Concept: Motif Detection", group = "Concept")
 public class MotifDetectionSample extends OpMode {
     private Robot robot;

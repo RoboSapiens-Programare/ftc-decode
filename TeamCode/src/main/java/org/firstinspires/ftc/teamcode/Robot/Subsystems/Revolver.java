@@ -5,40 +5,32 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
-import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
-public class Revolver{
+public class Revolver extends Subsystem {
     public final CRServo revolverSpin;
     private final Servo lift;
     public DcMotor encoderRevolver;
     public int greenPosition = 0;
 
-    public ColorEnum[] colorList = {
-            ColorEnum.UNDEFINED,
-            ColorEnum.UNDEFINED,
-            ColorEnum.UNDEFINED
-    };
-
+    public ColorEnum[] colorList = {ColorEnum.UNDEFINED, ColorEnum.UNDEFINED, ColorEnum.UNDEFINED};
 
     // target slot and encoder position
-    public static byte targetSlot = 0;
-    public static int target = 0;
-
+    public byte targetSlot = 0;
+    public int target = 0;
 
     // PID values for revolver
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
-    public static double Kp = 0.0001725;
-    public static double Kd = 0.0000475;
-    public static double Ki = 0.000255;
-    public static double Kf = 0.055; // Power to overcome inertia and friction
+    private final double Kp = 0.0001725;
+    private final double Kd = 0.0000475;
+    private final double Ki = 0.000255;
+    private final double Kf = 0.055; // Power to overcome inertia and friction
 
     private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
@@ -63,30 +55,45 @@ public class Revolver{
         pidfController.setTolerance(25);
     }
 
-    public void setTarget(int target){
-        Revolver.target = target;
+    public boolean isReady() {
+        return pidfController.targetReached();
     }
-
 
     public void setTargetSlot(byte n) {
         // determine if aligning for intake or outtake
         target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2;
 
-
-        target += uV.ticksPerRevolution / 3 * (n-1);
-        //TODO SEE IF IT WORKS
-//        if(target == 5460) target = -2730;
-
+        target += uV.ticksPerRevolution / 3 * (n - 1);
 
         targetSlot = n;
-        setTarget(target);
     }
-
-
-
 
     public byte getTargetSlot() {
         return targetSlot;
+    }
+
+    /*
+     * increments target slot by one, clamping it's max value to 2
+     * and resetting at 0 when needed
+     */
+    public void nextSlot() {
+
+        if (targetSlot == 2) setTargetSlot((byte) 0);
+        else {
+            setTargetSlot((byte) ((targetSlot) + (byte) (1)));
+        }
+    }
+
+    /*
+     * decrements target slot by one, clamping it's min value to 0
+     * and resetting at 2 when needed
+     */
+    public void prevSlot() {
+        if (targetSlot == 0) {
+            setTargetSlot((byte) 2);
+        } else {
+            setTargetSlot((byte) ((targetSlot) - (byte) (1)));
+        }
     }
 
     // load game element into turret via lift
@@ -99,41 +106,15 @@ public class Revolver{
         lift.setPosition(uV.liftDown);
     }
 
-    /*
-     * increments target slot by one, clamping it's max value to 2
-     * and resetting at 0 when needed
-     */
-    public void nextSlot() {
-
-        if (targetSlot == 2)
-            setTargetSlot((byte) 0);
-        else {
-            setTargetSlot((byte) ( (targetSlot) + (byte)(1)));
-        }
-
-    }
-
-    /*
-     * decrements target slot by one, clamping it's min value to 0
-     * and resetting at 2 when needed
-     */
-    public void prevSlot() {
-        if (targetSlot == 0) {
-            setTargetSlot((byte) 2);
-        } else {
-            setTargetSlot((byte) ( (targetSlot) - (byte)(1)));
-        }
-    }
-
     public void setSlotColor(byte i, ColorEnum color) {
         colorList[i] = color;
     }
 
     public ColorEnum getSlotColor(byte i) {
-        return  colorList[i];
+        return colorList[i];
     }
 
-    public byte getFullSlot(){
+    public byte getFullSlot() {
         for (byte b = 0; b < colorList.length; ++b) {
             if (colorList[b] != ColorEnum.UNDEFINED) {
                 return b;
@@ -143,7 +124,7 @@ public class Revolver{
         return -1;
     }
 
-    public boolean isSlotFull(byte targetSlot){
+    public boolean isSlotFull(byte targetSlot) {
         return colorList[targetSlot] != ColorEnum.UNDEFINED;
     }
 
@@ -167,29 +148,22 @@ public class Revolver{
         return count;
     }
 
-    public void update() {
-        pidfController.setSetpoint(target);
-
-        double out = pidfController.updatePID(encoderRevolver.getCurrentPosition());
-
-        revolverSpin.setPower(out);
-
-        // FtcDashboard.getInstance().getTelemetry().addData("out", out);
-        // FtcDashboard.getInstance().getTelemetry().addData("err", pidfController.error);
-        // FtcDashboard.getInstance().getTelemetry().update();
-    }
-
-    public void start() {
+    public byte getSlotByColor(ColorEnum color) {
+        for (byte b = 0; b < colorList.length; ++b) {
+            if (getSlotColor(b) == color) {
+                return b;
+            }
+        }
+        return -1;
     }
 
     public void nextMotif() {
-        if (greenPosition == 2)
-            greenPosition = 0;
+        if (greenPosition == 2) greenPosition = 0;
         else {
             ++greenPosition;
         }
-
     }
+
     public void prevMotif() {
         if (greenPosition == 0) {
             greenPosition = 2;
@@ -198,20 +172,20 @@ public class Revolver{
         }
     }
 
-    public byte getSlotByColor(ColorEnum color) {
-        for (byte b = 0; b < colorList.length; ++b) {
-            if (colorList[b] == color) {
-                return b;
-            }
-        }
-        return -1;
-    }
-
     public byte getSlotByMotifPosition(int p) {
         if (p == greenPosition) {
             return getSlotByColor(ColorEnum.GREEN);
         } else {
             return getSlotByColor(ColorEnum.PURPLE);
         }
+    }
+
+    @Override
+    public void update() {
+        pidfController.setSetpoint(target);
+
+        double out = pidfController.updatePID(encoderRevolver.getCurrentPosition());
+
+        revolverSpin.setPower(out);
     }
 }

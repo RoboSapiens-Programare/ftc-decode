@@ -1,14 +1,8 @@
 package org.firstinspires.ftc.teamcode.Robot.Utils;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
-import com.acmerobotics.dashboard.FtcDashboard;
 // import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.opencv.core.Mat;
 
 public class PIDFController {
     // 1. TUNING VARIABLES (Not static, so you can have multiple PIDs)
@@ -79,7 +73,6 @@ public class PIDFController {
 
         timer.reset();
 
-
         // 5. Clip result to motor limits
         return Range.clip(output, -1.0, 1.0);
     }
@@ -92,5 +85,9 @@ public class PIDFController {
 
     public void setTolerance(int tolerance) {
         this.tolerance = tolerance;
+    }
+
+    public boolean targetReached() {
+        return Math.abs(error) < tolerance;
     }
 }
