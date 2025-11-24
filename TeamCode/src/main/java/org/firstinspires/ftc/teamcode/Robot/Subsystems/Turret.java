@@ -1,19 +1,17 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import java.util.List;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
@@ -30,21 +28,19 @@ public class Turret extends Subsystem {
 
     public TargetObelisk targetObelisk = TargetObelisk.BLUE;
 
-    public final int frameWidth = 640;
-    public double currentPos = 0;
     public boolean tracking = true;
 
-    public AprilTagProcessor tagProcessor;
+    public Limelight3A limelight;
 
     // PID values for turret
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
 
-    private final double Kp = 0.000505;
-    private final double Ki = 0.001;
-    private final double Kd = 0.000165;
-    private final double Kf = 0.065; // Power to overcome inertia and friction
+    public static double Kp = 0.19;
+    public static double Ki = 0;
+    public static double Kd = 0.025;
+    public static double Kf = 0; // Power to overcome inertia and friction
 
     private final double shootKp = 1800 * 0.2;
     private final double shootKi = 1800 * 0.4 / (4.0 / 10);
@@ -52,11 +48,10 @@ public class Turret extends Subsystem {
     private final double shootKf = 9;
 
     public static double velocityTolerance = 75;
+    public double curr = 0;
 
     public PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
-    public PIDFController velocitypidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
-    private VisionPortal vision;
     public double targetVelocity;
 
     public Turret(HardwareMap hwMap) {
@@ -65,39 +60,43 @@ public class Turret extends Subsystem {
         turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretRotationServo = hwMap.get(CRServo.class, "turretRotationServo");
 
-        tagProcessor = AprilTagProcessor.easyCreateWithDefaults();
-        VisionPortal.Builder vBuilder = new VisionPortal.Builder();
+        limelight = hwMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
 
-        vBuilder.setCamera(hwMap.get(WebcamName.class, "webcamTurret"));
-        vBuilder.addProcessor(tagProcessor);
-        vBuilder.setCameraResolution(new Size(frameWidth, 480));
-        vBuilder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+        FtcDashboard.getInstance().startCameraStream(limelight, 30);
 
-        vision = vBuilder.build();
-
-        vision.resumeStreaming();
-
-        FtcDashboard.getInstance().startCameraStream(vision, 30);
-
-        pidfController.setSetpoint(frameWidth / 2.0);
-        pidfController.setTolerance(0);
+        pidfController.setSetpoint(0);
+        pidfController.setTolerance(0.3);
     }
 
     public void enableCamera() {
-        if (vision != null) {
-            vision.resumeStreaming(); // restarts the webcam stream
-        }
+        limelight.start();
     }
 
     public void disableCamera() {
-        if (vision != null) {
-            vision.stopStreaming(); // fully stops camera pipeline
-        }
+        limelight.stop();
     }
 
     public boolean isShootReady() {
         boolean velo = Math.abs(turretMotor.getVelocity() - targetVelocity) < velocityTolerance;
         return velo && found;
+    }
+
+    public double getDistance() {
+        Pose robotPose = Robot.follower.getPose();
+        Pose obeliskPose = new Pose(TargetObelisk.BLUE == targetObelisk ? 18 : 129, 132);
+
+        double dx = robotPose.getX() - obeliskPose.getX();
+        double dy = robotPose.getY() - obeliskPose.getY();
+
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public double computeVelocity() {
+        targetVelocity = ((getDistance() - 47.3) * 375 / 33.15 + 1000);
+        // 1370
+        return targetVelocity;
     }
 
     @Override
@@ -109,31 +108,24 @@ public class Turret extends Subsystem {
             return;
         }
 
-        List<AprilTagDetection> result = tagProcessor.getDetections();
+        LLResult result = limelight.getLatestResult();
 
-        if (!result.isEmpty()) {
-            for (AprilTagDetection tag : result) {
-                if (tag.id == (targetObelisk == TargetObelisk.RED ? 24 : 20)) {
-                    FtcDashboard.getInstance().getTelemetry().addData("tag center", tag.center.x);
-                    found = true;
-                    currentPos = tag.center.x;
-                    // -50 is the physical offset, currently aims too much to the right, compensates
-                    // 50 to the
-                    // left
-                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x - 50));
+        if (result.isValid()) {
+            if (result.getFiducialResults().get(0).getFiducialId()
+                    == (targetObelisk == TargetObelisk.RED ? 24 : 20)) {
+                // blue by default
 
-                    double dist =
-                            tag.ftcPose.x * tag.ftcPose.x
-                                    + tag.ftcPose.y * tag.ftcPose.y
-                                    + tag.ftcPose.z * tag.ftcPose.z;
-                    dist = Math.sqrt(dist);
+                FtcDashboard.getInstance().getTelemetry().addData("tag offset", result.getTx());
 
-                    targetVelocity = ((dist - 52.3) * 375 / 33.15 + 1000);
-                    turretMotor.setVelocity(targetVelocity);
-                }
+                found = true;
+                curr = result.getTx();
+                turretRotationServo.setPower(pidfController.updatePID(result.getTx()));
+
+                // TODO: target velocity formula based on position from odometry
+
+                turretMotor.setVelocity(computeVelocity());
             }
         } else {
-            // no more search fuck off driver 2
             turretRotationServo.setPower(0);
             found = false;
         }

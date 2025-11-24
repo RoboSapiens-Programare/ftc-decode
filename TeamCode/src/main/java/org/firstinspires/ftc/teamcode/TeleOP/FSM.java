@@ -4,6 +4,7 @@ import static java.lang.Math.abs;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -87,7 +88,9 @@ public class FSM extends OpMode {
     }
 
     public void handleIntake() {
-        robot.turret.tracking = false;
+        // always track when testing
+        // TODO: re-enable
+        //        robot.turret.tracking = false;
         robot.revolver.mode = Revolver.Mode.INTAKE;
         robot.turret.turretMotor.setPower(0);
         robot.intake.update();
@@ -152,7 +155,8 @@ public class FSM extends OpMode {
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
 
         if (!robot.turret.tracking) {
-            robot.turret.turretMotor.setPower(1);
+            // TODO : change to average spoolup value
+            robot.turret.turretMotor.setPower(0);
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
@@ -269,12 +273,16 @@ public class FSM extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap);
         robot.revolver.liftReset();
-        robot.turret.tracking = false;
+        // always tracking for testing
+        robot.turret.tracking = true;
         robot.turret.enableCamera();
         inputTimer.reset();
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
         robot.drive.driverGamepad = gamepad1;
+
+        // TODO: change to auto park pos
+        Robot.follower.setStartingPose(new Pose(72, 72));
     }
 
     @Override
@@ -293,7 +301,7 @@ public class FSM extends OpMode {
 
     @Override
     public void start() {
-        changeState(State.INTAKE);
+        changeState(State.OUTTAKE);
         sortingMode = SortingMode.AUTO;
 
         gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
@@ -323,9 +331,13 @@ public class FSM extends OpMode {
         robot.turret.update();
         robot.turret.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));
 
-        if (gamepad2.touchpad) {
-            robot.turret.tracking = true;
-        } else robot.turret.tracking = false;
+        Robot.follower.update();
+
+        // always track when testing
+        // TODO: re-enable
+        //        if (gamepad2.touchpad) {
+        //            robot.turret.tracking = true;
+        //        } else robot.turret.tracking = false;
 
         dashboardTelemetry.addData("state", state);
         dashboardTelemetry.addData("target position", robot.revolver.target);
@@ -342,6 +354,9 @@ public class FSM extends OpMode {
 
         dashboardTelemetry.addData("motifpos", motifPosition);
         //        dashboardTelemetry.addData("color", robot.intake.);
+
+        dashboardTelemetry.addData("dst", robot.turret.getDistance());
+        dashboardTelemetry.addData("curr odo", Robot.follower.getPose());
 
         dashboardTelemetry.update();
 

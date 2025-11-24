@@ -33,7 +33,7 @@ import java.util.List;
  * @version 1.0, 6/26/2025
  */
 @Configurable
-@TeleOp(name = "Tuning", group = "Pedro Pathing")
+@TeleOp(name = "Tuning", group = "Auto")
 public class Tuning extends SelectableOpMode {
     public static Follower follower;
 
@@ -162,7 +162,7 @@ class LocalizationTest extends OpMode {
     @Override
     public void loop() {
         follower.setTeleOpDrive(
-                -gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+                gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, true);
         follower.update();
 
         telemetryM.debug("x:" + follower.getPose().getX());
@@ -431,7 +431,7 @@ class ForwardVelocityTuner extends OpMode {
                 stopRobot();
             } else {
                 follower.setTeleOpDrive(1, 0, 0, true);
-                // double currentVelocity = Math.abs(follower.getVelocity().getXComponent());
+                // double currentVelocity = Math.abs(follower.computeVelocity().getXComponent());
                 double currentVelocity =
                         Math.abs(follower.poseTracker.getLocalizer().getVelocity().getX());
                 velocities.add(currentVelocity);
