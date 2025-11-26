@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
+import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 
@@ -45,7 +46,7 @@ public class FSM extends OpMode {
     private int shootStep = -1;
 
     private int motifPosition = 0;
-    private boolean homeRevolver = false;
+    private boolean homeSpindexer = false;
     private boolean sortMotif = false;
 
     // Helper method to kill joystick drift
@@ -69,16 +70,10 @@ public class FSM extends OpMode {
     }
 
     private void manualSort() {
-        // go to previous slot
-        if (gamepad2.dpad_left && inputTimer.milliseconds() > 300) {
-            robot.revolver.prevSlot();
-
-            inputTimer.reset();
-        }
 
         // go to next slot
         if (gamepad2.dpad_right && inputTimer.milliseconds() > 300) {
-            robot.revolver.nextSlot();
+            robot.spindexer.goToSlot(robot.spindexer.getTargetSlot() + 1);
 
             inputTimer.reset();
         }
@@ -103,10 +98,10 @@ public class FSM extends OpMode {
         switch (sortingMode) {
             case AUTO:
                 if (robot.spindexer.isSlotFull(robot.spindexer.getTargetSlot())) {
-                    if (robot.revolver.getFreeSlot() != -1) {
-                        robot.revolver.setTargetSlot(robot.revolver.getFreeSlot());
+                    if (robot.spindexer.getFreeSlot() != -1) {
+                        robot.spindexer.setTargetSlot(robot.spindexer.getFreeSlot());
                     }
-                } else robot.revolver.setTargetSlot(robot.revolver.getTargetSlot());
+                } else robot.spindexer.setTargetSlot(robot.spindexer.getTargetSlot());
 
                 if (gamepad2.dpad_right || gamepad2.dpad_left) {
                     sortingMode = SortingMode.MANUAL;
@@ -124,33 +119,33 @@ public class FSM extends OpMode {
         }
 
         // change color based on current slot
-        if (robot.revolver.getSlotColor(robot.revolver.getTargetSlot()) == ColorEnum.GREEN) {
+        if (robot.spindexer.getSlotColor(robot.spindexer.getTargetSlot()) == ColorEnum.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-        } else if (robot.revolver.getSlotColor(robot.revolver.getTargetSlot())
+        } else if (robot.spindexer.getSlotColor(robot.spindexer.getTargetSlot())
                 == ColorEnum.PURPLE) {
             gamepad2.setLedColor(155, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        // home revolver in case of ... fuck up
-        if (gamepad2.left_bumper && !homeRevolver && inputTimer.milliseconds() > 500) {
-            homeRevolver = true;
+        // homing
+        if (gamepad2.left_bumper && !homeSpindexer && inputTimer.milliseconds() > 500) {
+            homeSpindexer = true;
             inputTimer.reset();
         }
 
-        if (homeRevolver) {
-            robot.revolver.revolverSpin.setPower(applyDeadzone(gamepad2.right_stick_x) * 0.125);
+        if (homeSpindexer) {
+            robot.spindexer.motor.setPower(applyDeadzone(gamepad2.right_stick_x) * 0.125);
         }
 
-        if (gamepad2.left_bumper && homeRevolver && inputTimer.milliseconds() > 500) {
-            robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        if (gamepad2.left_bumper && homeSpindexer && inputTimer.milliseconds() > 500) {
+            robot.spindexer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-            homeRevolver = false;
+            homeSpindexer = false;
             inputTimer.reset();
         }
     }
 
     public void handleOuttake() {
-        robot.revolver.mode = Revolver.Mode.OUTTAKE;
+        robot.spindexer.mode = Spindexer.Mode.OUTTAKE;
 
         if (!robot.turret.tracking) {
             robot.turret.turretMotor.setPower(1);
@@ -164,17 +159,19 @@ public class FSM extends OpMode {
         switch (sortingMode) {
             case AUTO:
                 if (sortMotif) {
-                    byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
+                    int t = robot.spindexer.getMotifOffset();
                     FtcDashboard.getInstance().getTelemetry().addData("t", (int) t);
                     if (t != -1) {
-                        robot.revolver.setTargetSlot(t);
-                    } else robot.revolver.setTargetSlot((byte) 0);
+                        robot.spindexer.goToSlot(t);
+                    } else robot.spindexer.goToSlot(0);
                 } else {
-                    if (robot.revolver.getFullSlot() != -1) {
-                        robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
-                    } else if (loadBallTimer.milliseconds() > 300) {
-                        changeState(State.INTAKE);
+                    if (robot.spindexer.getFullSlot() != -1) {
+                        robot.spindexer.goToSlot(robot.spindexer.getFullSlot());
                     }
+//                    TODO: change to default to intake state when spindexer works consistently
+//                    else if (loadBallTimer.milliseconds() > 300) {
+//                        changeState(State.INTAKE);
+//                    }
                 }
 
                 if (gamepad2.dpad_right || gamepad2.dpad_left) {
@@ -189,9 +186,9 @@ public class FSM extends OpMode {
         }
 
         // change controller color based on current slot color
-        if (robot.revolver.getSlotColor(robot.revolver.getTargetSlot()) == ColorEnum.GREEN) {
+        if (robot.spindexer.getSlotColor(robot.spindexer.getTargetSlot()) == ColorEnum.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-        } else if (robot.revolver.getSlotColor(robot.revolver.getTargetSlot())
+        } else if (robot.spindexer.getSlotColor(robot.spindexer.getTargetSlot())
                 == ColorEnum.PURPLE) {
             gamepad2.setLedColor(155, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
@@ -211,22 +208,20 @@ public class FSM extends OpMode {
         // Shoot sequence
         // Load only if on shoot mode
         if (shootStep >= 0) {
-            // make sure revolver is stable before starting load sequence
-            if (shootStep == 0 && robot.revolver.isReady()) {
+            if (shootStep == 0 && robot.spindexer.isReady()) {
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
             if (loadBallTimer.milliseconds() > 100 && shootStep == 1) {
-                robot.revolver.liftLoad();
+                robot.spindexer.shootCurrentSlot();
 
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
             if (loadBallTimer.milliseconds() > 400 && shootStep == 2) {
-                robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
-                robot.revolver.liftReset();
+                robot.spindexer.setSlotColor(robot.spindexer.getTargetSlot(), ColorEnum.UNDEFINED);
 
                 loadBallTimer.reset();
                 ++shootStep;
@@ -255,13 +250,9 @@ public class FSM extends OpMode {
             }
         }
 
-        // cycle through motifs
+        // go to motif
         if (gamepad2.triangle && inputTimer.milliseconds() > 400) {
-            robot.revolver.prevMotif();
-            inputTimer.reset();
-
-        } else if (gamepad2.cross && inputTimer.milliseconds() > 400) {
-            robot.revolver.nextMotif();
+            robot.spindexer.gotoMotif();
             inputTimer.reset();
         }
     }
@@ -269,7 +260,6 @@ public class FSM extends OpMode {
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-        robot.revolver.liftReset();
         robot.turret.tracking = false;
         robot.turret.enableCamera();
         inputTimer.reset();
@@ -301,8 +291,9 @@ public class FSM extends OpMode {
         gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        robot.revolver.mode = Revolver.Mode.INTAKE;
-        robot.revolver.setTargetSlot((byte) 0);
+        robot.spindexer.mode = Spindexer.Mode.INTAKE;
+
+        robot.spindexer.setTargetSlot((byte) 0);
     }
 
     @Override
@@ -320,7 +311,7 @@ public class FSM extends OpMode {
 
         robot.drive.update();
 
-        if (!homeRevolver) robot.revolver.update();
+        if (!homeSpindexer) robot.spindexer.update();
 
         robot.turret.update();
         robot.turret.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));
@@ -330,24 +321,22 @@ public class FSM extends OpMode {
         } else robot.turret.tracking = false;
 
         dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target position", robot.revolver.target);
+        dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
         dashboardTelemetry.addData(
-                "current position", robot.revolver.encoderRevolver.getCurrentPosition());
+                "current position", robot.spindexer.motor.getCurrentPosition());
 
-        dashboardTelemetry.addData("power rotation: ", robot.revolver.revolverSpin.getPower());
+        dashboardTelemetry.addData("power rotation: ", robot.spindexer.motor.getPower());
         dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
         dashboardTelemetry.addData("shoot step: ", shootStep);
 
-        dashboardTelemetry.addData("slot 0", robot.revolver.getSlotColor((byte) 0));
-        dashboardTelemetry.addData("slot 1", robot.revolver.getSlotColor((byte) 1));
-        dashboardTelemetry.addData("slot 2", robot.revolver.getSlotColor((byte) 2));
+        dashboardTelemetry.addData("slot 0", robot.spindexer.getSlotColor((byte) 0));
+        dashboardTelemetry.addData("slot 1", robot.spindexer.getSlotColor((byte) 1));
+        dashboardTelemetry.addData("slot 2", robot.spindexer.getSlotColor((byte) 2));
 
         dashboardTelemetry.addData("motifpos", motifPosition);
         //        dashboardTelemetry.addData("color", robot.intake.);
 
         dashboardTelemetry.update();
-
-        telemetry.addData("revolver target slot", robot.revolver.getTargetSlot());
     }
 
     @Override

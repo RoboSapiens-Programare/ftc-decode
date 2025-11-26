@@ -26,6 +26,8 @@ public class Spindexer extends Subsystem {
 
     // e uite aici voiam sa bag un 2 enum-uri frumoas cu 2 directii si motif-uri dar voua nu v-ar fi
     // placut :<
+
+    // TODO: remove this later
     public static final double shootDirection = 1;
 
     /* greenMotifPosition means the position [0, 1, 2] of the green ball in the motif
@@ -37,6 +39,13 @@ public class Spindexer extends Subsystem {
     public static int currentMotifPosition = 0;
 
     public ColorEnum[] slotColors = {ColorEnum.UNDEFINED, ColorEnum.UNDEFINED, ColorEnum.UNDEFINED};
+
+    public enum Mode {
+        INTAKE,
+        OUTTAKE
+    };
+
+    public Mode mode = Mode.INTAKE;
 
     public Spindexer(HardwareMap hwMap) {
         motor = hwMap.get(DcMotorEx.class, "spindexerMotor");
@@ -63,15 +72,13 @@ public class Spindexer extends Subsystem {
         pidfController.setSetpoint(targetPosition);
     }
 
-    public boolean shootCurrentSlot() {
-        if (!isReady()) return false;
+    public void shootCurrentSlot() {
+        if (!isReady()) return;
 
         slotColors[++targetSlot] = ColorEnum.UNDEFINED;
 
         targetPosition += shootDirection * ticksPerRevolution / 3;
         pidfController.setSetpoint(targetPosition);
-
-        return true;
     }
 
     // Sorting functions
@@ -126,6 +133,16 @@ public class Spindexer extends Subsystem {
 
     // motif functions
 
+    public int getMotifOffset() {
+        return greenMotifPosition - currentMotifPosition;
+
+        // moves 2 slots if the offset is 2 becuase of passive 1way intake
+    }
+
+    public void gotoMotif() {
+        goToSlot(targetSlot + getMotifOffset());
+    }
+
     public void motifGoToStart() {
         int greenSlot = getSlotByColor(ColorEnum.GREEN);
         int begin = (greenSlot - greenMotifPosition) % 3;
@@ -141,6 +158,10 @@ public class Spindexer extends Subsystem {
 
     public boolean isReady() {
         return pidfController.targetReached();
+    }
+
+    public void setTargetSlot(int targetSlot) {
+        this.targetSlot = targetSlot;
     }
 
     public int getTargetSlot() {
