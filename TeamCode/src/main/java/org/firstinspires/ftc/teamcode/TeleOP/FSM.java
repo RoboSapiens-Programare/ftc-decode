@@ -158,9 +158,10 @@ public class FSM extends OpMode {
 
         switch (sortingMode) {
             case AUTO:
+                // TODO: implement motif sorting and test it
                 if (sortMotif) {
                     int t = robot.spindexer.getMotifOffset();
-                    FtcDashboard.getInstance().getTelemetry().addData("t", (int) t);
+                    FtcDashboard.getInstance().getTelemetry().addData("t", t);
                     if (t != -1) {
                         robot.spindexer.goToSlot(t);
                     } else robot.spindexer.goToSlot(0);

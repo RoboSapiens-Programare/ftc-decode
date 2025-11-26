@@ -18,7 +18,7 @@ public class Spindexer extends Subsystem {
     public static double Kf = 0;
 
     // TODO: change to byte for memory effieciency
-    private int targetSlot = 0;
+    private byte targetSlot = 0;
     public static double tolerance = 5;
     public static double targetPosition = 0;
 
@@ -101,8 +101,8 @@ public class Spindexer extends Subsystem {
         return !isSlotFull(targetSlot);
     }
 
-    public int getFreeSlot() {
-        for (int b = 0; b < slotColors.length; ++b) {
+    public byte getFreeSlot() {
+        for (byte b = 0; b < slotColors.length; ++b) {
             if (slotColors[b] == ColorEnum.UNDEFINED) {
                 return b;
             }
@@ -160,11 +160,12 @@ public class Spindexer extends Subsystem {
         return pidfController.targetReached();
     }
 
-    public void setTargetSlot(int targetSlot) {
+    public void setTargetSlot(byte targetSlot) {
         this.targetSlot = targetSlot;
+        goToSlot(targetSlot);
     }
 
-    public int getTargetSlot() {
+    public byte getTargetSlot() {
         return targetSlot;
     }
 
