@@ -50,48 +50,14 @@ public class AutoMotif extends LinearOpMode {
     // Initialize poses
     private final Pose startPose =
             new Pose(72, 120, Math.toRadians(90)); // Start Pose of our robot.
-    private final Pose scorePoseRed =
-            new Pose(
-                    96,
-                    95,
-                    Math.toRadians(
-                            115));
-    private final Pose scorePoseBlue =
-            new Pose(
-                    47,
-                    95,
-                    Math.toRadians(
-                            115));
-    private final Pose PPGPose =
-            new Pose(
-                    100,
-                    83.5,
-                    Math.toRadians(0));
-    private final Pose PGPPose =
-            new Pose(
-                    100,
-                    59.5,
-                    Math.toRadians(0));
-    private final Pose GPPPose =
-            new Pose(
-                    100,
-                    35.5,
-                    Math.toRadians(0));
-    private final Pose PPGPoseGrab =
-            new Pose(
-                    130,
-                    83.5,
-                    Math.toRadians(0));
-    private final Pose PGPPoseGrab =
-            new Pose(
-                    130,
-                    59.5,
-                    Math.toRadians(0));
-    private final Pose GPPPoseGrab =
-            new Pose(
-                    130,
-                    35.5,
-                    Math.toRadians(0));
+    private final Pose scorePoseRed = new Pose(96, 95, Math.toRadians(115));
+    private final Pose scorePoseBlue = new Pose(47, 95, Math.toRadians(115));
+    private final Pose PPGPose = new Pose(100, 83.5, Math.toRadians(0));
+    private final Pose PGPPose = new Pose(100, 59.5, Math.toRadians(0));
+    private final Pose GPPPose = new Pose(100, 35.5, Math.toRadians(0));
+    private final Pose PPGPoseGrab = new Pose(130, 83.5, Math.toRadians(0));
+    private final Pose PGPPoseGrab = new Pose(130, 59.5, Math.toRadians(0));
+    private final Pose GPPPoseGrab = new Pose(130, 35.5, Math.toRadians(0));
 
     private PathChain grabPPG1;
     private PathChain grabPPG2;
@@ -249,63 +215,70 @@ public class AutoMotif extends LinearOpMode {
 
     public void buildPathsAny() {
 
-// ---------- PPG CYCLE ----------
+        // ---------- PPG CYCLE ----------
         grabPPG1 =
                 follower.pathBuilder()
                         .addPath(new BezierLine(scorePoseRed, PPGPose))
-                        .setLinearHeadingInterpolation(scorePoseRed.getHeading(), PPGPose.getHeading())
+                        .setLinearHeadingInterpolation(
+                                scorePoseRed.getHeading(), PPGPose.getHeading())
                         .build();
 
         grabPPG2 =
                 follower.pathBuilder()
                         .addPath(new BezierLine(PPGPose, PPGPoseGrab))
-                        .setLinearHeadingInterpolation(PPGPose.getHeading(), PPGPoseGrab.getHeading())
+                        .setLinearHeadingInterpolation(
+                                PPGPose.getHeading(), PPGPoseGrab.getHeading())
                         .build();
 
         scorePPG =
                 follower.pathBuilder()
                         .addPath(new BezierLine(PPGPoseGrab, scorePoseRed))
-                        .setLinearHeadingInterpolation(PPGPoseGrab.getHeading(), scorePoseRed.getHeading())
+                        .setLinearHeadingInterpolation(
+                                PPGPoseGrab.getHeading(), scorePoseRed.getHeading())
                         .build();
 
-
-// ---------- PGP CYCLE ----------
+        // ---------- PGP CYCLE ----------
         grabPGP1 =
                 follower.pathBuilder()
                         .addPath(new BezierLine(scorePoseRed, PGPPose))
-                        .setLinearHeadingInterpolation(scorePoseRed.getHeading(), PGPPose.getHeading())
+                        .setLinearHeadingInterpolation(
+                                scorePoseRed.getHeading(), PGPPose.getHeading())
                         .build();
 
         grabPGP2 =
                 follower.pathBuilder()
                         .addPath(new BezierLine(PGPPose, PGPPoseGrab))
-                        .setLinearHeadingInterpolation(PGPPose.getHeading(), PGPPoseGrab.getHeading())
+                        .setLinearHeadingInterpolation(
+                                PGPPose.getHeading(), PGPPoseGrab.getHeading())
                         .build();
 
         scorePGP =
                 follower.pathBuilder()
                         .addPath(new BezierLine(PGPPoseGrab, scorePoseRed))
-                        .setLinearHeadingInterpolation(PGPPoseGrab.getHeading(), scorePoseRed.getHeading())
+                        .setLinearHeadingInterpolation(
+                                PGPPoseGrab.getHeading(), scorePoseRed.getHeading())
                         .build();
 
-
-// ---------- GPP CYCLE ----------
+        // ---------- GPP CYCLE ----------
         grabGPP1 =
                 follower.pathBuilder()
                         .addPath(new BezierLine(scorePoseRed, GPPPose))
-                        .setLinearHeadingInterpolation(scorePoseRed.getHeading(), GPPPose.getHeading())
+                        .setLinearHeadingInterpolation(
+                                scorePoseRed.getHeading(), GPPPose.getHeading())
                         .build();
 
         grabGPP2 =
                 follower.pathBuilder()
                         .addPath(new BezierLine(GPPPose, GPPPoseGrab))
-                        .setLinearHeadingInterpolation(GPPPose.getHeading(), GPPPoseGrab.getHeading())
+                        .setLinearHeadingInterpolation(
+                                GPPPose.getHeading(), GPPPoseGrab.getHeading())
                         .build();
 
         scoreGPP =
                 follower.pathBuilder()
                         .addPath(new BezierLine(GPPPoseGrab, scorePoseRed))
-                        .setLinearHeadingInterpolation(GPPPoseGrab.getHeading(), scorePoseRed.getHeading())
+                        .setLinearHeadingInterpolation(
+                                GPPPoseGrab.getHeading(), scorePoseRed.getHeading())
                         .build();
     }
 
@@ -315,67 +288,82 @@ public class AutoMotif extends LinearOpMode {
             // ---------- PRELOAD ----------
             case 0:
                 follower.followPath(scorePreload);
-                if (!follower.isBusy()) { setpathState(1); }
+                if (!follower.isBusy()) {
+                    setpathState(1);
+                }
                 break;
-
 
             // ---------- PPG ----------
             case 1:
                 follower.followPath(grabPPG1);
-                if (!follower.isBusy()) { setpathState(2); }
+                if (!follower.isBusy()) {
+                    setpathState(2);
+                }
                 break;
 
             case 2:
                 follower.followPath(grabPPG2);
-                if (!follower.isBusy()) { setpathState(3); }
+                if (!follower.isBusy()) {
+                    setpathState(3);
+                }
                 break;
 
             case 3:
                 follower.followPath(scorePPG);
-                if (!follower.isBusy()) { setpathState(4); }
+                if (!follower.isBusy()) {
+                    setpathState(4);
+                }
                 break;
-
 
             // ---------- PGP ----------
             case 4:
                 follower.followPath(grabPGP1);
-                if (!follower.isBusy()) { setpathState(5); }
+                if (!follower.isBusy()) {
+                    setpathState(5);
+                }
                 break;
 
             case 5:
                 follower.followPath(grabPGP2);
-                if (!follower.isBusy()) { setpathState(6); }
+                if (!follower.isBusy()) {
+                    setpathState(6);
+                }
                 break;
 
             case 6:
                 follower.followPath(scorePGP);
-                if (!follower.isBusy()) { setpathState(7); }
+                if (!follower.isBusy()) {
+                    setpathState(7);
+                }
                 break;
-
 
             // ---------- GPP ----------
             case 7:
                 follower.followPath(grabGPP1);
-                if (!follower.isBusy()) { setpathState(8); }
+                if (!follower.isBusy()) {
+                    setpathState(8);
+                }
                 break;
 
             case 8:
                 follower.followPath(grabGPP2);
-                if (!follower.isBusy()) { setpathState(9); }
+                if (!follower.isBusy()) {
+                    setpathState(9);
+                }
                 break;
 
             case 9:
                 follower.followPath(scoreGPP);
-                if (!follower.isBusy()) { setpathState(10); }
+                if (!follower.isBusy()) {
+                    setpathState(10);
+                }
                 break;
-
 
             // ---------- DONE ----------
             case 10:
                 // robot finished all paths
                 break;
         }
-
     }
 
     // Setter methods for pathState variables placed at the class level

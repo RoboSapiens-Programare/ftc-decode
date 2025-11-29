@@ -144,7 +144,7 @@ public class FSM extends OpMode {
         }
 
         if (gamepad2.left_bumper && homeRevolver && inputTimer.milliseconds() > 500) {
-            robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//            robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             homeRevolver = false;
             inputTimer.reset();
@@ -341,8 +341,8 @@ public class FSM extends OpMode {
 
         dashboardTelemetry.addData("state", state);
         dashboardTelemetry.addData("target position", robot.revolver.target);
-        dashboardTelemetry.addData(
-                "current position", robot.revolver.encoderRevolver.getCurrentPosition());
+//        dashboardTelemetry.addData(
+//                "current position", robot.revolver.encoderRevolver.getCurrentPosition());
 
         dashboardTelemetry.addData("power rotation: ", robot.revolver.revolverSpin.getPower());
         dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);

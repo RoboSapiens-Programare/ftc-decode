@@ -13,5 +13,7 @@ public class uV {
     public static double liftUp = 0.2;
     public static double liftDown = 0.6;
 
-    public static int ticksPerRevolution = 8192;
+    public static double ticksPerRevolution = 384.5;
+
+    public static double homingPower = 0.1;
 }

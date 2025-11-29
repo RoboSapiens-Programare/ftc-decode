@@ -3,25 +3,27 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@SuppressWarnings("FieldCanBeLocal")
 @Config
 public class Revolver extends Subsystem {
-    public final CRServo revolverSpin;
+    public final DcMotorEx revolverSpin;
     private final Servo lift;
-    public DcMotor encoderRevolver;
     public int greenPosition = 0;
+
+    public TouchSensor limitSwitch;
 
     public ColorEnum[] colorList = {ColorEnum.UNDEFINED, ColorEnum.UNDEFINED, ColorEnum.UNDEFINED};
 
     // target slot and encoder position
     public byte targetSlot = 0;
-    public int target = 0;
+    public double target = 0;
 
     // PID values for revolver
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
@@ -33,6 +35,7 @@ public class Revolver extends Subsystem {
     private final double Kf = 0.055; // Power to overcome inertia and friction
 
     private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
+    public boolean homing = false;
 
     // Align with INTAKE / OUTTAKE
     public enum Mode {
@@ -43,11 +46,11 @@ public class Revolver extends Subsystem {
     public Mode mode = Mode.INTAKE;
 
     public Revolver(HardwareMap hwMap) {
-        encoderRevolver = hwMap.get(DcMotor.class, "encoderRevolver");
-        encoderRevolver.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        limitSwitch = hwMap.get(TouchSensor.class, "revolverLimitSwitch");
 
-        revolverSpin = hwMap.get(CRServo.class, "revolverSpin");
+
+        revolverSpin = hwMap.get(DcMotorEx.class, "revolverSpin");
+        revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         revolverSpin.setDirection(CRServo.Direction.REVERSE);
 
         lift = hwMap.get(Servo.class, "lift");
@@ -77,7 +80,6 @@ public class Revolver extends Subsystem {
      * and resetting at 0 when needed
      */
     public void nextSlot() {
-
         if (targetSlot == 2) setTargetSlot((byte) 0);
         else {
             setTargetSlot((byte) ((targetSlot) + (byte) (1)));
@@ -180,12 +182,25 @@ public class Revolver extends Subsystem {
         }
     }
 
+    public void home() {
+        homing = true;
+    }
+
     @Override
     public void update() {
-        pidfController.setSetpoint(target);
+        //        pidfController.setSetpoint(target);
 
-        double out = pidfController.updatePID(encoderRevolver.getCurrentPosition());
+        if (!homing) {
+            revolverSpin.setTargetPosition((int) target);
+            revolverSpin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        } else {
+            if (limitSwitch.isPressed()) {
+                revolverSpin.setPower(0);
+                revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            } else {
+                revolverSpin.setPower(uV.homingPower);
+            }
+        }
 
-        revolverSpin.setPower(out);
     }
 }
