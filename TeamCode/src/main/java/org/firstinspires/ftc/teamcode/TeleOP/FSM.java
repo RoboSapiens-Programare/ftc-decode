@@ -301,7 +301,7 @@ public class FSM extends OpMode {
 
     @Override
     public void start() {
-        changeState(State.OUTTAKE);
+        changeState(State.INTAKE);
         sortingMode = SortingMode.AUTO;
 
         gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
@@ -335,9 +335,9 @@ public class FSM extends OpMode {
 
         // always track when testing
         // TODO: re-enable
-        //        if (gamepad2.touchpad) {
-        //            robot.turret.tracking = true;
-        //        } else robot.turret.tracking = false;
+//                if (gamepad2.touchpad) {
+//                    robot.turret.tracking = true;
+//                } else robot.turret.tracking = false;
 
         dashboardTelemetry.addData("state", state);
         dashboardTelemetry.addData("target position", robot.revolver.target);

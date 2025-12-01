@@ -13,11 +13,11 @@ import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class Intake extends Subsystem {
-    private DcMotorEx intakeMotor;
+    public DcMotorEx intakeMotor;
     private Revolver revolver;
     private final ElapsedTime cooldown = new ElapsedTime();
 
-    private PredominantColorProcessor colorSensor;
+    public PredominantColorProcessor colorSensor;
 
     private VisionPortal portal;
 

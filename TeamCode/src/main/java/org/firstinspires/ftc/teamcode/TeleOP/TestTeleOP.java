@@ -59,8 +59,14 @@ public class TestTeleOP extends OpMode {
         robot.drive.update();
         robot.revolver.update();
         robot.turret.update();
+        robot.intake.update();
 
         Robot.follower.update();
+
+        if(gamepad1.right_trigger > 0.1){
+            robot.intake.setPower(1);
+        }
+        else robot.intake.setPower(0);
 
         if (gamepad1.dpad_left && inputTimer.milliseconds() > 400) {
             robot.revolver.prevSlot();
@@ -73,7 +79,13 @@ public class TestTeleOP extends OpMode {
         }
 
         dashboardTelemetry.addData("target position", robot.revolver.target);
+        dashboardTelemetry.addData("slot 0", robot.revolver.getSlotColor((byte) 0));
+        dashboardTelemetry.addData("slot 1", robot.revolver.getSlotColor((byte) 1));
+        dashboardTelemetry.addData("slot 2", robot.revolver.getSlotColor((byte) 2));
 
+        dashboardTelemetry.addData("cam", robot.intake.colorSensor.getAnalysis().closestSwatch);
+        dashboardTelemetry.addData("intake pos", robot.revolver.revolverSpin.getCurrentPosition());
+        dashboardTelemetry.addData("power: ", robot.revolver.revolverSpin.getPower());
         dashboardTelemetry.update();
     }
 }

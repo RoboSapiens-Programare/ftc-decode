@@ -45,16 +45,18 @@ public class PIDFController {
         previousError = error;
 
         // Only accumulate if within 400 ticks to prevent massive windup
-        if (Math.abs(error) < 400) {
-            integral += error * timeChange;
-        } else {
-            integral = 0;
-        }
+//        if (Math.abs(error) < 20) {
+//            integral += error * timeChange;
+//        } else {
+//            integral = 0;
+//        }
+
+        integral += error * timeChange;
 
         // Clamp Integral contribution to 25% max
-        if (Math.abs(integral * kI) > 0.25) {
-            integral = Math.signum(integral) * (0.25 / kI);
-        }
+//        if (Math.abs(integral * kI) > 0.25) {
+//            integral = Math.signum(integral) * (0.25 / kI);
+//        }
 
         // Calculate PID Output
         double output = (kP * error) + (kI * integral) + (kD * derivative);

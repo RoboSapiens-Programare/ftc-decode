@@ -23,16 +23,16 @@ public class Revolver extends Subsystem {
 
     // target slot and encoder position
     public byte targetSlot = 0;
-    public double target = 0;
+    public static double target = 0;
 
     // PID values for revolver
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
-    private final double Kp = 0.0001725;
-    private final double Kd = 0.0000475;
-    private final double Ki = 0.000255;
-    private final double Kf = 0.055; // Power to overcome inertia and friction
+    public static double Kp = 0.008;
+    public static double Kd = 0.0003;
+    public static double Ki = 0;
+    public static double Kf = 0; // Power to overcome inertia and friction
 
     private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
     public boolean homing = false;
@@ -51,11 +51,12 @@ public class Revolver extends Subsystem {
 
         revolverSpin = hwMap.get(DcMotorEx.class, "revolverSpin");
         revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         revolverSpin.setDirection(CRServo.Direction.REVERSE);
 
         lift = hwMap.get(Servo.class, "lift");
 
-        pidfController.setTolerance(25);
+        pidfController.setTolerance(1);
     }
 
     public boolean isReady() {
@@ -188,11 +189,15 @@ public class Revolver extends Subsystem {
 
     @Override
     public void update() {
-        //        pidfController.setSetpoint(target);
+        pidfController.kP = Kp;
+        pidfController.kI = Ki;
+        pidfController.kD = Kd;
+        pidfController.kF = Kf;
 
         if (!homing) {
-            revolverSpin.setTargetPosition((int) target);
-            revolverSpin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            pidfController.setSetpoint(target);
+
+            revolverSpin.setPower(uV.revolverPower * pidfController.updatePID(revolverSpin.getCurrentPosition()));
         } else {
             if (limitSwitch.isPressed()) {
                 revolverSpin.setPower(0);
