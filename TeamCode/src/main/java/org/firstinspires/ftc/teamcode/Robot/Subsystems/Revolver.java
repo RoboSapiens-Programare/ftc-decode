@@ -17,7 +17,7 @@ public class Revolver extends Subsystem {
     private final Servo lift;
     public int greenPosition = 0;
 
-    public TouchSensor limitSwitch;
+    public TouchSensor revolverLimit, mihaiLimit;
 
     public ColorEnum[] colorList = {ColorEnum.UNDEFINED, ColorEnum.UNDEFINED, ColorEnum.UNDEFINED};
 
@@ -35,7 +35,7 @@ public class Revolver extends Subsystem {
     public static double Kf = 0; // Power to overcome inertia and friction
 
     private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
-    public boolean homing = false;
+    public boolean homing = true;
 
     // Align with INTAKE / OUTTAKE
     public enum Mode {
@@ -56,6 +56,9 @@ public class Revolver extends Subsystem {
 
         lift = hwMap.get(Servo.class, "lift");
 
+        revolverLimit = hwMap.get(TouchSensor.class, "revolverLimit");
+        mihaiLimit = hwMap.get(TouchSensor.class, "mihaiLimit");
+
         pidfController.setTolerance(1);
     }
 
@@ -67,7 +70,7 @@ public class Revolver extends Subsystem {
         // determine if aligning for intake or outtake
         target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2;
 
-        target += uV.ticksPerRevolution / 3 * (n - 1);
+        target += uV.ticksPerRevolution / 3 * n;
 
         targetSlot = n;
     }
@@ -184,7 +187,17 @@ public class Revolver extends Subsystem {
     }
 
     public void home() {
-        homing = true;
+        if(!revolverLimit.isPressed()) {
+            if (homing) {
+                revolverSpin.setPower(0.04);
+            }
+        }
+        else {
+            revolverSpin.setPower(0);
+            revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            homing = false;
+        }
     }
 
     @Override
@@ -198,13 +211,6 @@ public class Revolver extends Subsystem {
             pidfController.setSetpoint(target);
 
             revolverSpin.setPower(uV.revolverPower * pidfController.updatePID(revolverSpin.getCurrentPosition()));
-        } else {
-            if (limitSwitch.isPressed()) {
-                revolverSpin.setPower(0);
-                revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            } else {
-                revolverSpin.setPower(uV.homingPower);
-            }
         }
 
     }

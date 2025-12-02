@@ -44,7 +44,6 @@ public class FSM extends OpMode {
     private int shootStep = -1;
 
     private int motifPosition = 0;
-    private boolean homeRevolver = false;
     private boolean sortMotif = false;
 
     // Helper method to kill joystick drift
@@ -134,21 +133,21 @@ public class FSM extends OpMode {
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
         // home revolver in case of ... fuck up
-        if (gamepad2.left_bumper && !homeRevolver && inputTimer.milliseconds() > 500) {
-            homeRevolver = true;
-            inputTimer.reset();
-        }
-
-        if (homeRevolver) {
-            robot.revolver.revolverSpin.setPower(applyDeadzone(gamepad2.right_stick_x) * 0.125);
-        }
-
-        if (gamepad2.left_bumper && homeRevolver && inputTimer.milliseconds() > 500) {
-//            robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            homeRevolver = false;
-            inputTimer.reset();
-        }
+//        if (gamepad2.left_bumper && !homeRevolver && inputTimer.milliseconds() > 500) {
+//            homeRevolver = true;
+//            inputTimer.reset();
+//        }
+//
+//        if (homeRevolver) {
+//            robot.revolver.revolverSpin.setPower(applyDeadzone(gamepad2.right_stick_x) * 0.125);
+//        }
+//
+//        if (gamepad2.left_bumper && homeRevolver && inputTimer.milliseconds() > 500) {
+////            robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//            homeRevolver = false;
+//            inputTimer.reset();
+//        }
     }
 
     public void handleOuttake() {
@@ -171,7 +170,7 @@ public class FSM extends OpMode {
                     FtcDashboard.getInstance().getTelemetry().addData("t", (int) t);
                     if (t != -1) {
                         robot.revolver.setTargetSlot(t);
-                    } else robot.revolver.setTargetSlot((byte) 0);
+                    } else robot.revolver.setTargetSlot((byte) 1);
                 } else {
                     if (robot.revolver.getFullSlot() != -1) {
                         robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
@@ -206,8 +205,10 @@ public class FSM extends OpMode {
 
         // shoot ball
         // wait at least 300 ms to let motor speed up
+//        if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300 && shootStep == -1 && robot.turret.isShootReady()) {
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300 && shootStep == -1) {
-            shootStep = 0;
+
+        shootStep = 0;
             loadBallTimer.reset();
         }
 
@@ -220,23 +221,23 @@ public class FSM extends OpMode {
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 100 && shootStep == 1) {
+            if (loadBallTimer.milliseconds() > 1000 && shootStep == 1) {
                 robot.revolver.liftLoad();
 
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 400 && shootStep == 2) {
-                robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
+            if (loadBallTimer.milliseconds() > 700 && shootStep == 2) {
                 robot.revolver.liftReset();
 
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 800 && shootStep == 3) {
+            if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
                 // if button still pressed, continue shooting sequence
+                robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
                 if (gamepad1.left_trigger > 0.5) {
 
                     loadBallTimer.reset();
@@ -297,18 +298,18 @@ public class FSM extends OpMode {
             }
             inputTimer.reset();
         }
+        robot.revolver.home();
     }
 
     @Override
     public void start() {
         changeState(State.INTAKE);
+        robot.revolver.mode = Revolver.Mode.INTAKE;
         sortingMode = SortingMode.AUTO;
 
         gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-
-        robot.revolver.mode = Revolver.Mode.INTAKE;
-        robot.revolver.setTargetSlot((byte) 0);
+        robot.revolver.setTargetSlot((byte) 1);
     }
 
     @Override
@@ -323,10 +324,9 @@ public class FSM extends OpMode {
                 handleOuttake();
                 break;
         }
-
         robot.drive.update();
 
-        if (!homeRevolver) robot.revolver.update();
+        robot.revolver.update();
 
         robot.turret.update();
         robot.turret.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));

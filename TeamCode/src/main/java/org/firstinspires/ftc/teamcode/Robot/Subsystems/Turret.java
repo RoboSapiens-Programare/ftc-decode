@@ -21,6 +21,7 @@ public class Turret extends Subsystem {
     public DcMotorEx turretMotor;
     public CRServo turretRotationServo;
     private float turretRotation;
+    public TouchSensor limitaTuretaStanga, limitaTuretaDreapta;
     public boolean found = false;
 
     public enum TargetObelisk {
@@ -61,6 +62,9 @@ public class Turret extends Subsystem {
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretRotationServo = hwMap.get(CRServo.class, "turretRotationServo");
+
+        limitaTuretaStanga = hwMap.get(TouchSensor.class, "limitaTuretaStanga");
+        limitaTuretaDreapta = hwMap.get(TouchSensor.class, "limitaTuretaDreapta");
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
@@ -118,10 +122,16 @@ public class Turret extends Subsystem {
                 // blue by default
 
                 FtcDashboard.getInstance().getTelemetry().addData("tag offset", result.getTx());
-
+                double pidOutput = pidfController.updatePID(result.getTx());
                 found = true;
                 curr = result.getTx();
-                turretRotationServo.setPower(pidfController.updatePID(result.getTx()));
+                if(limitaTuretaStanga.isPressed() && pidOutput < 0){
+                    turretRotationServo.setPower(0);
+                }
+                else if(limitaTuretaDreapta.isPressed() && pidOutput > 0){
+                    turretRotationServo.setPower(0);
+                }
+                else turretRotationServo.setPower(pidOutput);
 
                 // TODO: target velocity formula based on position from odometry
 

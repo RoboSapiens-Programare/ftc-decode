@@ -43,7 +43,7 @@ public class Intake extends Subsystem {
                 new VisionPortal.Builder()
                         .addProcessor(colorSensor)
                         .setCameraResolution(new Size(320, 240))
-                        .setCamera(hwMap.get(WebcamName.class, "IntakeCam"))
+                        .setCamera(hwMap.get(WebcamName.class, "intakeCam"))
                         .enableLiveView(false)
                         .build();
     }

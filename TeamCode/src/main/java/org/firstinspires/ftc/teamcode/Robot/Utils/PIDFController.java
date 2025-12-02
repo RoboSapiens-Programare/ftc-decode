@@ -17,7 +17,7 @@ public class PIDFController {
     private double integral = 0;
     private double setpoint = 0;
     private double maxIntegral = 1.0; // Cap for the "I" term
-    private double tolerance = 0;
+    private double tolerance = 1;
 
     private ElapsedTime timer = new ElapsedTime();
 
