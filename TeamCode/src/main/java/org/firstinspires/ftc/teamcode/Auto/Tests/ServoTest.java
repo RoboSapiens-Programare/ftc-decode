@@ -22,7 +22,7 @@ public class ServoTest extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap);
 
-        servo = (CRServo) hardwareMap.get("revolverSpin");
+        servo = (CRServo) hardwareMap.get("turretRotationServo");
     }
 
     @Override
@@ -32,15 +32,7 @@ public class ServoTest extends OpMode {
 
     @Override
     public void loop() {
-        if (singleton) {
-            singleton = false;
-            timer.reset();
-        }
-        if (timer.milliseconds() > 1000) {
-            servo.setPower(0);
-        } else {
-            servo.setPower(mata);
-        }
+        servo.setPower(1);
 
         FtcDashboard.getInstance().getTelemetry().addData("Timer", timer.milliseconds());
         FtcDashboard.getInstance().getTelemetry().update();

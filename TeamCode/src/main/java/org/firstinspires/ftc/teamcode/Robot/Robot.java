@@ -4,7 +4,6 @@ import com.bylazar.configurables.PanelsConfigurables;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.util.PoseHistory;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Turret;
@@ -15,14 +14,12 @@ public class Robot {
     public Revolver revolver;
     public Intake intake;
     public Turret turret;
-    public Drive drive;
     public static Follower follower;
     public static PoseHistory poseHistory;
 
     public Robot(HardwareMap hwMap) {
         initialize = true;
 
-        drive = new Drive(hwMap);
         revolver = new Revolver(hwMap);
 
         turret = new Turret(hwMap);

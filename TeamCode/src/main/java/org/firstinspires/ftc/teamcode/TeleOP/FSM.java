@@ -303,8 +303,6 @@ public class FSM extends OpMode {
         inputTimer.reset();
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        robot.drive.driverGamepad = gamepad1;
-
         // TODO: change to auto park pos
         Robot.follower.setStartingPose(startPose);
     }
@@ -355,19 +353,16 @@ public class FSM extends OpMode {
         if (autoShoot && (gamepad1.right_bumper || !Robot.follower.isBusy())) {
             autoShoot = false;
             Robot.follower.startTeleopDrive();
-
         }
-        
+
         if (!autoShoot) {
             Robot.follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
                     -gamepad1.right_stick_x,
                     true // Robot Centric
-            );
+                    );
         }
-
-        
 
         robot.turret.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));
 

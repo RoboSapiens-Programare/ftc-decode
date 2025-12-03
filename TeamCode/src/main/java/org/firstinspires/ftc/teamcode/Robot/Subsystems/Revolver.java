@@ -46,8 +46,7 @@ public class Revolver extends Subsystem {
     public Mode mode = Mode.INTAKE;
 
     public Revolver(HardwareMap hwMap) {
-//        limitSwitch = hwMap.get(TouchSensor.class, "revolverLimitSwitch");
-
+        //        limitSwitch = hwMap.get(TouchSensor.class, "revolverLimitSwitch");
 
         revolverSpin = hwMap.get(DcMotorEx.class, "revolverSpin");
         revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -187,12 +186,11 @@ public class Revolver extends Subsystem {
     }
 
     public void home() {
-        if(!revolverLimit.isPressed()) {
+        if (!revolverLimit.isPressed()) {
             if (homing) {
                 revolverSpin.setPower(0.04);
             }
-        }
-        else {
+        } else {
             revolverSpin.setPower(0);
             revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -210,8 +208,8 @@ public class Revolver extends Subsystem {
         if (!homing) {
             pidfController.setSetpoint(target);
 
-            revolverSpin.setPower(uV.revolverPower * pidfController.updatePID(revolverSpin.getCurrentPosition()));
+            revolverSpin.setPower(
+                    uV.revolverPower * pidfController.updatePID(revolverSpin.getCurrentPosition()));
         }
-
     }
 }
