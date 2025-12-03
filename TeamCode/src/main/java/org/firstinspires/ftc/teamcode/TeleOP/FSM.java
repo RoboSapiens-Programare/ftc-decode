@@ -4,10 +4,11 @@ import static java.lang.Math.abs;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -42,6 +43,13 @@ public class FSM extends OpMode {
     private final ElapsedTime loadBallTimer = new ElapsedTime();
     private boolean singletonLoad = true;
     private int shootStep = -1;
+
+    // TODO: add one for blue and one for red
+    // for now keep it in the center of the field at the tip of the triangle
+    private Pose startPose = new Pose(72, 72, Math.toRadians(0));
+    private Pose shootPose = new Pose(72, 72, Math.toRadians(45));
+
+    private boolean autoShoot = false;
 
     private int motifPosition = 0;
     private boolean sortMotif = false;
@@ -133,29 +141,44 @@ public class FSM extends OpMode {
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
         // home revolver in case of ... fuck up
-//        if (gamepad2.left_bumper && !homeRevolver && inputTimer.milliseconds() > 500) {
-//            homeRevolver = true;
-//            inputTimer.reset();
-//        }
-//
-//        if (homeRevolver) {
-//            robot.revolver.revolverSpin.setPower(applyDeadzone(gamepad2.right_stick_x) * 0.125);
-//        }
-//
-//        if (gamepad2.left_bumper && homeRevolver && inputTimer.milliseconds() > 500) {
-////            robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//
-//            homeRevolver = false;
-//            inputTimer.reset();
-//        }
+        //        if (gamepad2.left_bumper && !homeRevolver && inputTimer.milliseconds() > 500) {
+        //            homeRevolver = true;
+        //            inputTimer.reset();
+        //        }
+        //
+        //        if (homeRevolver) {
+        //            robot.revolver.revolverSpin.setPower(applyDeadzone(gamepad2.right_stick_x) *
+        // 0.125);
+        //        }
+        //
+        //        if (gamepad2.left_bumper && homeRevolver && inputTimer.milliseconds() > 500) {
+        ////
+        // robot.revolver.encoderRevolver.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //
+        //            homeRevolver = false;
+        //            inputTimer.reset();
+        //        }
     }
 
     public void handleOuttake() {
         robot.revolver.mode = Revolver.Mode.OUTTAKE;
+        robot.turret.update();
+
+        // go to shoot position automatically
+        if (gamepad1.right_bumper && inputTimer.milliseconds() > 400 && !autoShoot) {
+            autoShoot = true;
+
+            Path toShootZone = new Path(new BezierLine(Robot.follower.getPose(), shootPose));
+            toShootZone.setLinearHeadingInterpolation(
+                    Robot.follower.getPose().getHeading(), shootPose.getHeading());
+            Robot.follower.followPath(toShootZone);
+
+            inputTimer.reset();
+        }
 
         if (!robot.turret.tracking) {
             // TODO : change to average spoolup value
-            robot.turret.turretMotor.setPower(0);
+            robot.turret.turretMotor.setPower(0.02);
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
@@ -205,10 +228,10 @@ public class FSM extends OpMode {
 
         // shoot ball
         // wait at least 300 ms to let motor speed up
-//        if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300 && shootStep == -1 && robot.turret.isShootReady()) {
+        //        if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300 && shootStep
+        // == -1 && robot.turret.isShootReady()) {
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300 && shootStep == -1) {
-
-        shootStep = 0;
+            shootStep = 0;
             loadBallTimer.reset();
         }
 
@@ -221,14 +244,14 @@ public class FSM extends OpMode {
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 1000 && shootStep == 1) {
+            if (loadBallTimer.milliseconds() > 350 && shootStep == 1) {
                 robot.revolver.liftLoad();
 
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 700 && shootStep == 2) {
+            if (loadBallTimer.milliseconds() > 500 && shootStep == 2) {
                 robot.revolver.liftReset();
 
                 loadBallTimer.reset();
@@ -238,7 +261,7 @@ public class FSM extends OpMode {
             if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
                 // if button still pressed, continue shooting sequence
                 robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
-                if (gamepad1.left_trigger > 0.5) {
+                if (gamepad1.right_trigger > 0.5) {
 
                     loadBallTimer.reset();
                     shootStep = 0;
@@ -283,7 +306,7 @@ public class FSM extends OpMode {
         robot.drive.driverGamepad = gamepad1;
 
         // TODO: change to auto park pos
-        Robot.follower.setStartingPose(new Pose(72, 72));
+        Robot.follower.setStartingPose(startPose);
     }
 
     @Override
@@ -310,10 +333,14 @@ public class FSM extends OpMode {
         gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         robot.revolver.setTargetSlot((byte) 1);
+
+        Robot.follower.startTeleOpDrive();
     }
 
     @Override
     public void loop() {
+        Robot.follower.update();
+        robot.revolver.update();
 
         switch (state) {
             case INTAKE:
@@ -324,43 +351,39 @@ public class FSM extends OpMode {
                 handleOuttake();
                 break;
         }
-        robot.drive.update();
 
-        robot.revolver.update();
+        if (autoShoot && (gamepad1.right_bumper || !Robot.follower.isBusy())) {
+            autoShoot = false;
+            Robot.follower.startTeleopDrive();
 
-        robot.turret.update();
+        }
+        
+        if (!autoShoot) {
+            Robot.follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    -gamepad1.right_stick_x,
+                    true // Robot Centric
+            );
+        }
+
+        
+
         robot.turret.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));
-
-        Robot.follower.update();
 
         // always track when testing
         // TODO: re-enable
-//                if (gamepad2.touchpad) {
-//                    robot.turret.tracking = true;
-//                } else robot.turret.tracking = false;
+        //                if (gamepad2.touchpad) {
+        //                    robot.turret.tracking = true;
+        //                } else robot.turret.tracking = false;
 
         dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target position", robot.revolver.target);
-//        dashboardTelemetry.addData(
-//                "current position", robot.revolver.encoderRevolver.getCurrentPosition());
-
-        dashboardTelemetry.addData("power rotation: ", robot.revolver.revolverSpin.getPower());
-        dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
-        dashboardTelemetry.addData("shoot step: ", shootStep);
-
-        dashboardTelemetry.addData("slot 0", robot.revolver.getSlotColor((byte) 0));
-        dashboardTelemetry.addData("slot 1", robot.revolver.getSlotColor((byte) 1));
-        dashboardTelemetry.addData("slot 2", robot.revolver.getSlotColor((byte) 2));
-
-        dashboardTelemetry.addData("motifpos", motifPosition);
-        //        dashboardTelemetry.addData("color", robot.intake.);
-
-        dashboardTelemetry.addData("dst", robot.turret.getDistance());
-        dashboardTelemetry.addData("curr odo", Robot.follower.getPose());
 
         dashboardTelemetry.update();
 
-        telemetry.addData("revolver target slot", robot.revolver.getTargetSlot());
+        telemetry.addData("odo", Robot.follower.getPose());
+        telemetry.addData("velo", robot.turret.targetVelocity);
+        telemetry.update();
     }
 
     @Override

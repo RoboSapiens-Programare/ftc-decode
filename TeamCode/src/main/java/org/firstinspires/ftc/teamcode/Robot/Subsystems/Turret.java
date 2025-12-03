@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 
@@ -100,7 +99,7 @@ public class Turret extends Subsystem {
     }
 
     public double computeVelocity() {
-        targetVelocity = ((getDistance() - 47.3) * 375 / 33.15 + 1000);
+        targetVelocity = ((getDistance() - 47.3) * 375 / 33.15 + 900);
         // 1370
         return targetVelocity;
     }
@@ -125,13 +124,11 @@ public class Turret extends Subsystem {
                 double pidOutput = pidfController.updatePID(result.getTx());
                 found = true;
                 curr = result.getTx();
-                if(limitaTuretaStanga.isPressed() && pidOutput < 0){
+                if (limitaTuretaStanga.isPressed() && pidOutput < 0) {
                     turretRotationServo.setPower(0);
-                }
-                else if(limitaTuretaDreapta.isPressed() && pidOutput > 0){
+                } else if (limitaTuretaDreapta.isPressed() && pidOutput > 0) {
                     turretRotationServo.setPower(0);
-                }
-                else turretRotationServo.setPower(pidOutput);
+                } else turretRotationServo.setPower(pidOutput);
 
                 // TODO: target velocity formula based on position from odometry
 
