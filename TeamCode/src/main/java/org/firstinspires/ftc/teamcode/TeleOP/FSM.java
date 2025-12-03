@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 
 @Config
@@ -44,10 +43,8 @@ public class FSM extends OpMode {
     private boolean singletonLoad = true;
     private int shootStep = -1;
 
-    // TODO: add one for blue and one for red
-    // for now keep it in the center of the field at the tip of the triangle
-    private Pose startPose = new Pose(72, 72, Math.toRadians(0));
-    private Pose shootPose = new Pose(72, 72, Math.toRadians(45));
+    private Pose startPose;
+    private Pose shootPose;
 
     private boolean autoShoot = false;
 
@@ -95,9 +92,6 @@ public class FSM extends OpMode {
     }
 
     public void handleIntake() {
-        // always track when testing
-        // TODO: re-enable
-        //        robot.turret.tracking = false;
         robot.revolver.mode = Revolver.Mode.INTAKE;
         robot.turret.turretMotor.setPower(0);
         robot.intake.update();
@@ -177,7 +171,6 @@ public class FSM extends OpMode {
         }
 
         if (!robot.turret.tracking) {
-            // TODO : change to average spoolup value
             robot.turret.turretMotor.setPower(0.02);
         }
 
@@ -303,23 +296,31 @@ public class FSM extends OpMode {
         inputTimer.reset();
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        // TODO: change to auto park pos
+        // TODO: Change to Autonomous Positions
+        if (Robot.alliance == Robot.Alliance.RED) {
+            startPose = new Pose(72, 72, Math.toRadians(0));
+            shootPose = new Pose(72, 72, Math.toRadians(45));
+
+        } else {
+            startPose = new Pose(72, 72, Math.toRadians(0));
+            shootPose = new Pose(72, 72, Math.toRadians(-45));
+        }
+
         Robot.follower.setStartingPose(startPose);
     }
 
     @Override
     public void init_loop() {
         if (gamepad1.options && inputTimer.milliseconds() > 400) {
-            if (robot.turret.targetObelisk == Turret.TargetObelisk.RED) {
-                robot.turret.targetObelisk = Turret.TargetObelisk.BLUE;
+            if (Robot.alliance == Robot.Alliance.RED) {
+                Robot.alliance = Robot.Alliance.BLUE;
                 gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
             } else {
-                robot.turret.targetObelisk = Turret.TargetObelisk.RED;
+                Robot.alliance = Robot.Alliance.RED;
                 gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
             }
             inputTimer.reset();
         }
-        robot.revolver.home();
     }
 
     @Override
@@ -330,15 +331,23 @@ public class FSM extends OpMode {
 
         gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-        robot.revolver.setTargetSlot((byte) 1);
+        robot.revolver.setTargetSlot((byte) 0);
 
         Robot.follower.startTeleOpDrive();
+
+        robot.revolver.home();
     }
 
     @Override
     public void loop() {
         Robot.follower.update();
         robot.revolver.update();
+
+        if (gamepad2.left_bumper && inputTimer.milliseconds() > 400) {
+            robot.revolver.reset();
+            robot.revolver.home();
+            inputTimer.reset();
+        }
 
         switch (state) {
             case INTAKE:
@@ -366,14 +375,7 @@ public class FSM extends OpMode {
 
         robot.turret.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));
 
-        // always track when testing
-        // TODO: re-enable
-        //                if (gamepad2.touchpad) {
-        //                    robot.turret.tracking = true;
-        //                } else robot.turret.tracking = false;
-
         dashboardTelemetry.addData("state", state);
-
         dashboardTelemetry.update();
 
         telemetry.addData("odo", Robot.follower.getPose());

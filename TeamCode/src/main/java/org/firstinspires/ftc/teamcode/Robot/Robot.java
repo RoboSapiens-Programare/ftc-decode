@@ -17,6 +17,13 @@ public class Robot {
     public static Follower follower;
     public static PoseHistory poseHistory;
 
+    public enum Alliance {
+        RED,
+        BLUE
+    };
+
+    public static Alliance alliance = Alliance.RED;
+
     public Robot(HardwareMap hwMap) {
         initialize = true;
 

@@ -186,15 +186,14 @@ public class Revolver extends Subsystem {
     }
 
     public void home() {
-        if (!revolverLimit.isPressed()) {
-            if (homing) {
-                revolverSpin.setPower(0.04);
-            }
-        } else {
-            revolverSpin.setPower(0);
-            revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            homing = false;
+        homing = true;
+    }
+
+    public void reset() {
+        setTargetSlot((byte) 0);
+
+        for (int i = 0; i < colorList.length; ++i) {
+            colorList[i] = ColorEnum.UNDEFINED;
         }
     }
 
@@ -210,6 +209,17 @@ public class Revolver extends Subsystem {
 
             revolverSpin.setPower(
                     uV.revolverPower * pidfController.updatePID(revolverSpin.getCurrentPosition()));
+
+        } else {
+            if (!revolverLimit.isPressed()) {
+                revolverSpin.setPower(0.04);
+
+            } else {
+                revolverSpin.setPower(0);
+                revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                homing = false;
+            }
         }
     }
 }

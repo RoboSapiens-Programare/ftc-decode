@@ -20,15 +20,8 @@ public class Turret extends Subsystem {
     public DcMotorEx turretMotor;
     public CRServo turretRotationServo;
     private float turretRotation;
-    public TouchSensor limitaTuretaStanga, limitaTuretaDreapta;
+    public TouchSensor leftLimit, rightLimit;
     public boolean found = false;
-
-    public enum TargetObelisk {
-        RED,
-        BLUE
-    };
-
-    public TargetObelisk targetObelisk = TargetObelisk.BLUE;
 
     public boolean tracking = true;
 
@@ -62,8 +55,8 @@ public class Turret extends Subsystem {
         turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretRotationServo = hwMap.get(CRServo.class, "turretRotationServo");
 
-        limitaTuretaStanga = hwMap.get(TouchSensor.class, "limitaTuretaStanga");
-        limitaTuretaDreapta = hwMap.get(TouchSensor.class, "limitaTuretaDreapta");
+        leftLimit = hwMap.get(TouchSensor.class, "limitaTuretaStanga");
+        rightLimit = hwMap.get(TouchSensor.class, "limitaTuretaDreapta");
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
@@ -90,7 +83,7 @@ public class Turret extends Subsystem {
 
     public double getDistance() {
         Pose robotPose = Robot.follower.getPose();
-        Pose obeliskPose = new Pose(TargetObelisk.BLUE == targetObelisk ? 18 : 129, 132);
+        Pose obeliskPose = new Pose(Robot.Alliance.BLUE == Robot.alliance ? 18 : 129, 132);
 
         double dx = robotPose.getX() - obeliskPose.getX();
         double dy = robotPose.getY() - obeliskPose.getY();
@@ -117,20 +110,18 @@ public class Turret extends Subsystem {
 
         if (result.isValid()) {
             if (result.getFiducialResults().get(0).getFiducialId()
-                    == (targetObelisk == TargetObelisk.RED ? 24 : 20)) {
+                    == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
                 // blue by default
 
                 FtcDashboard.getInstance().getTelemetry().addData("tag offset", result.getTx());
                 double pidOutput = pidfController.updatePID(result.getTx());
                 found = true;
                 curr = result.getTx();
-                if (limitaTuretaStanga.isPressed() && pidOutput < 0) {
+                if (leftLimit.isPressed() && pidOutput < 0) {
                     turretRotationServo.setPower(0);
-                } else if (limitaTuretaDreapta.isPressed() && pidOutput > 0) {
+                } else if (rightLimit.isPressed() && pidOutput > 0) {
                     turretRotationServo.setPower(0);
                 } else turretRotationServo.setPower(pidOutput);
-
-                // TODO: target velocity formula based on position from odometry
 
                 turretMotor.setVelocity(computeVelocity());
             }
