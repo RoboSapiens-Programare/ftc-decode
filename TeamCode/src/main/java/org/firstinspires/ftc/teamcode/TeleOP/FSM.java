@@ -37,6 +37,8 @@ public class FSM extends OpMode {
     private State state = State.INTAKE;
     private SortingMode sortingMode = SortingMode.AUTO;
 
+    private final ElapsedTime opModeTimer = new ElapsedTime();
+
     private final ElapsedTime inputTimer = new ElapsedTime();
     private final ElapsedTime stateTimer = new ElapsedTime();
     private final ElapsedTime loadBallTimer = new ElapsedTime();
@@ -298,7 +300,7 @@ public class FSM extends OpMode {
 
         // TODO: Change to Autonomous Positions
         if (Robot.alliance == Robot.Alliance.RED) {
-            startPose = new Pose(72, 72, Math.toRadians(0));
+            startPose = new Pose(41, 102, Math.toRadians(0));
             shootPose = new Pose(72, 72, Math.toRadians(45));
 
         } else {
@@ -311,14 +313,20 @@ public class FSM extends OpMode {
 
     @Override
     public void init_loop() {
+        if (Robot.alliance == Robot.Alliance.RED) {
+            gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
+        } else {
+            gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
+        }
+
         if (gamepad1.options && inputTimer.milliseconds() > 400) {
             if (Robot.alliance == Robot.Alliance.RED) {
                 Robot.alliance = Robot.Alliance.BLUE;
-                gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
+
             } else {
                 Robot.alliance = Robot.Alliance.RED;
-                gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
             }
+
             inputTimer.reset();
         }
     }
@@ -335,7 +343,10 @@ public class FSM extends OpMode {
 
         Robot.follower.startTeleOpDrive();
 
+        robot.revolver.reset();
         robot.revolver.home();
+
+        opModeTimer.reset();
     }
 
     @Override
@@ -347,6 +358,10 @@ public class FSM extends OpMode {
             robot.revolver.reset();
             robot.revolver.home();
             inputTimer.reset();
+        }
+
+        if (opModeTimer.seconds() >= 90) {
+            sortMotif = true;
         }
 
         switch (state) {

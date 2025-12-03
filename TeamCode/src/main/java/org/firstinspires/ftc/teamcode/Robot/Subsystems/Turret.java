@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -109,21 +110,21 @@ public class Turret extends Subsystem {
         LLResult result = limelight.getLatestResult();
 
         if (result.isValid()) {
-            if (result.getFiducialResults().get(0).getFiducialId()
-                    == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
-                // blue by default
+            for (FiducialResult fiducial : result.getFiducialResults()) {
+                if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
+                    double pidOutput = pidfController.updatePID(result.getTx());
+                    found = true;
+                    curr = result.getTx();
 
-                FtcDashboard.getInstance().getTelemetry().addData("tag offset", result.getTx());
-                double pidOutput = pidfController.updatePID(result.getTx());
-                found = true;
-                curr = result.getTx();
-                if (leftLimit.isPressed() && pidOutput < 0) {
-                    turretRotationServo.setPower(0);
-                } else if (rightLimit.isPressed() && pidOutput > 0) {
-                    turretRotationServo.setPower(0);
-                } else turretRotationServo.setPower(pidOutput);
+                    if ((leftLimit.isPressed() || rightLimit.isPressed()) && pidOutput != 0) {
+                        turretRotationServo.setPower(0);
 
-                turretMotor.setVelocity(computeVelocity());
+                    } else turretRotationServo.setPower(pidOutput);
+
+                    turretMotor.setVelocity(computeVelocity());
+
+                    break;
+                }
             }
         } else {
             turretRotationServo.setPower(0);
