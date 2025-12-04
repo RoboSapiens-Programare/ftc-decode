@@ -161,6 +161,9 @@ public class FSM extends OpMode {
         robot.turret.update();
 
         // go to shoot position automatically
+
+        // TODO: pedro tuning
+
         if (gamepad1.right_bumper && inputTimer.milliseconds() > 400 && !autoShoot) {
             autoShoot = true;
 
@@ -253,6 +256,9 @@ public class FSM extends OpMode {
                 ++shootStep;
             }
 
+            // TODO: check mihai and mihaiLimit logic
+            // explenation: this is the only instance of a mihaiLimit but physically mihai logic is broken somehow ????
+
             if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
                 // if button still pressed, continue shooting sequence
                 robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
@@ -298,9 +304,8 @@ public class FSM extends OpMode {
         inputTimer.reset();
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        // TODO: Change to Autonomous Positions
         if (Robot.alliance == Robot.Alliance.RED) {
-            startPose = new Pose(41, 102, Math.toRadians(0));
+            startPose = new Pose(72, 72, Math.toRadians(0));
             shootPose = new Pose(72, 72, Math.toRadians(45));
 
         } else {
@@ -351,6 +356,7 @@ public class FSM extends OpMode {
 
     @Override
     public void loop() {
+
         Robot.follower.update();
         robot.revolver.update();
 
