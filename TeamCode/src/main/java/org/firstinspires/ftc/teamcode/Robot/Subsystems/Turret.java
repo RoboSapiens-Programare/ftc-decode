@@ -98,6 +98,13 @@ public class Turret extends Subsystem {
         return targetVelocity;
     }
 
+    public void manualMove(double power) {
+        if ((leftLimit.isPressed() || rightLimit.isPressed()) && power != 0) {
+            turretRotationServo.setPower(0);
+
+        } else turretRotationServo.setPower(power);
+    }
+
     @Override
     public void update() {
         turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
@@ -116,10 +123,7 @@ public class Turret extends Subsystem {
                     found = true;
                     curr = result.getTx();
 
-                    if ((leftLimit.isPressed() || rightLimit.isPressed()) && pidOutput != 0) {
-                        turretRotationServo.setPower(0);
-
-                    } else turretRotationServo.setPower(pidOutput);
+                    manualMove(pidOutput);
 
                     turretMotor.setVelocity(computeVelocity());
 
