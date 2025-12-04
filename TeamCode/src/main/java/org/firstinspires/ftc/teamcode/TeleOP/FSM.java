@@ -388,7 +388,7 @@ public class FSM extends OpMode {
                     );
         }
 
-        robot.turret.manualMove((float) (-gamepad2.left_stick_x));
+        robot.turret.Move((float) (-gamepad2.left_stick_x));
 
         dashboardTelemetry.addData("state", state);
         dashboardTelemetry.update();

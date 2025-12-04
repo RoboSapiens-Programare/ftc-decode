@@ -98,11 +98,19 @@ public class Turret extends Subsystem {
         return targetVelocity;
     }
 
-    public void manualMove(double power) {
-        if ((leftLimit.isPressed() || rightLimit.isPressed()) && power != 0) {
-            turretRotationServo.setPower(0);
+    public void Move(double power) {
 
-        } else turretRotationServo.setPower(power);
+        // TODO: reverse < > signs according to servo direction for symbol
+
+        if (leftLimit.isPressed() && power > 0) {
+            turretRotationServo.setPower(0);
+        }
+        else if (rightLimit.isPressed() && power < 0) {
+                turretRotationServo.setPower(0);
+        }
+        else {
+                turretRotationServo.setPower(power);
+        }
     }
 
     @Override
@@ -123,7 +131,7 @@ public class Turret extends Subsystem {
                     found = true;
                     curr = result.getTx();
 
-                    manualMove(pidOutput);
+                    Move(pidOutput);
 
                     turretMotor.setVelocity(computeVelocity());
 
