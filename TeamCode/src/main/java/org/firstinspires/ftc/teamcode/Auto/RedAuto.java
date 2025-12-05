@@ -15,9 +15,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Blue Auto", group = "0. Autonomous")
+@Autonomous(name = "Red Auto", group = "0. Autonomous")
 @Configurable // Panels
-public class BlueAuto extends OpMode {
+public class RedAuto extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     public Robot robot; // Pedro Pathing follower instance
