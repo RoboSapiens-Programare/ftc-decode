@@ -12,14 +12,15 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 
 @Config
-@TeleOp(name = "TeleOp")
-public class FSM extends OpMode {
+@TeleOp(name = "TeleOpTest")
+public class FSMTest extends OpMode {
     private Robot robot;
 
     enum State {
@@ -97,9 +98,7 @@ public class FSM extends OpMode {
     public void handleIntake() {
         robot.revolver.mode = Revolver.Mode.INTAKE;
         robot.turret.turretMotor.setPower(0);
-        if (!robot.revolver.homing) {
-            robot.intake.update();
-        }
+        robot.intake.update();
 
         if (gamepad1.right_trigger > 0.5) {
             robot.intake.setPower(1);
@@ -139,7 +138,6 @@ public class FSM extends OpMode {
             gamepad2.setLedColor(155, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        shootStep = -1;
         // home revolver in case of ... fuck up
         //        if (gamepad2.left_bumper && !homeRevolver && inputTimer.milliseconds() > 500) {
         //            homeRevolver = true;
@@ -190,18 +188,19 @@ public class FSM extends OpMode {
 
         switch (sortingMode) {
             case AUTO:
-//                if (sortMotif) {
-//                    byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
-//                    FtcDashboard.getInstance().getTelemetry().addData("t", (int) t);
-//                    if (t != -1) {
-//                        robot.revolver.setTargetSlot(t);
-//                    } else robot.revolver.setTargetSlot((byte) 1);
+                if (sortMotif) {
+                    byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
+                    FtcDashboard.getInstance().getTelemetry().addData("t", (int) t);
+                    if (t != -1) {
+                        robot.revolver.setTargetSlot(t);
+                    } else robot.revolver.setTargetSlot((byte) 1);
+                } else {
                     if (robot.revolver.getFullSlot() != -1) {
                         robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
                     } else if (loadBallTimer.milliseconds() > 300) {
                         changeState(State.INTAKE);
                     }
-
+                }
 
                 if (gamepad2.dpad_right || gamepad2.dpad_left) {
                     sortingMode = SortingMode.MANUAL;
@@ -233,7 +232,6 @@ public class FSM extends OpMode {
         // == -1 && robot.turret.isShootReady()) {
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300 && shootStep == -1) {
             shootStep = 0;
-            robot.revolver.liftReset();
             loadBallTimer.reset();
         }
 
@@ -246,34 +244,44 @@ public class FSM extends OpMode {
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 400 && shootStep == 1) {
+            if (loadBallTimer.milliseconds() > 350 && shootStep == 1) {
                 robot.revolver.liftLoad();
 
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 300 && shootStep == 2) {
+            if (loadBallTimer.milliseconds() > 500 && shootStep == 2) {
                 robot.revolver.liftReset();
 
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
+            // TODO: check mihai and mihaiLimit logic
+            // explenation: this is the only instance of a mihaiLimit but physically mihai logic is broken somehow ????
+
             if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
                 // if button still pressed, continue shooting sequence
                 robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
+                if (gamepad1.right_trigger > 0.5) {
 
-                loadBallTimer.reset();
-                robot.turret.turretMotor.setPower(0);
-                loadBallTimer.reset();
-                shootStep = -1;
-//                // go to next slot in motif
-//                if (motifPosition == 2) {
-//                    motifPosition = 0;
-//                } else {
-//                    ++motifPosition;
-//                }
+                    loadBallTimer.reset();
+                    shootStep = 0;
+
+                } else {
+                    robot.turret.turretMotor.setPower(0);
+
+                    loadBallTimer.reset();
+                    shootStep = -1;
+                }
+
+                // go to next slot in motif
+                if (motifPosition == 2) {
+                    motifPosition = 0;
+                } else {
+                    ++motifPosition;
+                }
             }
         }
 
@@ -292,141 +300,144 @@ public class FSM extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap);
         robot.revolver.liftReset();
+        robot.revolver.home();
+
         // always tracking for testing
-        robot.turret.tracking = true;
-        robot.turret.enableCamera();
-        inputTimer.reset();
-        gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-
-        if (Robot.alliance == Robot.Alliance.RED) {
-            startPose = new Pose(72, 72, Math.toRadians(0));
-            shootPose = new Pose(72, 72, Math.toRadians(45));
-
-        } else {
-            startPose = new Pose(72, 72, Math.toRadians(0));
-            shootPose = new Pose(72, 72, Math.toRadians(-45));
-        }
-
-        Robot.follower.setStartingPose(startPose);
+//        robot.turret.tracking = true;
+//        robot.turret.enableCamera();
+//        inputTimer.reset();
+//        gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+//
+//        if (Robot.alliance == Robot.Alliance.RED) {
+//            startPose = new Pose(72, 72, Math.toRadians(0));
+//            shootPose = new Pose(72, 72, Math.toRadians(45));
+//
+//        } else {
+//            startPose = new Pose(72, 72, Math.toRadians(0));
+//            shootPose = new Pose(72, 72, Math.toRadians(-45));
+//        }
+//
+//        Robot.follower.setStartingPose(startPose);
     }
 
-    @Override
-    public void init_loop() {
-        if (Robot.alliance == Robot.Alliance.RED) {
-            gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
-        } else {
-            gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
-        }
-
-        if (gamepad1.options && inputTimer.milliseconds() > 400) {
-            if (Robot.alliance == Robot.Alliance.RED) {
-                Robot.alliance = Robot.Alliance.BLUE;
-
-            } else {
-                Robot.alliance = Robot.Alliance.RED;
-            }
-
-            inputTimer.reset();
-        }
-    }
+//    @Override
+//    public void init_loop() {
+//        if (Robot.alliance == Robot.Alliance.RED) {
+//            gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
+//        } else {
+//            gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
+//        }
+//
+//        if (gamepad1.options && inputTimer.milliseconds() > 400) {
+//            if (Robot.alliance == Robot.Alliance.RED) {
+//                Robot.alliance = Robot.Alliance.BLUE;
+//
+//            } else {
+//                Robot.alliance = Robot.Alliance.RED;
+//            }
+//
+//            inputTimer.reset();
+//        }
+//    }
 
     @Override
     public void start() {
-        changeState(State.INTAKE);
+//        changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
-        sortingMode = SortingMode.AUTO;
+//        sortingMode = SortingMode.AUTO;
+//
+//        gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+//        gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-        gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-        robot.revolver.setTargetSlot((byte) 0);
-
-        Robot.follower.startTeleOpDrive();
-
-        robot.revolver.reset();
-        robot.revolver.home();
-
-        opModeTimer.reset();
+//        Robot.follower.startTeleOpDrive();
+//
+//        robot.revolver.reset();
+//        robot.revolver.home();
+//
+//        opModeTimer.reset();
     }
 
 
     @Override
     public void loop() {
 
-        Robot.follower.update();
+//        Robot.follower.update();
 
-        if (!robot.revolver.homing){
-            robot.revolver.update();
-        }
-        if(robot.revolver.homing) {
-            if (!robot.revolver.revolverLimit.isPressed()) {
-                robot.revolver.revolverSpin.setPower(0.04);
 
-            } else {
-                robot.revolver.revolverSpin.setPower(0);
-                robot.revolver.homing = false;
-                robot.revolver.revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                robot.revolver.revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (gamepad1.right_trigger > 0.5) {
+            robot.intake.setPower(1);
+        } else if (gamepad1.left_trigger > 0.5) {
+            robot.intake.setPower((float) -0.55);
+        } else robot.intake.setPower(0);
+
+        if (robot.revolver.isSlotFull(robot.revolver.getTargetSlot())) {
+            if (robot.revolver.getFreeSlot() != -1) {
+                robot.revolver.setTargetSlot(robot.revolver.getFreeSlot());
             }
-        }
+        } else robot.revolver.setTargetSlot(robot.revolver.getTargetSlot());
 
-        if (gamepad2.left_bumper && inputTimer.milliseconds() > 400) {
-            robot.revolver.reset();
-            robot.revolver.home();
-            inputTimer.reset();
-        }
 
-        if (opModeTimer.seconds() >= 90) {
-            sortMotif = true;
-        }
 
-        switch (state) {
-            case INTAKE:
-                handleIntake();
-                break;
 
-            case OUTTAKE:
-                handleOuttake();
-                break;
-        }
+//        if (gamepad2.left_bumper && inputTimer.milliseconds() > 400) {
+//            robot.revolver.reset();
+//            robot.revolver.home();
+//            inputTimer.reset();
+//        }
+//
+//        if (opModeTimer.seconds() >= 90) {
+//            sortMotif = true;
+//        }
 
-        if (autoShoot && (gamepad1.right_bumper || !Robot.follower.isBusy())) {
-            autoShoot = false;
-            Robot.follower.startTeleopDrive();
-        }
+//        switch (state) {
+//            case INTAKE:
+//                handleIntake();
+//                break;
+//
+//            case OUTTAKE:
+//                handleOuttake();
+//                break;
+//        }
 
-        if (!autoShoot) {
-            Robot.follower.setTeleOpDrive(
-                    applyDeadzone(-gamepad1.left_stick_y),
-                    applyDeadzone(-gamepad1.left_stick_x),
-                    applyDeadzone(-gamepad1.right_stick_x),
-                    true // Robot Centric
-                    );
-        }
+//        if (autoShoot && (gamepad1.right_bumper || !Robot.follower.isBusy())) {
+//            autoShoot = false;
+//            Robot.follower.startTeleopDrive();
+//        }
+//
+//        if (!autoShoot) {
+//            Robot.follower.setTeleOpDrive(
+//                    applyDeadzone(-gamepad1.left_stick_y),
+//                    applyDeadzone(-gamepad1.left_stick_x),
+//                    applyDeadzone(-gamepad1.right_stick_x),
+//                    true // Robot Centric
+//                    );
+//        }
+//
+//        robot.turret.Move((float) (-gamepad2.left_stick_x));
 
-        robot.turret.Move((float) (-gamepad2.left_stick_x));
-
-        dashboardTelemetry.addData("state", state);
+//        dashboardTelemetry.addData("state", state);
 
         dashboardTelemetry.addData("current revolver position: ", robot.revolver.revolverSpin.getCurrentPosition());
         dashboardTelemetry.addData("power rotation: ", robot.revolver.revolverSpin.getPower());
-        dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
-        dashboardTelemetry.addData("shoot step: ", shootStep);
+//        dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
+//        dashboardTelemetry.addData("shoot step: ", shootStep);
 
         dashboardTelemetry.addData("slot 0", robot.revolver.getSlotColor((byte) 0));
         dashboardTelemetry.addData("slot 1", robot.revolver.getSlotColor((byte) 1));
         dashboardTelemetry.addData("slot 2", robot.revolver.getSlotColor((byte) 2));
 
-        dashboardTelemetry.addData("motifpos", motifPosition);
+//        dashboardTelemetry.addData("motifpos", motifPosition);
         //        dashboardTelemetry.addData("color", robot.intake.);
 
-        dashboardTelemetry.addData("dst", robot.turret.getDistance());
-        dashboardTelemetry.addData("curr odo", Robot.follower.getPose());
+//        dashboardTelemetry.addData("dst", robot.turret.getDistance());
+//        dashboardTelemetry.addData("curr odo", Robot.follower.getPose());
 
 
-        dashboardTelemetry.addData("revolver target slot", robot.revolver.getTargetSlot());
+        telemetry.addData("revolver target slot", robot.revolver.getTargetSlot());
 
-        telemetry.addData("odo", Robot.follower.getPose());
-        telemetry.addData("velo", robot.turret.targetVelocity);
+//        telemetry.addData("odo", Robot.follower.getPose());
+//        telemetry.addData("velo", robot.turret.targetVelocity);
         dashboardTelemetry.update();
         telemetry.update();
     }

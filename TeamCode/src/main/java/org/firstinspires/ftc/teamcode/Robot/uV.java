@@ -15,7 +15,7 @@ public class uV {
 
     public static double ticksPerRevolution = 384.5;
 
-    public static double revolverPower = 0.5;
+    public static double revolverPower = 0.3;
 
     public static double homingPower = 0.1;
 }

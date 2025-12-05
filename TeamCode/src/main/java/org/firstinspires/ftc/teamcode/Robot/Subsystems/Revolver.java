@@ -35,7 +35,7 @@ public class Revolver extends Subsystem {
     public static double Kf = 0; // Power to overcome inertia and friction
 
     private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
-    public boolean homing = true;
+    public boolean homing;
 
     // Align with INTAKE / OUTTAKE
     public enum Mode {
@@ -51,7 +51,6 @@ public class Revolver extends Subsystem {
         revolverSpin = hwMap.get(DcMotorEx.class, "revolverSpin");
         revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        revolverSpin.setDirection(CRServo.Direction.REVERSE);
 
         lift = hwMap.get(Servo.class, "lift");
 
@@ -69,7 +68,7 @@ public class Revolver extends Subsystem {
         // determine if aligning for intake or outtake
         target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2;
 
-        target += uV.ticksPerRevolution / 3 * n;
+        target += (uV.ticksPerRevolution / 3) * n;
 
         targetSlot = n;
     }
@@ -204,22 +203,10 @@ public class Revolver extends Subsystem {
         pidfController.kD = Kd;
         pidfController.kF = Kf;
 
-        if (!homing) {
-            pidfController.setSetpoint(target);
+        pidfController.setSetpoint(target);
 
-            revolverSpin.setPower(
-                    uV.revolverPower * pidfController.updatePID(revolverSpin.getCurrentPosition()));
+        revolverSpin.setPower(pidfController.updatePID(uV.revolverPower * revolverSpin.getCurrentPosition()));
 
-        } else {
-            if (!revolverLimit.isPressed()) {
-                revolverSpin.setPower(0.04);
-
-            } else {
-                revolverSpin.setPower(0);
-                revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                homing = false;
-            }
         }
     }
-}
+
