@@ -29,8 +29,8 @@ public class Revolver extends Subsystem {
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
-    public static double Kp = 0.008;
-    public static double Kd = 0.0003;
+    public static double Kp = 0.0045;
+    public static double Kd = 0.00003;
     public static double Ki = 0;
     public static double Kf = 0; // Power to overcome inertia and friction
 
@@ -66,7 +66,7 @@ public class Revolver extends Subsystem {
 
     public void setTargetSlot(byte n) {
         // determine if aligning for intake or outtake
-        target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2;
+        target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2 + 3;
 
         target += (uV.ticksPerRevolution / 3) * n;
 
@@ -205,7 +205,9 @@ public class Revolver extends Subsystem {
 
         pidfController.setSetpoint(target);
 
-        revolverSpin.setPower(pidfController.updatePID(uV.revolverPower * revolverSpin.getCurrentPosition()));
+        //TODO
+        //SCHIMBAT CA NU TRE SA FIE ASA LOGICA
+        revolverSpin.setPower(pidfController.updatePID(revolverSpin.getCurrentPosition()));
 
         }
     }
