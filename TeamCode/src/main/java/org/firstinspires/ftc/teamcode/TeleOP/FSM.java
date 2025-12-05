@@ -246,14 +246,14 @@ public class FSM extends OpMode {
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 400 && shootStep == 1) {
+            if (loadBallTimer.milliseconds() > 300 && shootStep == 1) {
                 robot.revolver.liftLoad();
 
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 300 && shootStep == 2) {
+            if (loadBallTimer.milliseconds() > 800 && shootStep == 2) {
                 robot.revolver.liftReset();
 
                 loadBallTimer.reset();
@@ -332,6 +332,9 @@ public class FSM extends OpMode {
 
     @Override
     public void start() {
+        //TODO
+        //TO REMOVE
+        Robot.alliance = Robot.Alliance.BLUE;
         changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
         sortingMode = SortingMode.AUTO;
@@ -427,6 +430,11 @@ public class FSM extends OpMode {
 
         telemetry.addData("odo", Robot.follower.getPose());
         telemetry.addData("velo", robot.turret.targetVelocity);
+        telemetry.addData("target slot", robot.revolver.targetSlot);
+
+        dashboardTelemetry.addData("homing: ", robot.revolver.homing);
+        dashboardTelemetry.addData("target revolver", Revolver.target);
+
         dashboardTelemetry.update();
         telemetry.update();
     }
