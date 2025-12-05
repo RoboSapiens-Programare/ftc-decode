@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto;
+package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.bylazar.configurables.annotations.Configurable;
@@ -15,25 +15,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Red Auto", group = "0. Autonomous")
+@Autonomous(name = "Blue Auto", group = "0. Autonomous")
 @Configurable // Panels
-public class RedAuto extends OpMode {
+public class BlueAuto extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     public Robot robot; // Pedro Pathing follower instance
     private int pathState; // Current autonomous path state (state machine)
     private Paths paths; // Paths defined in the Paths class
-
-    private final Pose startPose =
-            new Pose(72, 120, Math.toRadians(90)); // Start Pose of our robot.
-    private static final Pose scorePoseRed = new Pose(96, 95, Math.toRadians(115));
-    private static final Pose scorePoseBlue = new Pose(47, 95, Math.toRadians(115));
-    private static final Pose PPGPose = new Pose(100, 83.5, Math.toRadians(0));
-    private static final Pose PGPPose = new Pose(100, 59.5, Math.toRadians(0));
-    private static final Pose GPPPose = new Pose(100, 35.5, Math.toRadians(0));
-    private static final Pose PPGPoseGrab = new Pose(130, 83.5, Math.toRadians(0));
-    private static final Pose PGPPoseGrab = new Pose(130, 59.5, Math.toRadians(0));
-    private static final Pose GPPPoseGrab = new Pose(130, 35.5, Math.toRadians(0));
 
     @Override
     public void init() {
@@ -78,191 +67,146 @@ public class RedAuto extends OpMode {
     }
 
     public static class Paths {
-
-        public PathChain grabPPG1;
-        public PathChain grabPPG2;
-        public PathChain scorePPG;
-        public PathChain grabPGP1;
-        public PathChain grabPGP2;
-        public PathChain scorePGP;
-        public PathChain grabGPP1;
-        public PathChain grabGPP2;
-        public PathChain scoreGPP;
         public PathChain scorePreload;
+        public PathChain grabFirstLine;
+        public PathChain scoreFirstLine;
+        public PathChain grabSecondLine;
+        public PathChain scoreSecondLine;
+        public PathChain grabThirdLine;
+        public PathChain scoreThirdLine;
 
         public Paths(Follower follower) {
-
-            // ---------- PRELOAD -----------
-
-            // preload should make follower maintain a static position in case of the robot being pushed
-            // current logic is most likely not correct
-
             scorePreload =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(scorePoseRed, scorePoseRed))
-                            .setConstantHeadingInterpolation(scorePoseRed.getHeading())
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(144-56.000, 144-8.000),
+                                            new Pose(144-67.000, 144-91.000),
+                                            new Pose(144-41.000, 144-102.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(-135))
                             .build();
 
-            // ---------- PPG CYCLE ----------
-            grabPPG1 =
+            grabFirstLine =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(scorePoseRed, PPGPose))
-                            .setLinearHeadingInterpolation(
-                                    scorePoseRed.getHeading(), PPGPose.getHeading())
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(144-41.000, 144-102.000),
+                                            new Pose(144-85.000, 144-82.500),
+                                            new Pose(144-17.000, 144-84.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(-180))
                             .build();
 
-            grabPPG2 =
+            scoreFirstLine =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(PPGPose, PPGPoseGrab))
-                            .setLinearHeadingInterpolation(
-                                    PPGPose.getHeading(), PPGPoseGrab.getHeading())
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(144-17.000, 144-84.000), new Pose(144-41.000, 144-102.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(-135))
                             .build();
 
-            scorePPG =
+            grabSecondLine =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(PPGPoseGrab, scorePoseRed))
-                            .setLinearHeadingInterpolation(
-                                    PPGPoseGrab.getHeading(), scorePoseRed.getHeading())
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(144-41.000, 144-102.000),
+                                            new Pose(144-85.000, 144-56.000),
+                                            new Pose(144-17.000, 144-60.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(-180))
                             .build();
 
-            // ---------- PGP CYCLE ----------
-            grabPGP1 =
+            scoreSecondLine =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(scorePoseRed, PGPPose))
-                            .setLinearHeadingInterpolation(
-                                    scorePoseRed.getHeading(), PGPPose.getHeading())
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(144-17.000, 144-60.000), new Pose(144-41.000, 144-102.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(-135))
                             .build();
 
-            grabPGP2 =
+            grabThirdLine =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(PGPPose, PGPPoseGrab))
-                            .setLinearHeadingInterpolation(
-                                    PGPPose.getHeading(), PGPPoseGrab.getHeading())
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(144-41.000, 144-102.000),
+                                            new Pose(144-85.000, 144-35.000),
+                                            new Pose(144-17.000, 144-35.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(-180))
                             .build();
 
-            scorePGP =
+            scoreThirdLine =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(PGPPoseGrab, scorePoseRed))
-                            .setLinearHeadingInterpolation(
-                                    PGPPoseGrab.getHeading(), scorePoseRed.getHeading())
-                            .build();
-
-            // ---------- GPP CYCLE ----------
-            grabGPP1 =
-                    follower.pathBuilder()
-                            .addPath(new BezierLine(scorePoseRed, GPPPose))
-                            .setLinearHeadingInterpolation(
-                                    scorePoseRed.getHeading(), GPPPose.getHeading())
-                            .build();
-
-            grabGPP2 =
-                    follower.pathBuilder()
-                            .addPath(new BezierLine(GPPPose, GPPPoseGrab))
-                            .setLinearHeadingInterpolation(
-                                    GPPPose.getHeading(), GPPPoseGrab.getHeading())
-                            .build();
-
-            scoreGPP =
-                    follower.pathBuilder()
-                            .addPath(new BezierLine(GPPPoseGrab, scorePoseRed))
-                            .setLinearHeadingInterpolation(
-                                    GPPPoseGrab.getHeading(), scorePoseRed.getHeading())
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(144-17.000, 144-35.000), new Pose(144-41.000, 144-102.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(-135))
                             .build();
         }
     }
 
-    public void setpathState(int x) {
+    public void changePathState(int x) {
         pathState = x;
     }
 
     public int autonomousPathUpdate() {
         switch (pathState) {
-
             // ---------- PRELOAD ----------
             case 0:
-
-                //should score from start position
-
                 Robot.follower.followPath(paths.scorePreload);
-
                 if (!Robot.follower.isBusy()) {
-                    setpathState(1);
+                    changePathState(1);
                 }
                 break;
 
-            // ---------- PPG ----------
+            // ---------- FIRST LINE ----------
             case 1:
-                Robot.follower.followPath(paths.grabPPG1);
+                Robot.follower.followPath(paths.grabFirstLine);
                 if (!Robot.follower.isBusy()) {
-                    setpathState(2);
+                    changePathState(2);
                 }
                 break;
 
             case 2:
-                Robot.follower.followPath(paths.grabPPG2);
+                Robot.follower.followPath(paths.scoreFirstLine);
                 if (!Robot.follower.isBusy()) {
-                    setpathState(3);
+                    changePathState(3);
                 }
                 break;
 
+            // ---------- SECOND LINE ----------
             case 3:
-                Robot.follower.followPath(paths.scorePPG);
+                Robot.follower.followPath(paths.grabSecondLine);
                 if (!Robot.follower.isBusy()) {
-                    setpathState(4);
+                    changePathState(4);
                 }
                 break;
 
-            // ---------- PGP ----------
             case 4:
-                Robot.follower.followPath(paths.grabPGP1);
+                Robot.follower.followPath(paths.scoreSecondLine);
                 if (!Robot.follower.isBusy()) {
-                    setpathState(5);
+                    changePathState(5);
                 }
                 break;
+
+            // ---------- THIRD LINE ----------
 
             case 5:
-                Robot.follower.followPath(paths.grabPGP2);
+                Robot.follower.followPath(paths.grabThirdLine);
                 if (!Robot.follower.isBusy()) {
-                    setpathState(6);
+                    changePathState(6);
                 }
                 break;
 
             case 6:
-                Robot.follower.followPath(paths.scorePGP);
+                Robot.follower.followPath(paths.scoreThirdLine);
                 if (!Robot.follower.isBusy()) {
-                    setpathState(7);
-                }
-                break;
-
-            // ---------- GPP ----------
-            case 7:
-                Robot.follower.followPath(paths.grabGPP1);
-                if (!Robot.follower.isBusy()) {
-                    setpathState(8);
-                }
-                break;
-
-            case 8:
-                Robot.follower.followPath(paths.grabGPP2);
-                if (!Robot.follower.isBusy()) {
-                    setpathState(9);
-                }
-                break;
-
-            case 9:
-                Robot.follower.followPath(paths.scoreGPP);
-                if (!Robot.follower.isBusy()) {
-                    setpathState(10);
+                    changePathState(7);
                 }
                 break;
 
             // ---------- DONE ----------
-            case 10:
+            case 7:
                 // robot finished all paths
                 break;
-
         }
         return pathState;
     }
 }
-
