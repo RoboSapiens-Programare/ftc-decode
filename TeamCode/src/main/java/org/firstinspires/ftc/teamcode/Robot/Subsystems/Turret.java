@@ -33,9 +33,9 @@ public class Turret extends Subsystem {
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
 
-    public static double Kp = 0.19;
+    public static double Kp = 0.3;
     public static double Ki = 0;
-    public static double Kd = 0.025;
+    public static double Kd = 0.03;
     public static double Kf = 0; // Power to overcome inertia and friction
 
     private final double shootKp = 1800 * 0.2;
@@ -67,14 +67,18 @@ public class Turret extends Subsystem {
 
         pidfController.setSetpoint(0);
         pidfController.setTolerance(0.3);
+
+        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
     }
 
     public void enableCamera() {
         limelight.start();
+        tracking = true;
     }
 
     public void disableCamera() {
         limelight.stop();
+        tracking = false;
     }
 
     public boolean isShootReady() {
@@ -93,29 +97,24 @@ public class Turret extends Subsystem {
     }
 
     public double computeVelocity() {
-        targetVelocity = ((getDistance() - 47.3) * 375 / 33.15 + 900);
+        targetVelocity = ((getDistance() - 47.3) * 375 / 33.15 + 800);
         // 1370
         return targetVelocity;
     }
 
-    public void Move(double power) {
-
-        // TODO: reverse < > signs according to servo direction for symbol
+    public void move(double power) {
 
         if (leftLimit.isPressed() && power > 0) {
             turretRotationServo.setPower(0);
-        }
-        else if (rightLimit.isPressed() && power < 0) {
-                turretRotationServo.setPower(0);
-        }
-        else {
-                turretRotationServo.setPower(power);
+        } else if (rightLimit.isPressed() && power < 0) {
+            turretRotationServo.setPower(0);
+        } else {
+            turretRotationServo.setPower(power);
         }
     }
 
     @Override
     public void update() {
-        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
 
         if (!tracking) {
             found = false;
@@ -131,9 +130,10 @@ public class Turret extends Subsystem {
                     found = true;
                     curr = result.getTx();
 
-                    Move(pidOutput);
+                    move(pidOutput);
 
-                    turretMotor.setVelocity(computeVelocity());
+                    // turretMotor.setVelocity(computeVelocity());
+                    turretMotor.setPower(0.2);
 
                     break;
                 }

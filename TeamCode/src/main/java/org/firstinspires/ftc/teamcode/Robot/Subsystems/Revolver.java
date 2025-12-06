@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -66,7 +65,7 @@ public class Revolver extends Subsystem {
 
     public void setTargetSlot(byte n) {
         // determine if aligning for intake or outtake
-        target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2 + 3;
+        target = mode == Mode.INTAKE ? 0 : uV.ticksPerRevolution / 2 + uV.revolverOffset;
 
         target += (uV.ticksPerRevolution / 3) * n;
 
@@ -205,10 +204,20 @@ public class Revolver extends Subsystem {
 
         pidfController.setSetpoint(target);
 
-        //TODO
-        //SCHIMBAT CA NU TRE SA FIE ASA LOGICA
-        revolverSpin.setPower(pidfController.updatePID(revolverSpin.getCurrentPosition()));
+        if (homing) {
+            if (!revolverLimit.isPressed()) {
+                revolverSpin.setPower(0.08);
 
+            } else {
+                revolverSpin.setPower(0);
+                homing = false;
+                revolverSpin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                revolverSpin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+        } else {
+            if (mihaiLimit.isPressed())
+                revolverSpin.setPower(pidfController.updatePID(revolverSpin.getCurrentPosition()));
+            else revolverSpin.setPower(0);
         }
     }
-
+}

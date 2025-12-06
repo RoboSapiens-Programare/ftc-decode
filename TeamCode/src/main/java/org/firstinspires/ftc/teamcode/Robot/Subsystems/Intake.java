@@ -19,7 +19,7 @@ public class Intake extends Subsystem {
 
     public PredominantColorProcessor colorSensor;
 
-    private VisionPortal portal;
+    public VisionPortal portal;
 
     public Intake(HardwareMap hwMap, Revolver revolver) {
         intakeMotor = hwMap.get(DcMotorEx.class, "intakeMotor");
@@ -48,11 +48,23 @@ public class Intake extends Subsystem {
                         .build();
     }
 
+    public void disableCamera() {
+        // if (portal.getCameraState() == VisionPortal.CameraState.STREAMING) portal.stopStreaming();
+        // colorSensor.setEnabled(false);
+        portal.setProcessorEnabled(colorSensor, false);   // disable
+    }
+
+    public void enableCamera() {
+        // if (portal.getCameraState() != VisionPortal.CameraState.STREAMING) portal.resumeStreaming();
+        portal.setProcessorEnabled(colorSensor, true);   // disable
+    }
+
     @Override
     public void update() {
         // check both are equal in order to ignore false positives
 
         if (revolver.getBallCount() >= 3) return;
+        if (!revolver.isReady()) return;
 
         PredominantColorProcessor.Result result = colorSensor.getAnalysis();
 

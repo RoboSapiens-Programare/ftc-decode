@@ -90,6 +90,6 @@ public class PIDFController {
     }
 
     public boolean targetReached() {
-        return Math.abs(error) < tolerance;
+        return Math.abs(error) <= tolerance;
     }
 }

@@ -9,10 +9,8 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
@@ -244,7 +242,7 @@ public class FSMTest extends OpMode {
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 350 && shootStep == 1) {
+            if (loadBallTimer.milliseconds() > 500 && shootStep == 1) {
                 robot.revolver.liftLoad();
 
                 loadBallTimer.reset();
@@ -259,7 +257,8 @@ public class FSMTest extends OpMode {
             }
 
             // TODO: check mihai and mihaiLimit logic
-            // explenation: this is the only instance of a mihaiLimit but physically mihai logic is broken somehow ????
+            // explenation: this is the only instance of a mihaiLimit but physically mihai logic is
+            // broken somehow ????
 
             if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
                 // if button still pressed, continue shooting sequence
@@ -303,67 +302,64 @@ public class FSMTest extends OpMode {
         robot.revolver.home();
 
         // always tracking for testing
-//        robot.turret.tracking = true;
-//        robot.turret.enableCamera();
-//        inputTimer.reset();
-//        gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-//
-//        if (Robot.alliance == Robot.Alliance.RED) {
-//            startPose = new Pose(72, 72, Math.toRadians(0));
-//            shootPose = new Pose(72, 72, Math.toRadians(45));
-//
-//        } else {
-//            startPose = new Pose(72, 72, Math.toRadians(0));
-//            shootPose = new Pose(72, 72, Math.toRadians(-45));
-//        }
-//
-//        Robot.follower.setStartingPose(startPose);
+        //        robot.turret.tracking = true;
+        //        robot.turret.enableCamera();
+        //        inputTimer.reset();
+        //        gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+        //
+        //        if (Robot.alliance == Robot.Alliance.RED) {
+        //            startPose = new Pose(72, 72, Math.toRadians(0));
+        //            shootPose = new Pose(72, 72, Math.toRadians(45));
+        //
+        //        } else {
+        //            startPose = new Pose(72, 72, Math.toRadians(0));
+        //            shootPose = new Pose(72, 72, Math.toRadians(-45));
+        //        }
+        //
+        //        Robot.follower.setStartingPose(startPose);
     }
 
-//    @Override
-//    public void init_loop() {
-//        if (Robot.alliance == Robot.Alliance.RED) {
-//            gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
-//        } else {
-//            gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
-//        }
-//
-//        if (gamepad1.options && inputTimer.milliseconds() > 400) {
-//            if (Robot.alliance == Robot.Alliance.RED) {
-//                Robot.alliance = Robot.Alliance.BLUE;
-//
-//            } else {
-//                Robot.alliance = Robot.Alliance.RED;
-//            }
-//
-//            inputTimer.reset();
-//        }
-//    }
+    //    @Override
+    //    public void init_loop() {
+    //        if (Robot.alliance == Robot.Alliance.RED) {
+    //            gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
+    //        } else {
+    //            gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
+    //        }
+    //
+    //        if (gamepad1.options && inputTimer.milliseconds() > 400) {
+    //            if (Robot.alliance == Robot.Alliance.RED) {
+    //                Robot.alliance = Robot.Alliance.BLUE;
+    //
+    //            } else {
+    //                Robot.alliance = Robot.Alliance.RED;
+    //            }
+    //
+    //            inputTimer.reset();
+    //        }
+    //    }
 
     @Override
     public void start() {
-//        changeState(State.INTAKE);
+        //        changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
-//        sortingMode = SortingMode.AUTO;
-//
-//        gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-//        gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+        //        sortingMode = SortingMode.AUTO;
+        //
+        //        gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+        //        gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-//        Robot.follower.startTeleOpDrive();
-//
-//        robot.revolver.reset();
-//        robot.revolver.home();
-//
-//        opModeTimer.reset();
+        //        Robot.follower.startTeleOpDrive();
+        //
+        //        robot.revolver.reset();
+        //        robot.revolver.home();
+        //
+        //        opModeTimer.reset();
     }
-
 
     @Override
     public void loop() {
 
-//        Robot.follower.update();
-
-
+        //        Robot.follower.update();
 
         if (gamepad1.right_trigger > 0.5) {
             robot.intake.setPower(1);
@@ -377,67 +373,64 @@ public class FSMTest extends OpMode {
             }
         } else robot.revolver.setTargetSlot(robot.revolver.getTargetSlot());
 
+        //        if (gamepad2.left_bumper && inputTimer.milliseconds() > 400) {
+        //            robot.revolver.reset();
+        //            robot.revolver.home();
+        //            inputTimer.reset();
+        //        }
+        //
+        //        if (opModeTimer.seconds() >= 90) {
+        //            sortMotif = true;
+        //        }
 
+        //        switch (state) {
+        //            case INTAKE:
+        //                handleIntake();
+        //                break;
+        //
+        //            case OUTTAKE:
+        //                handleOuttake();
+        //                break;
+        //        }
 
+        //        if (autoShoot && (gamepad1.right_bumper || !Robot.follower.isBusy())) {
+        //            autoShoot = false;
+        //            Robot.follower.startTeleopDrive();
+        //        }
+        //
+        //        if (!autoShoot) {
+        //            Robot.follower.setTeleOpDrive(
+        //                    applyDeadzone(-gamepad1.left_stick_y),
+        //                    applyDeadzone(-gamepad1.left_stick_x),
+        //                    applyDeadzone(-gamepad1.right_stick_x),
+        //                    true // Robot Centric
+        //                    );
+        //        }
+        //
+        //        robot.turret.Move((float) (-gamepad2.left_stick_x));
 
-//        if (gamepad2.left_bumper && inputTimer.milliseconds() > 400) {
-//            robot.revolver.reset();
-//            robot.revolver.home();
-//            inputTimer.reset();
-//        }
-//
-//        if (opModeTimer.seconds() >= 90) {
-//            sortMotif = true;
-//        }
+        //        dashboardTelemetry.addData("state", state);
 
-//        switch (state) {
-//            case INTAKE:
-//                handleIntake();
-//                break;
-//
-//            case OUTTAKE:
-//                handleOuttake();
-//                break;
-//        }
-
-//        if (autoShoot && (gamepad1.right_bumper || !Robot.follower.isBusy())) {
-//            autoShoot = false;
-//            Robot.follower.startTeleopDrive();
-//        }
-//
-//        if (!autoShoot) {
-//            Robot.follower.setTeleOpDrive(
-//                    applyDeadzone(-gamepad1.left_stick_y),
-//                    applyDeadzone(-gamepad1.left_stick_x),
-//                    applyDeadzone(-gamepad1.right_stick_x),
-//                    true // Robot Centric
-//                    );
-//        }
-//
-//        robot.turret.Move((float) (-gamepad2.left_stick_x));
-
-//        dashboardTelemetry.addData("state", state);
-
-        dashboardTelemetry.addData("current revolver position: ", robot.revolver.revolverSpin.getCurrentPosition());
+        dashboardTelemetry.addData(
+                "current revolver position: ", robot.revolver.revolverSpin.getCurrentPosition());
         dashboardTelemetry.addData("power rotation: ", robot.revolver.revolverSpin.getPower());
-//        dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
-//        dashboardTelemetry.addData("shoot step: ", shootStep);
+        //        dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
+        //        dashboardTelemetry.addData("shoot step: ", shootStep);
 
         dashboardTelemetry.addData("slot 0", robot.revolver.getSlotColor((byte) 0));
         dashboardTelemetry.addData("slot 1", robot.revolver.getSlotColor((byte) 1));
         dashboardTelemetry.addData("slot 2", robot.revolver.getSlotColor((byte) 2));
 
-//        dashboardTelemetry.addData("motifpos", motifPosition);
+        //        dashboardTelemetry.addData("motifpos", motifPosition);
         //        dashboardTelemetry.addData("color", robot.intake.);
 
-//        dashboardTelemetry.addData("dst", robot.turret.getDistance());
-//        dashboardTelemetry.addData("curr odo", Robot.follower.getPose());
-
+        //        dashboardTelemetry.addData("dst", robot.turret.getDistance());
+        //        dashboardTelemetry.addData("curr odo", Robot.follower.getPose());
 
         telemetry.addData("revolver target slot", robot.revolver.getTargetSlot());
 
-//        telemetry.addData("odo", Robot.follower.getPose());
-//        telemetry.addData("velo", robot.turret.targetVelocity);
+        //        telemetry.addData("odo", Robot.follower.getPose());
+        //        telemetry.addData("velo", robot.turret.targetVelocity);
         dashboardTelemetry.update();
         telemetry.update();
     }

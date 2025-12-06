@@ -80,64 +80,74 @@ public class RedAuto extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(144-56.000, 144-8.000),
-                                            new Pose(144-67.000, 144-91.000),
-                                            new Pose(144-41.000, 144-102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(-135))
+                                            new Pose(144 - 56.000, 144 - 8.000),
+                                            new Pose(144 - 67.000, 144 - 91.000),
+                                            new Pose(144 - 41.000, 144 - 102.000)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(-90), Math.toRadians(-135))
                             .build();
 
             grabFirstLine =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(144-41.000, 144-102.000),
-                                            new Pose(144-85.000, 144-82.500),
-                                            new Pose(144-17.000, 144-84.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(-180))
+                                            new Pose(144 - 41.000, 144 - 102.000),
+                                            new Pose(144 - 85.000, 144 - 82.500),
+                                            new Pose(144 - 17.000, 144 - 84.000)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(-135), Math.toRadians(-180))
                             .build();
 
             scoreFirstLine =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(144-17.000, 144-84.000), new Pose(144-41.000, 144-102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(-135))
+                                            new Pose(144 - 17.000, 144 - 84.000),
+                                            new Pose(144 - 41.000, 144 - 102.000)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(-180), Math.toRadians(-135))
                             .build();
 
             grabSecondLine =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(144-41.000, 144-102.000),
-                                            new Pose(144-85.000, 144-56.000),
-                                            new Pose(144-17.000, 144-60.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(-180))
+                                            new Pose(144 - 41.000, 144 - 102.000),
+                                            new Pose(144 - 85.000, 144 - 56.000),
+                                            new Pose(144 - 17.000, 144 - 60.000)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(-135), Math.toRadians(-180))
                             .build();
 
             scoreSecondLine =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(144-17.000, 144-60.000), new Pose(144-41.000, 144-102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(-135))
+                                            new Pose(144 - 17.000, 144 - 60.000),
+                                            new Pose(144 - 41.000, 144 - 102.000)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(-180), Math.toRadians(-135))
                             .build();
 
             grabThirdLine =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(144-41.000, 144-102.000),
-                                            new Pose(144-85.000, 144-35.000),
-                                            new Pose(144-17.000, 144-35.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(-180))
+                                            new Pose(144 - 41.000, 144 - 102.000),
+                                            new Pose(144 - 85.000, 144 - 35.000),
+                                            new Pose(144 - 17.000, 144 - 35.000)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(-135), Math.toRadians(-180))
                             .build();
 
             scoreThirdLine =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(144-17.000, 144-35.000), new Pose(144-41.000, 144-102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(-135))
+                                            new Pose(144 - 17.000, 144 - 35.000),
+                                            new Pose(144 - 41.000, 144 - 102.000)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(-180), Math.toRadians(-135))
                             .build();
         }
     }
