@@ -159,8 +159,6 @@ public class FSM extends OpMode {
             robot.intake.disableCamera();
             doOnceState = false;
         }
-        robot.turret.update();
-
         // go to shoot position automatically
 
         // TODO: pedro tuning
@@ -172,6 +170,7 @@ public class FSM extends OpMode {
             toShootZone.setLinearHeadingInterpolation(
                     Robot.follower.getPose().getHeading(), shootPose.getHeading());
             Robot.follower.followPath(toShootZone);
+            dashboardTelemetry.addData("pula", "urmeaza");
 
             inputTimer.reset();
         }
@@ -354,6 +353,7 @@ public class FSM extends OpMode {
         Robot.follower.update();
 
         robot.revolver.update();
+        robot.turret.update();
 
         if (gamepad2.left_bumper && inputTimer.milliseconds() > 400) {
             robot.revolver.reset();
@@ -395,43 +395,13 @@ public class FSM extends OpMode {
         }
 
         robot.turret.move((float) (-gamepad2.left_stick_x));
-        telemetry.addData("p", (float) (-gamepad2.left_stick_x));
-        telemetry.addData("l", robot.turret.leftLimit.isPressed());
-        telemetry.addData("r", robot.turret.rightLimit.isPressed());
-        telemetry.addData("isReady", robot.revolver.isReady());
 
-        dashboardTelemetry.addData("state", state);
-
-        dashboardTelemetry.addData(
-                "current revolver position: ", robot.revolver.revolverSpin.getCurrentPosition());
-        dashboardTelemetry.addData("power rotation: ", robot.revolver.revolverSpin.getPower());
-        dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
-        dashboardTelemetry.addData("shoot step: ", shootStep);
-
-        dashboardTelemetry.addData("slot 0", robot.revolver.getSlotColor((byte) 0));
-        dashboardTelemetry.addData("slot 1", robot.revolver.getSlotColor((byte) 1));
-        dashboardTelemetry.addData("slot 2", robot.revolver.getSlotColor((byte) 2));
-
-        dashboardTelemetry.addData("motifpos", motifPosition);
-        //        dashboardTelemetry.addData("color", robot.intake.);
-
-        dashboardTelemetry.addData("dst", robot.turret.getDistance());
-        dashboardTelemetry.addData("curr odo", Robot.follower.getPose());
-
-        dashboardTelemetry.addData("revolver target slot", robot.revolver.getTargetSlot());
-
-        telemetry.addData("odo", Robot.follower.getPose());
-        telemetry.addData("velo", robot.turret.targetVelocity);
-        telemetry.addData("target slot", robot.revolver.targetSlot);
-
-        dashboardTelemetry.addData("homing: ", robot.revolver.homing);
-        dashboardTelemetry.addData("target revolver", Revolver.target);
-
-        telemetry.addData("mihai", robot.revolver.mihaiLimit.isPressed());
-        telemetry.addData("cs", robot.intake.portal.getCameraState());
-
+        dashboardTelemetry.addData("current", robot.turret.turretMotor.getVelocity());
+        dashboardTelemetry.addData("target", robot.turret.targetVelocity);
+        dashboardTelemetry.addData("distance", robot.turret.getDistance());
+        dashboardTelemetry.addData("target", robot.turret.targetVelocity);
+        dashboardTelemetry.addData("pose", Robot.follower.getPose());
         dashboardTelemetry.update();
-        telemetry.update();
     }
 
     @Override

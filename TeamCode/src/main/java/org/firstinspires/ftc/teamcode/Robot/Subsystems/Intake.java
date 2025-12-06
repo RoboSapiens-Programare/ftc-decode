@@ -49,14 +49,16 @@ public class Intake extends Subsystem {
     }
 
     public void disableCamera() {
-        // if (portal.getCameraState() == VisionPortal.CameraState.STREAMING) portal.stopStreaming();
+        // if (portal.getCameraState() == VisionPortal.CameraState.STREAMING)
+        // portal.stopStreaming();
         // colorSensor.setEnabled(false);
-        portal.setProcessorEnabled(colorSensor, false);   // disable
+        portal.setProcessorEnabled(colorSensor, false); // disable
     }
 
     public void enableCamera() {
-        // if (portal.getCameraState() != VisionPortal.CameraState.STREAMING) portal.resumeStreaming();
-        portal.setProcessorEnabled(colorSensor, true);   // disable
+        // if (portal.getCameraState() != VisionPortal.CameraState.STREAMING)
+        // portal.resumeStreaming();
+        portal.setProcessorEnabled(colorSensor, true); // disable
     }
 
     @Override

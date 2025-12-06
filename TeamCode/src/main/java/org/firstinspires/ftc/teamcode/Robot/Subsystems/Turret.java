@@ -38,17 +38,32 @@ public class Turret extends Subsystem {
     public static double Kd = 0.03;
     public static double Kf = 0; // Power to overcome inertia and friction
 
-    private final double shootKp = 1800 * 0.2;
-    private final double shootKi = 1800 * 0.4 / (4.0 / 10);
-    private final double shootKd = 0.066 * 1800 * 4 / 10;
-    private final double shootKf = 9;
+    public static double shootKp = 400;
+    public static double shootKi = 0;
+    public static double shootKd = 100;
+    public static double shootKf = 13;
+
+    double limelightMountAngleDegrees = 15.0; 
+
+    // TODO: change to cm
+
+    double limelightLensHeightInches = 11.65; 
+
+    double goalHeightInches = 29.33; 
+
+    double targetOffsetAngle_Vertical = 0;
+
+    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+
+    double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
 
     public static double velocityTolerance = 75;
     public double curr = 0;
 
     public PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
-    public double targetVelocity;
+    public static double targetVelocity;
 
     public Turret(HardwareMap hwMap) {
         turretMotor = hwMap.get(DcMotorEx.class, "turretMotor");
@@ -63,12 +78,11 @@ public class Turret extends Subsystem {
         limelight.pipelineSwitch(0);
         limelight.start();
 
+
         FtcDashboard.getInstance().startCameraStream(limelight, 30);
 
         pidfController.setSetpoint(0);
         pidfController.setTolerance(0.3);
-
-        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
     }
 
     public void enableCamera() {
@@ -87,20 +101,16 @@ public class Turret extends Subsystem {
     }
 
     public double getDistance() {
-        Pose robotPose = Robot.follower.getPose();
-        Pose obeliskPose = new Pose(Robot.Alliance.BLUE == Robot.alliance ? 18 : 129, 132);
 
-        double dx = robotPose.getX() - obeliskPose.getX();
-        double dy = robotPose.getY() - obeliskPose.getY();
+        targetOffsetAngle_Vertical = limelight.getLatestResult().getTy();
 
-        return Math.sqrt(dx * dx + dy * dy);
+        angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+        angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+
+        return distanceFromLimelightToGoalInches = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+
     }
 
-    public double computeVelocity() {
-        targetVelocity = ((getDistance() - 47.3) * 375 / 33.15 + 800);
-        // 1370
-        return targetVelocity;
-    }
 
     public void move(double power) {
 
@@ -115,13 +125,15 @@ public class Turret extends Subsystem {
 
     @Override
     public void update() {
+        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
 
         if (!tracking) {
             found = false;
+            turretRotationServo.setPower(0);
             return;
         }
 
-        LLResult result = limelight.getLatestResult();
+        final LLResult result = limelight.getLatestResult();
 
         if (result.isValid()) {
             for (FiducialResult fiducial : result.getFiducialResults()) {
@@ -130,10 +142,14 @@ public class Turret extends Subsystem {
                     found = true;
                     curr = result.getTx();
 
-                    move(pidOutput);
+                    //move(pidOutput);
 
-                    // turretMotor.setVelocity(computeVelocity());
-                    turretMotor.setPower(0.2);
+                    // turretMotor.setVelocity((getDistance()- 47.3) * 375 / 33.15 + 800);
+                    targetVelocity = getDistance() * 37/7 + 785.67;
+                    turretMotor.setVelocity(targetVelocity);
+
+                
+                    // turretMotor.setPower(0.2);
 
                     break;
                 }
