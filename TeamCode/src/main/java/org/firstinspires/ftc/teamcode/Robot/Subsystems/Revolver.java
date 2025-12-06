@@ -33,7 +33,7 @@ public class Revolver extends Subsystem {
     public static double Ki = 0;
     public static double Kf = 0; // Power to overcome inertia and friction
 
-    private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
+    public PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
     public boolean homing;
 
     // Align with INTAKE / OUTTAKE

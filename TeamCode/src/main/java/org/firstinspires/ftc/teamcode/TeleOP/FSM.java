@@ -92,7 +92,7 @@ public class FSM extends OpMode {
             inputTimer.reset();
         }
 
-        if (gamepad2.right_bumper) {
+        if (gamepad2.right_trigger > 0.5) {
             sortingMode = SortingMode.AUTO;
         }
     }
@@ -184,6 +184,16 @@ public class FSM extends OpMode {
             changeState(State.INTAKE);
         }
 
+        if (gamepad2.dpad_up && inputTimer.milliseconds() > 400) {
+            robot.revolver.liftLoad();
+            inputTimer.reset();
+        }
+
+        if (gamepad2.dpad_down && inputTimer.milliseconds() > 400) {
+            robot.revolver.liftReset();
+            inputTimer.reset();
+        }
+
         switch (sortingMode) {
             case AUTO:
                 //                if (sortMotif) {
@@ -229,15 +239,13 @@ public class FSM extends OpMode {
         // == -1 && robot.turret.isShootReady()) {
         if (gamepad1.right_trigger > 0.5 && stateTimer.milliseconds() > 300 && shootStep == -1) {
             shootStep = 0;
-            robot.revolver.liftReset();
-            loadBallTimer.reset();
         }
 
         // Shoot sequence
         // Load only if on shoot mode
         if (shootStep >= 0) {
             // make sure revolver is stable before starting load sequence
-            if (shootStep == 0 && robot.revolver.isReady()) {
+            if (shootStep == 0 && robot.revolver.pidfController.error <= 13) {
                 loadBallTimer.reset();
                 ++shootStep;
             }
@@ -251,25 +259,15 @@ public class FSM extends OpMode {
 
             if (loadBallTimer.milliseconds() > 800 && shootStep == 2) {
                 robot.revolver.liftReset();
+                robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
 
                 loadBallTimer.reset();
                 ++shootStep;
             }
 
             if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
-                // if button still pressed, continue shooting sequence
-                robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
-
-                loadBallTimer.reset();
-                robot.turret.turretMotor.setPower(0);
                 loadBallTimer.reset();
                 shootStep = -1;
-                //                // go to next slot in motif
-                //                if (motifPosition == 2) {
-                //                    motifPosition = 0;
-                //                } else {
-                //                    ++motifPosition;
-                //                }
             }
         }
 
@@ -394,7 +392,7 @@ public class FSM extends OpMode {
                     );
         }
 
-        robot.turret.move((float) (-gamepad2.left_stick_x));
+        robot.turret.move((float) (-gamepad2.left_stick_x) * 0.45);
 
         dashboardTelemetry.addData("current", robot.turret.turretMotor.getVelocity());
         dashboardTelemetry.addData("target", robot.turret.targetVelocity);

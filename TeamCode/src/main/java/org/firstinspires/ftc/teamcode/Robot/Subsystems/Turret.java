@@ -33,9 +33,9 @@ public class Turret extends Subsystem {
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
 
-    public static double Kp = 0.3;
+    public static double Kp = 0.067;
     public static double Ki = 0;
-    public static double Kd = 0.03;
+    public static double Kd = 0;
     public static double Kf = 0; // Power to overcome inertia and friction
 
     public static double shootKp = 400;
@@ -83,6 +83,8 @@ public class Turret extends Subsystem {
 
         pidfController.setSetpoint(0);
         pidfController.setTolerance(0.3);
+
+        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
     }
 
     public void enableCamera() {
@@ -125,7 +127,10 @@ public class Turret extends Subsystem {
 
     @Override
     public void update() {
-        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
+        pidfController.kP = Kp;
+        pidfController.kI = Ki;
+        pidfController.kD = Kd;
+        pidfController.kF = Kf;
 
         if (!tracking) {
             found = false;
@@ -142,7 +147,7 @@ public class Turret extends Subsystem {
                     found = true;
                     curr = result.getTx();
 
-                    //move(pidOutput);
+                    move(pidOutput);
 
                     // turretMotor.setVelocity((getDistance()- 47.3) * 375 / 33.15 + 800);
                     targetVelocity = getDistance() * 37/7 + 785.67;
