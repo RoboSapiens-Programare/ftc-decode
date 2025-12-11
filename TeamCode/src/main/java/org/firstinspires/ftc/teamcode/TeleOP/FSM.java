@@ -163,6 +163,12 @@ public class FSM extends OpMode {
 
         // TODO: pedro tuning
 
+        if (gamepad1.left_trigger > .5) {
+            robot.turret.override = true;
+        } else {
+            robot.turret.override = false;
+        }
+
         if (gamepad1.right_bumper && inputTimer.milliseconds() > 400 && !autoShoot) {
             autoShoot = true;
 
@@ -205,8 +211,6 @@ public class FSM extends OpMode {
                 //                    } else robot.revolver.setTargetSlot((byte) 1);
                 if (robot.revolver.getFullSlot() != -1) {
                     robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
-                } else if (loadBallTimer.milliseconds() > 300) {
-                    changeState(State.INTAKE);
                 }
 
                 if (gamepad2.dpad_right || gamepad2.dpad_left) {
@@ -307,9 +311,10 @@ public class FSM extends OpMode {
     @Override
     public void init_loop() {
         if (Robot.alliance == Robot.Alliance.RED) {
-            gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
-        } else {
             gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
+
+        } else {
+            gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         }
 
         if (gamepad1.options && inputTimer.milliseconds() > 400) {
@@ -326,9 +331,6 @@ public class FSM extends OpMode {
 
     @Override
     public void start() {
-        // TODO: REMOVE
-        Robot.alliance = Robot.Alliance.BLUE;
-
         changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
         sortingMode = SortingMode.AUTO;
@@ -399,6 +401,9 @@ public class FSM extends OpMode {
         dashboardTelemetry.addData("distance", robot.turret.getDistance());
         dashboardTelemetry.addData("target", robot.turret.targetVelocity);
         dashboardTelemetry.addData("pose", Robot.follower.getPose());
+        dashboardTelemetry.addData("is turret ready", robot.turret.isShootReady());
+        dashboardTelemetry.addData("alliance", (Robot.alliance));
+        dashboardTelemetry.addData("Searching for tag", (Robot.alliance == Robot.Alliance.RED ? 24 : 20));
         dashboardTelemetry.update();
     }
 

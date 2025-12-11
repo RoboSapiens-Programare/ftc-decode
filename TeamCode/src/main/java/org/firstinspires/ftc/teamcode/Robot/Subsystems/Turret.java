@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -25,6 +24,7 @@ public class Turret extends Subsystem {
     public boolean found = false;
 
     public boolean tracking = true;
+    public boolean override = false;
 
     public Limelight3A limelight;
 
@@ -43,20 +43,21 @@ public class Turret extends Subsystem {
     public static double shootKd = 100;
     public static double shootKf = 13;
 
-    double limelightMountAngleDegrees = 15.0; 
+    double limelightMountAngleDegrees = 15.0;
 
     // TODO: change to cm
 
-    double limelightLensHeightInches = 11.65; 
+    double limelightLensHeightInches = 11.65;
 
-    double goalHeightInches = 29.33; 
+    double goalHeightInches = 29.33;
 
     double targetOffsetAngle_Vertical = 0;
 
     double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
-    double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+    double distanceFromLimelightToGoalInches =
+            (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
 
     public static double velocityTolerance = 75;
     public double curr = 0;
@@ -77,7 +78,6 @@ public class Turret extends Subsystem {
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
         limelight.start();
-
 
         FtcDashboard.getInstance().startCameraStream(limelight, 30);
 
@@ -109,10 +109,9 @@ public class Turret extends Subsystem {
         angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
         angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
-        return distanceFromLimelightToGoalInches = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
-
+        return distanceFromLimelightToGoalInches =
+                (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
     }
-
 
     public void move(double power) {
 
@@ -150,13 +149,19 @@ public class Turret extends Subsystem {
                     move(pidOutput);
 
                     // turretMotor.setVelocity((getDistance()- 47.3) * 375 / 33.15 + 800);
-                    targetVelocity = getDistance() * 37/7 + 785.67;
+                    if (!override) {
+                        targetVelocity = getDistance() * 37 / 7 + 785.67;
+                    } else {
+                        targetVelocity = 1320;
+                    }
+
                     turretMotor.setVelocity(targetVelocity);
 
-                
                     // turretMotor.setPower(0.2);
 
                     break;
+                } else {
+                    found = false;
                 }
             }
         } else {
