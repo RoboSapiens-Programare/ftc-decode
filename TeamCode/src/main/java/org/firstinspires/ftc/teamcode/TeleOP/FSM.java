@@ -52,7 +52,8 @@ public class FSM extends OpMode {
     private boolean autoShoot = false;
 
     private int motifPosition = 0;
-    private boolean sortMotif = false;
+    // TODO: change to false in final version
+    private boolean sortMotif = true;
 
     // Helper method to kill joystick drift
     private float applyDeadzone(float input) {
@@ -73,6 +74,8 @@ public class FSM extends OpMode {
 
         robot.intake.setPower(0);
         robot.revolver.liftReset();
+
+        motifPosition = 0;
 
         doOnceState = true;
     }
@@ -163,6 +166,10 @@ public class FSM extends OpMode {
 
         // TODO: pedro tuning
 
+        if (robot.revolver.getBallCount() == 0) {
+            changeState(State.INTAKE);
+        }
+
         if (gamepad1.left_trigger > .5) {
             robot.turret.override = true;
         } else {
@@ -202,14 +209,17 @@ public class FSM extends OpMode {
 
         switch (sortingMode) {
             case AUTO:
-                //                if (sortMotif) {
-                //                    byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
-                //                    FtcDashboard.getInstance().getTelemetry().addData("t", (int)
-                // t);
-                //                    if (t != -1) {
-                //                        robot.revolver.setTargetSlot(t);
-                //                    } else robot.revolver.setTargetSlot((byte) 1);
-                if (robot.revolver.getFullSlot() != -1) {
+                if (sortMotif) {
+                    byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
+                    FtcDashboard.getInstance().getTelemetry().addData("t", (int)t);
+                    if (t != -1) {
+                        robot.revolver.setTargetSlot(t);
+                    } else {
+                        t = robot.revolver.getFullSlot();
+                        robot.revolver.setTargetSlot(t != -1 ? t : 1);
+                    }
+
+                } else if (robot.revolver.getFullSlot() != -1) {
                     robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
                 }
 
@@ -249,7 +259,7 @@ public class FSM extends OpMode {
         // Load only if on shoot mode
         if (shootStep >= 0) {
             // make sure revolver is stable before starting load sequence
-            if (shootStep == 0 && robot.revolver.pidfController.error <= 13) {
+            if (shootStep == 0 && robot.revolver.isReady()) {
                 loadBallTimer.reset();
                 ++shootStep;
             }
@@ -272,6 +282,11 @@ public class FSM extends OpMode {
             if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
                 loadBallTimer.reset();
                 shootStep = -1;
+
+                if (motifPosition == 2) {
+                    motifPosition = 0;
+                } else
+                    ++motifPosition;
             }
         }
 
@@ -366,9 +381,10 @@ public class FSM extends OpMode {
             inputTimer.reset();
         }
 
-        if (opModeTimer.seconds() >= 90) {
-            sortMotif = true;
-        }
+        // TODO: enable in teleop
+        // if (opModeTimer.seconds() >= 90) {
+            // sortMotif = true;
+        // }
 
         switch (state) {
             case INTAKE:
@@ -394,6 +410,15 @@ public class FSM extends OpMode {
                     );
         }
 
+        if (gamepad2.left_trigger > 0.5 && inputTimer.milliseconds() > 500) {
+            robot.revolver.prevMotif();
+            inputTimer.reset();
+
+        } else if (gamepad2.right_trigger > 0.5 && inputTimer.milliseconds() > 500) {
+            robot.revolver.nextMotif();
+            inputTimer.reset();
+        }
+
         robot.turret.move((float) (-gamepad2.left_stick_x) * 0.45);
 
         dashboardTelemetry.addData("current", robot.turret.turretMotor.getVelocity());
@@ -410,9 +435,17 @@ public class FSM extends OpMode {
 
         dashboardTelemetry.addData("left limit", (robot.turret.leftLimit.isPressed()));
         dashboardTelemetry.addData("right limit", (robot.turret.rightLimit.isPressed()));
+
+        dashboardTelemetry.addData("green position", (robot.revolver.greenPosition));
+        dashboardTelemetry.addData("motif position", (motifPosition));
         
         dashboardTelemetry.addData("Searching for tag", (Robot.alliance == Robot.Alliance.RED ? 24 : 20));
         dashboardTelemetry.update();
+
+        StringBuilder pattern = new StringBuilder("PPP");
+        pattern.setCharAt(greenPosition, 'G');
+        telemetry.addData("Pattern", pattern.toString());
+        telemetry.update();
     }
 
     @Override
