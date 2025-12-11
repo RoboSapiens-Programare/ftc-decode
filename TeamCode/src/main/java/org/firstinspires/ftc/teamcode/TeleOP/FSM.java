@@ -261,7 +261,7 @@ public class FSM extends OpMode {
                 ++shootStep;
             }
 
-            if (loadBallTimer.milliseconds() > 800 && shootStep == 2) {
+            if (loadBallTimer.milliseconds() > 500 && shootStep == 2) {
                 robot.revolver.liftReset();
                 robot.revolver.setSlotColor(robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
 
@@ -403,6 +403,14 @@ public class FSM extends OpMode {
         dashboardTelemetry.addData("pose", Robot.follower.getPose());
         dashboardTelemetry.addData("is turret ready", robot.turret.isShootReady());
         dashboardTelemetry.addData("alliance", (Robot.alliance));
+
+        dashboardTelemetry.addData("slot 0", robot.revolver.colorList[0]);
+        dashboardTelemetry.addData("slot 1", robot.revolver.colorList[1]);
+        dashboardTelemetry.addData("slot 2", robot.revolver.colorList[2]);
+
+        dashboardTelemetry.addData("left limit", (robot.turret.leftLimit.isPressed()));
+        dashboardTelemetry.addData("right limit", (robot.turret.rightLimit.isPressed()));
+        
         dashboardTelemetry.addData("Searching for tag", (Robot.alliance == Robot.Alliance.RED ? 24 : 20));
         dashboardTelemetry.update();
     }

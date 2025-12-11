@@ -16,6 +16,9 @@ public class Intake extends Subsystem {
     public DcMotorEx intakeMotor;
     private Revolver revolver;
     private final ElapsedTime cooldown = new ElapsedTime();
+    private final ElapsedTime cooldown2 = new ElapsedTime();
+
+    private boolean doCooldown = false;
 
     public PredominantColorProcessor colorSensor;
 
@@ -59,6 +62,9 @@ public class Intake extends Subsystem {
         // if (portal.getCameraState() != VisionPortal.CameraState.STREAMING)
         // portal.resumeStreaming();
         portal.setProcessorEnabled(colorSensor, true); // disable
+
+        doCooldown = true;
+        cooldown.reset();
     }
 
     @Override
@@ -66,28 +72,22 @@ public class Intake extends Subsystem {
         // check both are equal in order to ignore false positives
 
         if (revolver.getBallCount() >= 3) return;
-        if (!revolver.isReady()) return;
+        if (doCooldown && cooldown.milliseconds() > 1000) {
+            cooldown.reset();
+            doCooldown = false;
+        }
+        if (!revolver.isReady() || doCooldown) return;
 
         PredominantColorProcessor.Result result = colorSensor.getAnalysis();
 
         FtcDashboard.getInstance().getTelemetry().addData("color", result.closestSwatch);
 
-        if (result.closestSwatch != PredominantColorProcessor.Swatch.ARTIFACT_GREEN
-                && result.closestSwatch != PredominantColorProcessor.Swatch.ARTIFACT_PURPLE) {
-            return;
+        if (result.closestSwatch == PredominantColorProcessor.Swatch.ARTIFACT_GREEN) {
+            revolver.setSlotColor(revolver.getTargetSlot(), ColorEnum.GREEN);
+        } else if (result.closestSwatch == PredominantColorProcessor.Swatch.ARTIFACT_PURPLE) {
+            revolver.setSlotColor(revolver.getTargetSlot(), ColorEnum.PURPLE);
         }
 
-        if (cooldown.milliseconds() < 500) {
-            return;
-        }
-
-        cooldown.reset();
-
-        revolver.setSlotColor(
-                revolver.getTargetSlot(),
-                result.closestSwatch == PredominantColorProcessor.Swatch.ARTIFACT_GREEN
-                        ? ColorEnum.GREEN
-                        : ColorEnum.PURPLE);
     }
 
     public void setPower(double power) {
