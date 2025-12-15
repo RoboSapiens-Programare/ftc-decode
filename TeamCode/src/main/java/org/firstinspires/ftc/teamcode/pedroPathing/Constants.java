@@ -22,8 +22,8 @@ public class Constants {
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
-                .twoWheelLocalizer(twoWheelLocalizerConstants)
-                // .pinpointLocalizer(localizerConstants)
+//                .twoWheelLocalizer(twoWheelLocalizerConstants)
+                .pinpointLocalizer(localizerConstants)
                 .mecanumDrivetrain(mecanumConstants)
                 .build();
     }
@@ -39,10 +39,12 @@ public class Constants {
                     .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
                     .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
                     .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-                    .xVelocity(57.723720)
-                    .yVelocity(57.723720)
-                    .forwardZeroPowerAcceleration(-23.30059)
-                    .lateralZeroPowerAcceleration(-20691.667);
+                    .xVelocity(58.85)
+                    .yVelocity(47.8)
+                    // line below gives an error on Victus but not on other Victus and the auto tuner test for it does not work
+                    // TODO: do it
+                    .forwardZeroPowerAcceleration()
+                    .lateralZeroPowerAcceleration(-54.1);
 
     public static PinpointConstants localizerConstants =
             new PinpointConstants()
