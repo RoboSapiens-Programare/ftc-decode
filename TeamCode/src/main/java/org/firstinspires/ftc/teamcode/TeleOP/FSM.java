@@ -211,7 +211,7 @@ public class FSM extends OpMode {
             case AUTO:
                 if (sortMotif) {
                     byte t = robot.revolver.getSlotByMotifPosition(motifPosition);
-                    FtcDashboard.getInstance().getTelemetry().addData("t", (int)t);
+                    FtcDashboard.getInstance().getTelemetry().addData("t", (int) t);
                     if (t != -1) {
                         robot.revolver.setTargetSlot(t);
                     } else {
@@ -285,8 +285,7 @@ public class FSM extends OpMode {
 
                 if (motifPosition == 2) {
                     motifPosition = 0;
-                } else
-                    ++motifPosition;
+                } else ++motifPosition;
             }
         }
 
@@ -383,7 +382,7 @@ public class FSM extends OpMode {
 
         // TODO: enable in teleop
         // if (opModeTimer.seconds() >= 90) {
-            // sortMotif = true;
+        // sortMotif = true;
         // }
 
         switch (state) {
@@ -438,12 +437,13 @@ public class FSM extends OpMode {
 
         dashboardTelemetry.addData("green position", (robot.revolver.greenPosition));
         dashboardTelemetry.addData("motif position", (motifPosition));
-        
-        dashboardTelemetry.addData("Searching for tag", (Robot.alliance == Robot.Alliance.RED ? 24 : 20));
+
+        dashboardTelemetry.addData(
+                "Searching for tag", (Robot.alliance == Robot.Alliance.RED ? 24 : 20));
         dashboardTelemetry.update();
 
         StringBuilder pattern = new StringBuilder("PPP");
-        pattern.setCharAt(greenPosition, 'G');
+        pattern.setCharAt(robot.revolver.greenPosition, 'G');
         telemetry.addData("Pattern", pattern.toString());
         telemetry.update();
     }

@@ -87,7 +87,6 @@ public class Intake extends Subsystem {
         } else if (result.closestSwatch == PredominantColorProcessor.Swatch.ARTIFACT_PURPLE) {
             revolver.setSlotColor(revolver.getTargetSlot(), ColorEnum.PURPLE);
         }
-
     }
 
     public void setPower(double power) {
