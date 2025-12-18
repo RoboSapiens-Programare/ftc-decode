@@ -169,4 +169,28 @@ public class Turret extends Subsystem {
             found = false;
         }
     }
+
+    public void updateVelocity() {
+        final LLResult result = limelight.getLatestResult();
+
+        if (result.isValid()) {
+            for (FiducialResult fiducial : result.getFiducialResults()) {
+                if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
+                    found = true;
+                    curr = result.getTx();
+
+                    // turretMotor.setVelocity((getDistance()- 47.3) * 375 / 33.15 + 800);
+                    targetVelocity = getDistance() * 37 / 7 + 785.67;
+
+                    turretMotor.setVelocity(targetVelocity);
+
+                    // turretMotor.setPower(0.2);
+
+                    break;
+                } else {
+                    found = false;
+                }
+            }
+        }
+    }
 }
