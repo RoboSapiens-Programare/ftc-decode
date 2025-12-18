@@ -29,6 +29,7 @@ public class BlueAuto extends OpMode {
     private int pathState; // Current autonomous path state (state machine)
     private Paths paths; // Paths defined in the Paths class
     private boolean singleton = true;
+    private boolean singletonoverride = true;
     private int motifPosition = 0;
     private ElapsedTime loadBallTimer = new ElapsedTime();
     private int shootStep = 0;
@@ -56,8 +57,10 @@ public class BlueAuto extends OpMode {
 
     @Override
     public void loop() {
-        if (robot.revolver.mode== Revolver.Mode.OUTTAKE) {
+        if (robot.revolver.mode == Revolver.Mode.OUTTAKE && robot.revolver.isMotif()) {
             robot.revolver.setTargetSlot(robot.revolver.getSlotByMotifPosition(motifPosition));
+        } else if (robot.revolver.mode == Revolver.Mode.OUTTAKE){
+            robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
         } else {
             robot.revolver.setTargetSlot(robot.revolver.getFreeSlot());
         }
@@ -133,7 +136,7 @@ public class BlueAuto extends OpMode {
 
         double dh = path.endPose().getHeading() - Robot.follower.getHeading();
 
-        return d < 2.5 && Math.abs(dh) < 10.0 / 360 * (Math.PI * 2);
+        return d < 3.5 && Math.abs(dh) < 10.0 / 360 * (Math.PI * 2);
     }
 
     public static class Paths {
@@ -162,7 +165,7 @@ public class BlueAuto extends OpMode {
                                     new BezierCurve(
                                             new Pose(41.000, 102.000),
                                             new Pose(85.000, 82.500),
-                                            new Pose(17.000, 84.000)))
+                                            new Pose(17.000, 81.000)))
                             .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
                             .build();
 
@@ -215,18 +218,30 @@ public class BlueAuto extends OpMode {
     public void changePathState(int x) {
         pathState = x;
         singleton = true;
+        singletonoverride = true;
     }
 
     public int autonomousPathUpdate() {
         switch (pathState) {
             // ---------- PRELOAD ----------
             case 0:
+
+                if (singletonoverride) {
+                    for (byte i = 0; i < robot.revolver.colorList.length; i++) {
+                        if (robot.revolver.colorList[i] == ColorEnum.UNDEFINED) {
+                            robot.revolver.colorList[i] = ColorEnum.PURPLE;
+                        }
+                    }
+                    singletonoverride = false;
+                }
+
                 if (singleton) {
                     Robot.follower.followPath(paths.scorePreload);
+                    robot.revolver.mode = Revolver.Mode.OUTTAKE;
                     singleton = false;
                 }
                 if (targetReached(paths.scorePreload)) {
-                    robot.revolver.mode = Revolver.Mode.OUTTAKE;
+
 
                     if (shootStep >= 0) {
                         // make sure revolver is stable before starting load sequence
@@ -274,7 +289,9 @@ public class BlueAuto extends OpMode {
                 if (singleton) {
                     Robot.follower.followPath(paths.grabFirstLine);
                     singleton = false;
+                    robot.revolver.mode = Revolver.Mode.INTAKE;
                     robot.intake.intakeMotor.setPower(1);
+                    robot.turret.turretMotor.setPower(0);
                 }
                 if (targetReached(paths.grabFirstLine) || robot.revolver.getBallCount() == 3) {
                     changePathState(2);

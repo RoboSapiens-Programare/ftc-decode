@@ -183,6 +183,26 @@ public class Revolver extends Subsystem {
         }
     }
 
+    public boolean isMotif()
+    {
+        byte greenCount = 0;
+        byte purpleCount = 0;
+
+        for (byte i = 0; i < colorList.length; i++)
+        {
+            if (colorList[i] == ColorEnum.PURPLE)
+            {
+                purpleCount++;
+            }
+            else if (colorList[i] == ColorEnum.GREEN)
+            {
+                greenCount++;
+            }
+        }
+
+        return greenCount == 1 && purpleCount == 2;
+    }
+
     public void home() {
         homing = true;
     }
