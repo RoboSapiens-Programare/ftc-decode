@@ -38,6 +38,7 @@ public class BlueAuto extends OpMode {
     private ElapsedTime loadBallTimer = new ElapsedTime();
     private int shootStep = 0;
     private ElapsedTime stopTimer = new ElapsedTime();
+    private ElapsedTime autoTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -64,7 +65,7 @@ public class BlueAuto extends OpMode {
     public void loop() {
         if (robot.revolver.mode == Revolver.Mode.OUTTAKE && robot.revolver.isMotif()) {
             robot.revolver.setTargetSlot(robot.revolver.getSlotByMotifPosition(motifPosition));
-        } else if (robot.revolver.mode == Revolver.Mode.OUTTAKE){
+        } else if (robot.revolver.mode == Revolver.Mode.OUTTAKE) {
             robot.revolver.setTargetSlot(robot.revolver.getFullSlot());
         } else {
             robot.revolver.setTargetSlot(robot.revolver.getFreeSlot());
@@ -76,7 +77,7 @@ public class BlueAuto extends OpMode {
         robot.revolver.update();
         robot.turret.updateVelocity();
 
-        if(driveSingleton) {
+        if (driveSingleton) {
             Robot.follower.update(); // Update Pedro Pathing
         }
 
@@ -94,6 +95,7 @@ public class BlueAuto extends OpMode {
         dashboardTelemetry.addData("is stuck", Robot.follower.isRobotStuck());
         dashboardTelemetry.addData(
                 "target reached score preload", targetReached(paths.scorePreload));
+        dashboardTelemetry.addData("timer", autoTimer.seconds());
         dashboardTelemetry.update();
     }
 
@@ -137,6 +139,11 @@ public class BlueAuto extends OpMode {
         dashboardTelemetry.addData("Y", Robot.follower.getPose().getY());
         dashboardTelemetry.addData("Heading", Robot.follower.getPose().getHeading());
         dashboardTelemetry.update();
+    }
+
+    @Override
+    public void start() {
+        autoTimer.reset();
     }
 
     public boolean targetReached(PathChain path) {
@@ -211,7 +218,7 @@ public class BlueAuto extends OpMode {
                                     new BezierCurve(
                                             new Pose(41.000, 102.000),
                                             new Pose(130.670, 35.000),
-                                            new Pose(17.000, 31.000)))
+                                            new Pose(16.000, 30.000)))
                             .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(180))
                             .build();
 
@@ -235,14 +242,82 @@ public class BlueAuto extends OpMode {
         stopsingleton4 = true;
         stopsingleton5 = true;
         stopTimer.reset();
-        shootStep=0;
+        shootStep = 0;
+
+        robot.intake.intakeMotor.setPower(0);
+        robot.turret.turretMotor.setVelocity(0);
+
+        if (x % 2 == 1) {
+            robot.revolver.reset();
+            robot.revolver.home();
+        }
+    }
+
+    private void sugiBileCuDintii() {
+        // nu ma intreba despre aceste 2 ifuri
+        // sunt oribile da merg
+
+        if (Robot.follower.getPose().getX() < 40
+                && Robot.follower.getPose().getX() > 39.5) {
+            if (stopsingleton1 && stopsingleton2) {
+                Robot.follower.drivetrain.breakFollowing();
+                stopsingleton1 = false;
+                driveSingleton = false;
+                stopTimer.reset();
+            }
+            if (stopTimer.seconds() > 1 && stopsingleton2) {
+                dashboardTelemetry.addData("step", "grab1");
+                robot.revolver.setSlotColor((byte) 1, ColorEnum.UNDEFINED);
+                robot.revolver.setSlotColor((byte) 2, ColorEnum.UNDEFINED);
+
+                stopsingleton2 = false;
+                Robot.follower.resumePathFollowing();
+                stopsingleton1 = true;
+                driveSingleton = true;
+                stopTimer.reset();
+            }
+        }
+
+        // pune pe pozitie aici
+
+        if (stopTimer.seconds() > .225 && !stopsingleton2 && stopsingleton3) {
+            dashboardTelemetry.addData("step", "grab2");
+            if (stopsingleton4) {
+                Robot.follower.drivetrain.breakFollowing();
+                stopsingleton4 = false;
+                driveSingleton = false;
+                robot.revolver.setSlotColor((byte) 2, ColorEnum.UNDEFINED);
+            }
+            if (stopTimer.seconds() > 1.5) {
+                stopsingleton3 = false;
+                Robot.follower.resumePathFollowing();
+                stopsingleton4 = true;
+                driveSingleton = true;
+                stopTimer.reset();
+            }
+        }
+
+        if (stopTimer.seconds() > .3 && !stopsingleton2 && !stopsingleton3 && stopsingleton5) {
+            dashboardTelemetry.addData("step", "grab3");
+            if (stopsingleton4) {
+                Robot.follower.drivetrain.breakFollowing();
+                stopsingleton4 = false;
+                driveSingleton = false;
+            }
+            if (stopTimer.seconds() > .7) {
+                stopsingleton4 = false;
+                Robot.follower.resumePathFollowing();
+                stopsingleton5 = false;
+                driveSingleton = true;
+                stopTimer.reset();
+            }
+        }
     }
 
     public int autonomousPathUpdate() {
         switch (pathState) {
             // ---------- PRELOAD ----------
             case 0:
-
                 if (singletonoverride) {
                     for (byte i = 0; i < robot.revolver.colorList.length; i++) {
                         if (robot.revolver.colorList[i] == ColorEnum.UNDEFINED) {
@@ -258,7 +333,6 @@ public class BlueAuto extends OpMode {
                     singleton = false;
                 }
                 if (targetReached(paths.scorePreload)) {
-
 
                     if (shootStep >= 0) {
                         // make sure revolver is stable before starting load sequence
@@ -311,76 +385,20 @@ public class BlueAuto extends OpMode {
                     robot.turret.turretMotor.setPower(0);
                 }
 
-                // nu ma intreba despre aceste 2 ifuri
-                // sunt oribile da merg
+                sugiBileCuDintii();
 
-                if (Robot.follower.getPose().getX() < 40 && Robot.follower.getPose().getX() > 39.5)
-                {
-                    if (stopsingleton1 && stopsingleton2)
-                    {
-                        Robot.follower.drivetrain.breakFollowing();
-                        stopsingleton1 = false;
-                        driveSingleton = false;
-                        stopTimer.reset();
 
-                    }
-                    if (stopTimer.seconds()>1.2 && robot.revolver.isReady())
-                    {
-                        robot.revolver.setSlotColor((byte) 1, ColorEnum.UNDEFINED);
-                        robot.revolver.setSlotColor((byte) 2, ColorEnum.UNDEFINED);
-                        if (stopsingleton2) {
-                            stopsingleton2 = false;
-                            Robot.follower.resumePathFollowing();
-                            stopsingleton1 = true;
-                            driveSingleton = true;
+                //                if (targetReached(paths.grabFirstLine) ||
+                // robot.revolver.getBallCount() == 3) {
+                //                    changePathState(2);
+                //                }
 
-                        }
-                    }
-                }
-
-                // pune pe pozitie aici
-
-                if (stopTimer.seconds() > 1.525 && !stopsingleton2)
-                {
-                    if (stopsingleton4 && stopsingleton3)
-                    {
-                        Robot.follower.drivetrain.breakFollowing();
-                        stopsingleton4 = false;
-                        driveSingleton = false;
-                        stopTimer.reset();
-                    }
-                    if (stopTimer.seconds()>1.8 && robot.revolver.isReady())
-                    {
-                        if (stopsingleton3) {
-                            stopsingleton3 = false;
-                            Robot.follower.resumePathFollowing();
-                            stopsingleton4 = true;
-                            driveSingleton = true;
-                        }
-                    }
-                }
-
-                if (stopsingleton5)
-                {
-
-                    Robot.follower.resumePathFollowing();
-                    driveSingleton = true;
-                    stopsingleton5 = false;
-                    stopTimer.reset();
-
-                }
-
-//                if (targetReached(paths.grabFirstLine) || robot.revolver.getBallCount() == 3) {
-//                    changePathState(2);
-//                }
-
-                if (targetReached(paths.grabFirstLine) && stopTimer.seconds() > 1) {
+                if (targetReached(paths.grabFirstLine) && stopTimer.seconds() > 1 &&  !stopsingleton2 && !stopsingleton3 && !stopsingleton5) {
                     changePathState(2);
                 }
                 break;
 
             case 2:
-
                 if (singletonoverride) {
                     for (byte i = 0; i < robot.revolver.colorList.length; i++) {
                         if (robot.revolver.colorList[i] == ColorEnum.UNDEFINED) {
@@ -451,67 +469,20 @@ public class BlueAuto extends OpMode {
                     robot.turret.turretMotor.setPower(0);
                 }
 
-                if (Robot.follower.getPose().getX() < 40 && Robot.follower.getPose().getX() > 39.5)
-                {
-                    if (stopsingleton1 && stopsingleton2)
-                    {
-                        Robot.follower.drivetrain.breakFollowing();
-                        stopsingleton1 = false;
-                        driveSingleton = false;
-                        stopTimer.reset();
-                    }
-                    if (stopTimer.seconds()>1.2)
-                    {
-                        if (stopsingleton2) {
-                            stopsingleton2 = false;
-                            Robot.follower.resumePathFollowing();
-                            stopsingleton1 = true;
-                            driveSingleton = true;
-                        }
-                    }
-                }
+                sugiBileCuDintii();
 
 
+                //                if (targetReached(paths.grabFirstLine) ||
+                // robot.revolver.getBallCount() == 3) {
+                //                    changePathState(2);
+                //                }
 
-                if (stopTimer.seconds() > 1.525 && !stopsingleton2)
-                {
-                    if (stopsingleton4 && stopsingleton3)
-                    {
-                        Robot.follower.drivetrain.breakFollowing();
-                        stopsingleton4 = false;
-                        driveSingleton = false;
-                        robot.revolver.setSlotColor((byte) 1, ColorEnum.UNDEFINED);
-                        robot.revolver.setSlotColor((byte) 2, ColorEnum.UNDEFINED);
-                        stopTimer.reset();
-                    }
-                    if (stopTimer.seconds()>1.8)
-                    {
-                        if (stopsingleton3) {
-                            stopsingleton3 = false;
-                            Robot.follower.resumePathFollowing();
-                            stopsingleton4 = true;
-                            driveSingleton = true;
-                        }
-                    }
-                }
-
-                if (stopsingleton5)
-                {
-
-                    Robot.follower.resumePathFollowing();
-                    driveSingleton = true;
-                    stopsingleton5 = false;
-                    stopTimer.reset();
-
-                }
-
-                if (targetReached(paths.grabSecondLine) && stopTimer.seconds() > 1) {
+                if (targetReached(paths.grabSecondLine) && stopTimer.seconds() > 1 &&  !stopsingleton2 && !stopsingleton3 && !stopsingleton5) {
                     changePathState(4);
                 }
                 break;
 
             case 4:
-
                 if (singletonoverride) {
                     for (byte i = 0; i < robot.revolver.colorList.length; i++) {
                         if (robot.revolver.colorList[i] == ColorEnum.UNDEFINED) {
@@ -583,67 +554,20 @@ public class BlueAuto extends OpMode {
                     robot.turret.turretMotor.setPower(0);
                 }
 
-                if (Robot.follower.getPose().getX() < 40 && Robot.follower.getPose().getX() > 39.5)
-                {
-                    if (stopsingleton1 && stopsingleton2)
-                    {
-                        Robot.follower.drivetrain.breakFollowing();
-                        stopsingleton1 = false;
-                        driveSingleton = false;
-                        stopTimer.reset();
-                    }
-                    if (stopTimer.seconds()>1.2)
-                    {
-                        if (stopsingleton2) {
-                            stopsingleton2 = false;
-                            Robot.follower.resumePathFollowing();
-                            stopsingleton1 = true;
-                            driveSingleton = true;
-                        }
-                    }
-                }
+                sugiBileCuDintii();
 
 
+                //                if (targetReached(paths.grabFirstLine) ||
+                // robot.revolver.getBallCount() == 3) {
+                //                    changePathState(2);
+                //                }
 
-                if (stopTimer.seconds() > 1.525 && !stopsingleton2)
-                {
-                    if (stopsingleton4 && stopsingleton3)
-                    {
-                        Robot.follower.drivetrain.breakFollowing();
-                        stopsingleton4 = false;
-                        driveSingleton = false;
-                        robot.revolver.setSlotColor((byte) 1, ColorEnum.UNDEFINED);
-                        robot.revolver.setSlotColor((byte) 2, ColorEnum.UNDEFINED);
-                        stopTimer.reset();
-                    }
-                    if (stopTimer.seconds()>1.8)
-                    {
-                        if (stopsingleton3) {
-                            stopsingleton3 = false;
-                            Robot.follower.resumePathFollowing();
-                            stopsingleton4 = true;
-                            driveSingleton = true;
-                        }
-                    }
-                }
-
-                if (stopsingleton5)
-                {
-
-                    Robot.follower.resumePathFollowing();
-                    driveSingleton = true;
-                    stopsingleton5 = false;
-                    stopTimer.reset();
-
-                }
-
-                if (targetReached(paths.grabThirdLine) && stopTimer.seconds() > 1) {
+                if (targetReached(paths.grabThirdLine) && stopTimer.seconds() > 1 &&  !stopsingleton2 && !stopsingleton3 && !stopsingleton5) {
                     changePathState(6);
                 }
                 break;
 
             case 6:
-
                 if (singletonoverride) {
                     for (byte i = 0; i < robot.revolver.colorList.length; i++) {
                         if (robot.revolver.colorList[i] == ColorEnum.UNDEFINED) {
