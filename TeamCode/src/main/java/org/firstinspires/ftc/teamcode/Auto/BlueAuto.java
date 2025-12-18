@@ -166,7 +166,7 @@ public class BlueAuto extends OpMode {
                                             new Pose(41.000, 102.000),
                                             new Pose(85.000, 82.500),
                                             new Pose(17.000, 81.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
+                            .setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(180))
                             .build();
 
             scoreFirstLine =
@@ -174,7 +174,7 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierLine(
                                             new Pose(17.000, 84.000), new Pose(41.000, 102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(50))
                             .build();
 
             grabSecondLine =
@@ -184,7 +184,7 @@ public class BlueAuto extends OpMode {
                                             new Pose(41.000, 102.000),
                                             new Pose(85.000, 56.000),
                                             new Pose(17.000, 60.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
+                            .setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(180))
                             .build();
 
             scoreSecondLine =
@@ -192,7 +192,7 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierLine(
                                             new Pose(17.000, 60.000), new Pose(41.000, 102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(50))
                             .build();
 
             grabThirdLine =
@@ -202,7 +202,7 @@ public class BlueAuto extends OpMode {
                                             new Pose(41.000, 102.000),
                                             new Pose(85.000, 35.000),
                                             new Pose(17.000, 35.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
+                            .setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(180))
                             .build();
 
             scoreThirdLine =
@@ -210,7 +210,7 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierLine(
                                             new Pose(17.000, 35.000), new Pose(41.000, 102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(50))
                             .build();
         }
     }
@@ -301,10 +301,52 @@ public class BlueAuto extends OpMode {
             case 2:
                 if (singleton) {
                     Robot.follower.followPath(paths.scoreFirstLine);
+                    robot.revolver.mode = Revolver.Mode.OUTTAKE;
                     singleton = false;
                 }
                 if (targetReached(paths.scoreFirstLine)) {
-                    changePathState(3);
+
+                    if (robot.revolver.getBallCount() == 0) {
+                        changePathState(3);
+                    }
+
+                    if (shootStep >= 0) {
+                        if (shootStep == 0 && robot.revolver.isReady()) {
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (loadBallTimer.milliseconds() > 300 && shootStep == 1) {
+                            robot.revolver.liftLoad();
+
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (loadBallTimer.milliseconds() > 500 && shootStep == 2) {
+                            robot.revolver.liftReset();
+                            robot.revolver.setSlotColor(
+                                    robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
+
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
+                            loadBallTimer.reset();
+                            shootStep = -1;
+
+                            if (motifPosition == 2) {
+                                motifPosition = 0;
+                            } else ++motifPosition;
+
+                            if (robot.revolver.getBallCount() > 0) {
+                                shootStep = 0;
+                            } else {
+                                changePathState(3);
+                            }
+                        }
+                    }
                 }
                 break;
 
@@ -313,8 +355,11 @@ public class BlueAuto extends OpMode {
                 if (singleton) {
                     Robot.follower.followPath(paths.grabSecondLine);
                     singleton = false;
+                    robot.revolver.mode = Revolver.Mode.INTAKE;
+                    robot.intake.intakeMotor.setPower(1);
+                    robot.turret.turretMotor.setPower(0);
                 }
-                if (targetReached(paths.grabSecondLine)) {
+                if (targetReached(paths.grabSecondLine) || robot.revolver.getBallCount() == 3) {
                     changePathState(4);
                 }
                 break;
@@ -322,10 +367,52 @@ public class BlueAuto extends OpMode {
             case 4:
                 if (singleton) {
                     Robot.follower.followPath(paths.scoreSecondLine);
+                    robot.revolver.mode = Revolver.Mode.OUTTAKE;
                     singleton = false;
                 }
                 if (targetReached(paths.scoreSecondLine)) {
-                    changePathState(5);
+
+                    if (robot.revolver.getBallCount() == 0) {
+                        changePathState(5);
+                    }
+
+                    if (shootStep >= 0) {
+                        if (shootStep == 0 && robot.revolver.isReady()) {
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (loadBallTimer.milliseconds() > 300 && shootStep == 1) {
+                            robot.revolver.liftLoad();
+
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (loadBallTimer.milliseconds() > 500 && shootStep == 2) {
+                            robot.revolver.liftReset();
+                            robot.revolver.setSlotColor(
+                                    robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
+
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
+                            loadBallTimer.reset();
+                            shootStep = -1;
+
+                            if (motifPosition == 2) {
+                                motifPosition = 0;
+                            } else ++motifPosition;
+
+                            if (robot.revolver.getBallCount() > 0) {
+                                shootStep = 0;
+                            } else {
+                                changePathState(5);
+                            }
+                        }
+                    }
                 }
                 break;
 
@@ -335,8 +422,11 @@ public class BlueAuto extends OpMode {
                 if (singleton) {
                     Robot.follower.followPath(paths.grabThirdLine);
                     singleton = false;
+                    robot.revolver.mode = Revolver.Mode.INTAKE;
+                    robot.intake.intakeMotor.setPower(1);
+                    robot.turret.turretMotor.setPower(0);
                 }
-                if (targetReached(paths.grabThirdLine)) {
+                if (targetReached(paths.grabThirdLine) || robot.revolver.getBallCount() == 3) {
                     changePathState(6);
                 }
                 break;
@@ -344,10 +434,52 @@ public class BlueAuto extends OpMode {
             case 6:
                 if (singleton) {
                     Robot.follower.followPath(paths.scoreThirdLine);
+                    robot.revolver.mode = Revolver.Mode.OUTTAKE;
                     singleton = false;
                 }
                 if (targetReached(paths.scoreThirdLine)) {
-                    changePathState(7);
+
+                    if (robot.revolver.getBallCount() == 0) {
+                        changePathState(7);
+                    }
+
+                    if (shootStep >= 0) {
+                        if (shootStep == 0 && robot.revolver.isReady()) {
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (loadBallTimer.milliseconds() > 300 && shootStep == 1) {
+                            robot.revolver.liftLoad();
+
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (loadBallTimer.milliseconds() > 500 && shootStep == 2) {
+                            robot.revolver.liftReset();
+                            robot.revolver.setSlotColor(
+                                    robot.revolver.getTargetSlot(), ColorEnum.UNDEFINED);
+
+                            loadBallTimer.reset();
+                            ++shootStep;
+                        }
+
+                        if (robot.revolver.mihaiLimit.isPressed() && shootStep == 3) {
+                            loadBallTimer.reset();
+                            shootStep = -1;
+
+                            if (motifPosition == 2) {
+                                motifPosition = 0;
+                            } else ++motifPosition;
+
+                            if (robot.revolver.getBallCount() > 0) {
+                                shootStep = 0;
+                            } else {
+                                changePathState(7);
+                            }
+                        }
+                    }
                 }
                 break;
 
