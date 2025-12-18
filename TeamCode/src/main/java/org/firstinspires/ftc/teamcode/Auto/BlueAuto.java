@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
@@ -30,9 +28,16 @@ public class BlueAuto extends OpMode {
     private Paths paths; // Paths defined in the Paths class
     private boolean singleton = true;
     private boolean singletonoverride = true;
+    private boolean stopsingleton1 = true;
+    private boolean stopsingleton2 = true;
+    private boolean stopsingleton3 = true;
+    private boolean stopsingleton4 = true;
+    private boolean stopsingleton5 = true;
+    private boolean driveSingleton = true;
     private int motifPosition = 0;
     private ElapsedTime loadBallTimer = new ElapsedTime();
     private int shootStep = 0;
+    private ElapsedTime stopTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -71,12 +76,17 @@ public class BlueAuto extends OpMode {
         robot.revolver.update();
         robot.turret.updateVelocity();
 
-        Robot.follower.update(); // Update Pedro Pathing
+        if(driveSingleton) {
+            Robot.follower.update(); // Update Pedro Pathing
+        }
 
         pathState = autonomousPathUpdate(); // Update autonomous state machine
 
         // Log values to Panels and Driver Station
         dashboardTelemetry.addData("Path State", pathState);
+        dashboardTelemetry.addData("slot 0", robot.revolver.colorList[0]);
+        dashboardTelemetry.addData("slot 1", robot.revolver.colorList[1]);
+        dashboardTelemetry.addData("slot 2", robot.revolver.colorList[2]);
         dashboardTelemetry.addData("X", Robot.follower.getPose().getX());
         dashboardTelemetry.addData("Y", Robot.follower.getPose().getY());
         dashboardTelemetry.addData("Heading", Robot.follower.getPose().getHeading());
@@ -156,7 +166,7 @@ public class BlueAuto extends OpMode {
                                             new Pose(56.000, 8.000),
                                             new Pose(67.000, 91.000),
                                             new Pose(41.000, 102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(50))
+                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(35))
                             .build();
 
             grabFirstLine =
@@ -164,9 +174,9 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierCurve(
                                             new Pose(41.000, 102.000),
-                                            new Pose(85.000, 82.500),
-                                            new Pose(17.000, 81.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(180))
+                                            new Pose(130.670, 82.500),
+                                            new Pose(17.000, 78.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(180))
                             .build();
 
             scoreFirstLine =
@@ -174,7 +184,7 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierLine(
                                             new Pose(17.000, 84.000), new Pose(41.000, 102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(50))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(35))
                             .build();
 
             grabSecondLine =
@@ -182,9 +192,9 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierCurve(
                                             new Pose(41.000, 102.000),
-                                            new Pose(85.000, 56.000),
-                                            new Pose(17.000, 60.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(180))
+                                            new Pose(130.670, 56.000),
+                                            new Pose(17.000, 56.300)))
+                            .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(180))
                             .build();
 
             scoreSecondLine =
@@ -192,7 +202,7 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierLine(
                                             new Pose(17.000, 60.000), new Pose(41.000, 102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(50))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(35))
                             .build();
 
             grabThirdLine =
@@ -200,9 +210,9 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierCurve(
                                             new Pose(41.000, 102.000),
-                                            new Pose(85.000, 35.000),
-                                            new Pose(17.000, 35.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(180))
+                                            new Pose(130.670, 35.000),
+                                            new Pose(17.000, 33.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(180))
                             .build();
 
             scoreThirdLine =
@@ -210,7 +220,7 @@ public class BlueAuto extends OpMode {
                             .addPath(
                                     new BezierLine(
                                             new Pose(17.000, 35.000), new Pose(41.000, 102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(50))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(35))
                             .build();
         }
     }
@@ -219,6 +229,13 @@ public class BlueAuto extends OpMode {
         pathState = x;
         singleton = true;
         singletonoverride = true;
+        stopsingleton2 = true;
+        stopsingleton1 = true;
+        stopsingleton3 = true;
+        stopsingleton4 = true;
+        stopsingleton5 = true;
+        stopTimer.reset();
+        shootStep=0;
     }
 
     public int autonomousPathUpdate() {
@@ -293,12 +310,86 @@ public class BlueAuto extends OpMode {
                     robot.intake.intakeMotor.setPower(1);
                     robot.turret.turretMotor.setPower(0);
                 }
-                if (targetReached(paths.grabFirstLine) || robot.revolver.getBallCount() == 3) {
+
+                // nu ma intreba despre aceste 2 ifuri
+                // sunt oribile da merg
+
+                if (Robot.follower.getPose().getX() < 40 && Robot.follower.getPose().getX() > 39.5)
+                {
+                    if (stopsingleton1 && stopsingleton2)
+                    {
+                        Robot.follower.drivetrain.breakFollowing();
+                        stopsingleton1 = false;
+                        driveSingleton = false;
+                        stopTimer.reset();
+
+                    }
+                    if (stopTimer.seconds()>1.2 && robot.revolver.isReady())
+                    {
+                        robot.revolver.setSlotColor((byte) 1, ColorEnum.UNDEFINED);
+                        robot.revolver.setSlotColor((byte) 2, ColorEnum.UNDEFINED);
+                        if (stopsingleton2) {
+                            stopsingleton2 = false;
+                            Robot.follower.resumePathFollowing();
+                            stopsingleton1 = true;
+                            driveSingleton = true;
+
+                        }
+                    }
+                }
+
+                // pune pe pozitie aici
+
+                if (stopTimer.seconds() > 1.525 && !stopsingleton2)
+                {
+                    if (stopsingleton4 && stopsingleton3)
+                    {
+                        Robot.follower.drivetrain.breakFollowing();
+                        stopsingleton4 = false;
+                        driveSingleton = false;
+                        stopTimer.reset();
+                    }
+                    if (stopTimer.seconds()>1.8 && robot.revolver.isReady())
+                    {
+                        if (stopsingleton3) {
+                            stopsingleton3 = false;
+                            Robot.follower.resumePathFollowing();
+                            stopsingleton4 = true;
+                            driveSingleton = true;
+                        }
+                    }
+                }
+
+                if (stopsingleton5)
+                {
+
+                    Robot.follower.resumePathFollowing();
+                    driveSingleton = true;
+                    stopsingleton5 = false;
+                    stopTimer.reset();
+
+                }
+
+//                if (targetReached(paths.grabFirstLine) || robot.revolver.getBallCount() == 3) {
+//                    changePathState(2);
+//                }
+
+                if (targetReached(paths.grabFirstLine) && stopTimer.seconds() > 1) {
                     changePathState(2);
                 }
                 break;
 
             case 2:
+
+                if (singletonoverride) {
+                    for (byte i = 0; i < robot.revolver.colorList.length; i++) {
+                        if (robot.revolver.colorList[i] == ColorEnum.UNDEFINED) {
+                            robot.revolver.colorList[i] = ColorEnum.PURPLE;
+                        }
+                    }
+                    singletonoverride = false;
+                }
+
                 if (singleton) {
                     Robot.follower.followPath(paths.scoreFirstLine);
                     robot.revolver.mode = Revolver.Mode.OUTTAKE;
@@ -359,12 +450,77 @@ public class BlueAuto extends OpMode {
                     robot.intake.intakeMotor.setPower(1);
                     robot.turret.turretMotor.setPower(0);
                 }
-                if (targetReached(paths.grabSecondLine) || robot.revolver.getBallCount() == 3) {
+
+                if (Robot.follower.getPose().getX() < 40 && Robot.follower.getPose().getX() > 39.5)
+                {
+                    if (stopsingleton1 && stopsingleton2)
+                    {
+                        Robot.follower.drivetrain.breakFollowing();
+                        stopsingleton1 = false;
+                        driveSingleton = false;
+                        stopTimer.reset();
+                    }
+                    if (stopTimer.seconds()>1.2)
+                    {
+                        if (stopsingleton2) {
+                            stopsingleton2 = false;
+                            Robot.follower.resumePathFollowing();
+                            stopsingleton1 = true;
+                            driveSingleton = true;
+                        }
+                    }
+                }
+
+
+
+                if (stopTimer.seconds() > 1.525 && !stopsingleton2)
+                {
+                    if (stopsingleton4 && stopsingleton3)
+                    {
+                        Robot.follower.drivetrain.breakFollowing();
+                        stopsingleton4 = false;
+                        driveSingleton = false;
+                        robot.revolver.setSlotColor((byte) 1, ColorEnum.UNDEFINED);
+                        robot.revolver.setSlotColor((byte) 2, ColorEnum.UNDEFINED);
+                        stopTimer.reset();
+                    }
+                    if (stopTimer.seconds()>1.8)
+                    {
+                        if (stopsingleton3) {
+                            stopsingleton3 = false;
+                            Robot.follower.resumePathFollowing();
+                            stopsingleton4 = true;
+                            driveSingleton = true;
+                        }
+                    }
+                }
+
+                if (stopsingleton5)
+                {
+
+                    Robot.follower.resumePathFollowing();
+                    driveSingleton = true;
+                    stopsingleton5 = false;
+                    stopTimer.reset();
+
+                }
+
+                if (targetReached(paths.grabSecondLine) && stopTimer.seconds() > 1) {
                     changePathState(4);
                 }
                 break;
 
             case 4:
+
+                if (singletonoverride) {
+                    for (byte i = 0; i < robot.revolver.colorList.length; i++) {
+                        if (robot.revolver.colorList[i] == ColorEnum.UNDEFINED) {
+                            robot.revolver.colorList[i] = ColorEnum.PURPLE;
+                        }
+                    }
+                    singletonoverride = false;
+                }
+
                 if (singleton) {
                     Robot.follower.followPath(paths.scoreSecondLine);
                     robot.revolver.mode = Revolver.Mode.OUTTAKE;
@@ -426,12 +582,77 @@ public class BlueAuto extends OpMode {
                     robot.intake.intakeMotor.setPower(1);
                     robot.turret.turretMotor.setPower(0);
                 }
-                if (targetReached(paths.grabThirdLine) || robot.revolver.getBallCount() == 3) {
+
+                if (Robot.follower.getPose().getX() < 40 && Robot.follower.getPose().getX() > 39.5)
+                {
+                    if (stopsingleton1 && stopsingleton2)
+                    {
+                        Robot.follower.drivetrain.breakFollowing();
+                        stopsingleton1 = false;
+                        driveSingleton = false;
+                        stopTimer.reset();
+                    }
+                    if (stopTimer.seconds()>1.2)
+                    {
+                        if (stopsingleton2) {
+                            stopsingleton2 = false;
+                            Robot.follower.resumePathFollowing();
+                            stopsingleton1 = true;
+                            driveSingleton = true;
+                        }
+                    }
+                }
+
+
+
+                if (stopTimer.seconds() > 1.525 && !stopsingleton2)
+                {
+                    if (stopsingleton4 && stopsingleton3)
+                    {
+                        Robot.follower.drivetrain.breakFollowing();
+                        stopsingleton4 = false;
+                        driveSingleton = false;
+                        robot.revolver.setSlotColor((byte) 1, ColorEnum.UNDEFINED);
+                        robot.revolver.setSlotColor((byte) 2, ColorEnum.UNDEFINED);
+                        stopTimer.reset();
+                    }
+                    if (stopTimer.seconds()>1.8)
+                    {
+                        if (stopsingleton3) {
+                            stopsingleton3 = false;
+                            Robot.follower.resumePathFollowing();
+                            stopsingleton4 = true;
+                            driveSingleton = true;
+                        }
+                    }
+                }
+
+                if (stopsingleton5)
+                {
+
+                    Robot.follower.resumePathFollowing();
+                    driveSingleton = true;
+                    stopsingleton5 = false;
+                    stopTimer.reset();
+
+                }
+
+                if (targetReached(paths.grabThirdLine) && stopTimer.seconds() > 1) {
                     changePathState(6);
                 }
                 break;
 
             case 6:
+
+                if (singletonoverride) {
+                    for (byte i = 0; i < robot.revolver.colorList.length; i++) {
+                        if (robot.revolver.colorList[i] == ColorEnum.UNDEFINED) {
+                            robot.revolver.colorList[i] = ColorEnum.PURPLE;
+                        }
+                    }
+                    singletonoverride = false;
+                }
+
                 if (singleton) {
                     Robot.follower.followPath(paths.scoreThirdLine);
                     robot.revolver.mode = Revolver.Mode.OUTTAKE;
