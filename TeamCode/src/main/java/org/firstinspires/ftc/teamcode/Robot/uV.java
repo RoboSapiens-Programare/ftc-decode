@@ -19,5 +19,5 @@ public class uV {
 
     public static double homingPower = 0.1;
 
-    public static double revolverOffset = 6;
+    public static double revolverOffset = 1;
 }

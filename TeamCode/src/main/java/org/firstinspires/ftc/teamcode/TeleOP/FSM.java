@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
@@ -72,26 +73,29 @@ public class FSM extends OpMode {
         stateTimer.reset();
         loadBallTimer.reset();
 
-        robot.intake.setPower(0);
+        robot.intake.setPower(0.6);
         robot.revolver.liftReset();
 
         motifPosition = 0;
 
         doOnceState = true;
+
+        if (newState == State.INTAKE) {
+            robot.revolver.reset();
+            robot.revolver.home();
+        }
     }
 
     private void manualSort() {
         // go to previous slot
         if (gamepad2.dpad_left && inputTimer.milliseconds() > 300) {
             robot.revolver.prevSlot();
-
             inputTimer.reset();
         }
 
         // go to next slot
         if (gamepad2.dpad_right && inputTimer.milliseconds() > 300) {
             robot.revolver.nextSlot();
-
             inputTimer.reset();
         }
 
@@ -118,7 +122,7 @@ public class FSM extends OpMode {
             robot.intake.setPower(1);
         } else if (gamepad1.left_trigger > 0.5) {
             robot.intake.setPower((float) -0.55);
-        } else robot.intake.setPower(0);
+        } else robot.intake.setPower(0.6);
 
         // sort
         switch (sortingMode) {
@@ -193,7 +197,6 @@ public class FSM extends OpMode {
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
-            robot.intake.setPower(0);
             changeState(State.INTAKE);
         }
 
@@ -345,7 +348,6 @@ public class FSM extends OpMode {
 
     @Override
     public void start() {
-        changeState(State.INTAKE);
         robot.revolver.mode = Revolver.Mode.INTAKE;
         sortingMode = SortingMode.AUTO;
 
@@ -359,6 +361,8 @@ public class FSM extends OpMode {
         robot.revolver.home();
 
         opModeTimer.reset();
+
+        changeState(State.INTAKE);
     }
 
     @Override
@@ -418,33 +422,44 @@ public class FSM extends OpMode {
             inputTimer.reset();
         }
 
-        robot.turret.move((float) (-gamepad2.left_stick_x) * 0.45);
+        robot.turret.move((float) (-gamepad2.right_stick_x) * 0.45);
 
-        dashboardTelemetry.addData("current", robot.turret.turretMotor.getVelocity());
-        dashboardTelemetry.addData("target", robot.turret.targetVelocity);
-        dashboardTelemetry.addData("distance", robot.turret.getDistance());
-        dashboardTelemetry.addData("target", robot.turret.targetVelocity);
-        dashboardTelemetry.addData("pose", Robot.follower.getPose());
-        dashboardTelemetry.addData("is turret ready", robot.turret.isShootReady());
-        dashboardTelemetry.addData("alliance", (Robot.alliance));
+//        dashboardTelemetry.addData("current", robot.turret.turretMotor.getVelocity());
+//        dashboardTelemetry.addData("target", robot.turret.targetVelocity);
+//        dashboardTelemetry.addData("distance", robot.turret.getDistance());
+//        dashboardTelemetry.addData("target", robot.turret.targetVelocity);
+//        dashboardTelemetry.addData("pose", Robot.follower.getPose());
+//        dashboardTelemetry.addData("is turret ready", robot.turret.isShootReady());
+//        dashboardTelemetry.addData("alliance", (Robot.alliance));
 
-        dashboardTelemetry.addData("slot 0", robot.revolver.colorList[0]);
-        dashboardTelemetry.addData("slot 1", robot.revolver.colorList[1]);
-        dashboardTelemetry.addData("slot 2", robot.revolver.colorList[2]);
-
-        dashboardTelemetry.addData("left limit", (robot.turret.leftLimit.isPressed()));
-        dashboardTelemetry.addData("right limit", (robot.turret.rightLimit.isPressed()));
-
-        dashboardTelemetry.addData("green position", (robot.revolver.greenPosition));
-        dashboardTelemetry.addData("motif position", (motifPosition));
-
-        dashboardTelemetry.addData(
-                "Searching for tag", (Robot.alliance == Robot.Alliance.RED ? 24 : 20));
-        dashboardTelemetry.update();
+//        dashboardTelemetry.addData("slot 0", robot.revolver.colorList[0]);
+//        dashboardTelemetry.addData("slot 1", robot.revolver.colorList[1]);
+//        dashboardTelemetry.addData("slot 2", robot.revolver.colorList[2]);
+//
+//        dashboardTelemetry.addData("left limit", (robot.turret.leftLimit.isPressed()));
+//        dashboardTelemetry.addData("right limit", (robot.turret.rightLimit.isPressed()));
+//
+//        dashboardTelemetry.addData("green position", (robot.revolver.greenPosition));
+//        dashboardTelemetry.addData("motif position", (motifPosition));
+//
+//        dashboardTelemetry.addData(
+//                "Searching for tag", (Robot.alliance == Robot.Alliance.RED ? 24 : 20));
+//        dashboardTelemetry.update();
 
         StringBuilder pattern = new StringBuilder("PPP");
         pattern.setCharAt(robot.revolver.greenPosition, 'G');
-        telemetry.addData("Pattern", pattern.toString());
+
+        telemetry.addData(" 0. Pattern", pattern.toString());
+        telemetry.addData(" 1. Alliance", Robot.alliance);
+        telemetry.addData(" 2. State", state);
+        telemetry.addData(" 3.   ---------------------", "");
+        telemetry.addData(" 4. Ball Count", robot.revolver.getBallCount());
+        telemetry.addData(" 5.   Slot 1", robot.revolver.getSlotColor((byte) 0));
+        telemetry.addData(" 6.   Slot 2", robot.revolver.getSlotColor((byte) 1));
+        telemetry.addData(" 7.   Slot 3", robot.revolver.getSlotColor((byte) 2));
+        telemetry.addData(" 8.   ---------------------", "");
+        telemetry.addData(" 9. Revolver Ready", robot.revolver.isReady());
+        telemetry.addData("10. Shoot Ready", robot.turret.isShootReady());
         telemetry.update();
     }
 

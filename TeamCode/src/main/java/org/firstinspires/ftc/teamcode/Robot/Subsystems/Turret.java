@@ -33,9 +33,9 @@ public class Turret extends Subsystem {
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
 
-    public static double Kp = 0.067;
+    public static double Kp = 0.032;
     public static double Ki = 0;
-    public static double Kd = 0;
+    public static double Kd = 0.01;
     public static double Kf = 0; // Power to overcome inertia and friction
 
     public static double shootKp = 400;
@@ -139,6 +139,8 @@ public class Turret extends Subsystem {
 
         final LLResult result = limelight.getLatestResult();
 
+        found = false;
+
         if (result.isValid()) {
             for (FiducialResult fiducial : result.getFiducialResults()) {
                 if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
@@ -160,13 +162,10 @@ public class Turret extends Subsystem {
                     // turretMotor.setPower(0.2);
 
                     break;
-                } else {
-                    found = false;
                 }
             }
         } else {
             turretRotationServo.setPower(0);
-            found = false;
         }
     }
 

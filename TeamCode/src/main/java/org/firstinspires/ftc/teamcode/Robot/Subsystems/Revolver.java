@@ -56,7 +56,7 @@ public class Revolver extends Subsystem {
         revolverLimit = hwMap.get(TouchSensor.class, "revolverLimit");
         mihaiLimit = hwMap.get(TouchSensor.class, "mihaiLimit");
 
-        pidfController.setTolerance(1);
+        pidfController.setTolerance(3);
     }
 
     public boolean isReady() {

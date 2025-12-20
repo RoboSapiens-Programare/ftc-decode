@@ -18,9 +18,9 @@ import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Blue Auto", group = "0. Autonomous")
+@Autonomous(name = "Blue Auto Close", group = "0. Autonomous")
 @Configurable // Panels
-public class BlueAuto extends OpMode {
+public class BlueAutoClose extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     public Robot robot; // Pedro Pathing follower instance
@@ -54,7 +54,7 @@ public class BlueAuto extends OpMode {
         Robot.alliance = Robot.Alliance.BLUE;
 
         Robot.follower = Constants.createFollower(hardwareMap);
-        Robot.follower.setStartingPose(new Pose(56, 8, Math.toRadians(90)));
+        Robot.follower.setStartingPose(new Pose(22, 123, Math.toRadians(144)));
 
         paths = new Paths(Robot.follower); // Build paths
         Robot.follower.activateAllPIDFs();
@@ -169,11 +169,10 @@ public class BlueAuto extends OpMode {
             scorePreload =
                     follower.pathBuilder()
                             .addPath(
-                                    new BezierCurve(
-                                            new Pose(56.000, 8.000),
-                                            new Pose(67.000, 91.000),
+                                    new BezierLine(
+                                            new Pose(22, 123),
                                             new Pose(41.000, 102.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(35))
+                            .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(35))
                             .build();
 
             grabFirstLine =
