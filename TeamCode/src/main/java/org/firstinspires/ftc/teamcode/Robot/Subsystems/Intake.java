@@ -14,17 +14,17 @@ import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 @SuppressWarnings("FieldCanBeLocal")
 public class Intake extends Subsystem {
     private DcMotorEx intakeMotor;
-    private Revolver revolver;
+    private Spindexer spindexer;
     private final ElapsedTime cooldown = new ElapsedTime();
 
     private PredominantColorProcessor colorSensor;
 
     private VisionPortal portal;
 
-    public Intake(HardwareMap hwMap, Revolver revolver) {
+    public Intake(HardwareMap hwMap, Spindexer revolver) {
         intakeMotor = hwMap.get(DcMotorEx.class, "intakeMotor");
 
-        this.revolver = revolver;
+        this.spindexer = revolver;
 
         colorSensor =
                 new PredominantColorProcessor.Builder()
@@ -52,7 +52,7 @@ public class Intake extends Subsystem {
     public void update() {
         // check both are equal in order to ignore false positives
 
-        if (revolver.getBallCount() >= 3) return;
+        if (spindexer.getBallCount() >= 3) return;
 
         PredominantColorProcessor.Result result = colorSensor.getAnalysis();
 
@@ -69,8 +69,8 @@ public class Intake extends Subsystem {
 
         cooldown.reset();
 
-        revolver.setSlotColor(
-                revolver.getTargetSlot(),
+        spindexer.setSlotColor(
+                spindexer.getTargetSlot(),
                 result.closestSwatch == PredominantColorProcessor.Swatch.ARTIFACT_GREEN
                         ? ColorEnum.GREEN
                         : ColorEnum.PURPLE);

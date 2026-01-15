@@ -1,19 +1,18 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import java.util.List;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
@@ -21,43 +20,51 @@ public class Turret extends Subsystem {
     public DcMotorEx turretMotor;
     public CRServo turretRotationServo;
     private float turretRotation;
+    public TouchSensor leftLimit, rightLimit;
     public boolean found = false;
 
-    public enum TargetObelisk {
-        RED,
-        BLUE
-    };
-
-    public TargetObelisk targetObelisk = TargetObelisk.BLUE;
-
-    public final int frameWidth = 640;
-    public double currentPos = 0;
     public boolean tracking = true;
+    public boolean override = false;
 
-    public AprilTagProcessor tagProcessor;
+    public Limelight3A limelight;
 
     // PID values for turret
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
 
-    private final double Kp = 0.000505;
-    private final double Ki = 0.001;
-    private final double Kd = 0.000165;
-    private final double Kf = 0.065; // Power to overcome inertia and friction
+    public static double Kp = 0.032;
+    public static double Ki = 0;
+    public static double Kd = 0.01;
+    public static double Kf = 0; // Power to overcome inertia and friction
 
-    private final double shootKp = 1800 * 0.2;
-    private final double shootKi = 1800 * 0.4 / (4.0 / 10);
-    private final double shootKd = 0.066 * 1800 * 4 / 10;
-    private final double shootKf = 9;
+    public static double shootKp = 400;
+    public static double shootKi = 0;
+    public static double shootKd = 100;
+    public static double shootKf = 13;
+
+    double limelightMountAngleDegrees = 15.0;
+
+    // TODO: change to cm
+
+    double limelightLensHeightInches = 11.65;
+
+    double goalHeightInches = 29.33;
+
+    double targetOffsetAngle_Vertical = 0;
+
+    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+
+    double distanceFromLimelightToGoalInches =
+            (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
 
     public static double velocityTolerance = 75;
+    public double curr = 0;
 
     public PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
-    public PIDFController velocitypidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
-    private VisionPortal vision;
-    public double targetVelocity;
+    public static double targetVelocity;
 
     public Turret(HardwareMap hwMap) {
         turretMotor = hwMap.get(DcMotorEx.class, "turretMotor");
@@ -65,34 +72,29 @@ public class Turret extends Subsystem {
         turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretRotationServo = hwMap.get(CRServo.class, "turretRotationServo");
 
-        tagProcessor = AprilTagProcessor.easyCreateWithDefaults();
-        VisionPortal.Builder vBuilder = new VisionPortal.Builder();
+        leftLimit = hwMap.get(TouchSensor.class, "limitaTuretaStanga");
+        rightLimit = hwMap.get(TouchSensor.class, "limitaTuretaDreapta");
 
-        vBuilder.setCamera(hwMap.get(WebcamName.class, "webcamTurret"));
-        vBuilder.addProcessor(tagProcessor);
-        vBuilder.setCameraResolution(new Size(frameWidth, 480));
-        vBuilder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+        limelight = hwMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
 
-        vision = vBuilder.build();
+        FtcDashboard.getInstance().startCameraStream(limelight, 30);
 
-        vision.resumeStreaming();
+        pidfController.setSetpoint(0);
+        pidfController.setTolerance(0.3);
 
-        FtcDashboard.getInstance().startCameraStream(vision, 30);
-
-        pidfController.setSetpoint(frameWidth / 2.0);
-        pidfController.setTolerance(0);
+        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
     }
 
     public void enableCamera() {
-        if (vision != null) {
-            vision.resumeStreaming(); // restarts the webcam stream
-        }
+        limelight.start();
+        tracking = true;
     }
 
     public void disableCamera() {
-        if (vision != null) {
-            vision.stopStreaming(); // fully stops camera pipeline
-        }
+        limelight.stop();
+        tracking = false;
     }
 
     public boolean isShootReady() {
@@ -100,42 +102,94 @@ public class Turret extends Subsystem {
         return velo && found;
     }
 
+    public double getDistance() {
+
+        targetOffsetAngle_Vertical = limelight.getLatestResult().getTy();
+
+        angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+        angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+
+        return distanceFromLimelightToGoalInches =
+                (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+    }
+
+    public void move(double power) {
+
+        if (leftLimit.isPressed() && power > 0) {
+            turretRotationServo.setPower(0);
+        } else if (rightLimit.isPressed() && power < 0) {
+            turretRotationServo.setPower(0);
+        } else {
+            turretRotationServo.setPower(power);
+        }
+    }
+
     @Override
     public void update() {
-        turretMotor.setVelocityPIDFCoefficients(shootKp, shootKi, shootKd, shootKf);
+        pidfController.kP = Kp;
+        pidfController.kI = Ki;
+        pidfController.kD = Kd;
+        pidfController.kF = Kf;
 
         if (!tracking) {
             found = false;
+            turretRotationServo.setPower(0);
             return;
         }
 
-        List<AprilTagDetection> result = tagProcessor.getDetections();
+        final LLResult result = limelight.getLatestResult();
 
-        if (!result.isEmpty()) {
-            for (AprilTagDetection tag : result) {
-                if (tag.id == (targetObelisk == TargetObelisk.RED ? 24 : 20)) {
-                    FtcDashboard.getInstance().getTelemetry().addData("tag center", tag.center.x);
+        found = false;
+
+        if (result.isValid()) {
+            for (FiducialResult fiducial : result.getFiducialResults()) {
+                if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
+                    double pidOutput = pidfController.updatePID(result.getTx());
                     found = true;
-                    currentPos = tag.center.x;
-                    // -50 is the physical offset, currently aims too much to the right, compensates
-                    // 50 to the
-                    // left
-                    turretRotationServo.setPower(pidfController.updatePID(tag.center.x - 50));
+                    curr = result.getTx();
 
-                    double dist =
-                            tag.ftcPose.x * tag.ftcPose.x
-                                    + tag.ftcPose.y * tag.ftcPose.y
-                                    + tag.ftcPose.z * tag.ftcPose.z;
-                    dist = Math.sqrt(dist);
+                    move(pidOutput);
 
-                    targetVelocity = ((dist - 52.3) * 375 / 33.15 + 1000);
+                    // turretMotor.setVelocity((getDistance()- 47.3) * 375 / 33.15 + 800);
+                    if (!override) {
+                        targetVelocity = getDistance() * 37 / 7 + 785.67;
+                    } else {
+                        targetVelocity = 1320;
+                    }
+
                     turretMotor.setVelocity(targetVelocity);
+
+                    // turretMotor.setPower(0.2);
+
+                    break;
                 }
             }
         } else {
-            // no more search fuck off driver 2
             turretRotationServo.setPower(0);
-            found = false;
+        }
+    }
+
+    public void updateVelocity() {
+        final LLResult result = limelight.getLatestResult();
+
+        if (result.isValid()) {
+            for (FiducialResult fiducial : result.getFiducialResults()) {
+                if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
+                    found = true;
+                    curr = result.getTx();
+
+                    // turretMotor.setVelocity((getDistance()- 47.3) * 375 / 33.15 + 800);
+                    targetVelocity = getDistance() * 37 / 7 + 785.67;
+
+                    turretMotor.setVelocity(targetVelocity);
+
+                    // turretMotor.setPower(0.2);
+
+                    break;
+                } else {
+                    found = false;
+                }
+            }
         }
     }
 }

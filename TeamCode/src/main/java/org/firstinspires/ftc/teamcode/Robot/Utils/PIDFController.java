@@ -17,7 +17,7 @@ public class PIDFController {
     private double integral = 0;
     private double setpoint = 0;
     private double maxIntegral = 1.0; // Cap for the "I" term
-    private int tolerance = 0;
+    private double tolerance = 0;
 
     private ElapsedTime timer = new ElapsedTime();
 
@@ -83,7 +83,7 @@ public class PIDFController {
         timer.reset();
     }
 
-    public void setTolerance(int tolerance) {
+    public void setTolerance(double tolerance) {
         this.tolerance = tolerance;
     }
 

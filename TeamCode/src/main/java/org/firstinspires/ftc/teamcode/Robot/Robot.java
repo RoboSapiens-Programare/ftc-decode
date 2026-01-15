@@ -1,30 +1,45 @@
 package org.firstinspires.ftc.teamcode.Robot;
 
+import com.bylazar.configurables.PanelsConfigurables;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Drive;
+import org.firstinspires.ftc.teamcode.Robot.Subsystems.FixedTurret;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Intake;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Turret;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.util.PoseHistory;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 public class Robot {
     public boolean initialize;
     public Spindexer spindexer;
-    public Revolver revolver;
     public Intake intake;
-    public Turret turret;
-    public Drive drive;
+    public FixedTurret turret;
+    public static Follower follower;
+    public static PoseHistory poseHistory;
+
+    public enum Alliance {
+        RED,
+        BLUE
+    };
+
+    public static Alliance alliance = Alliance.RED;
 
     public Robot(HardwareMap hwMap) {
         initialize = true;
 
-        drive = new Drive(hwMap);
-
         spindexer = new Spindexer(hwMap);
-        revolver = new Revolver(hwMap);
 
-        turret = new Turret(hwMap);
-        intake = new Intake(hwMap, revolver);
+        turret = new FixedTurret(hwMap);
+        intake = new Intake(hwMap, spindexer);
+
+        if (follower == null) {
+            follower = Constants.createFollower(hwMap);
+            PanelsConfigurables.INSTANCE.refreshClass(this);
+        } else {
+            follower = Constants.createFollower(hwMap);
+        }
+
+        poseHistory = follower.getPoseHistory();
 
         initialize = false;
     }
