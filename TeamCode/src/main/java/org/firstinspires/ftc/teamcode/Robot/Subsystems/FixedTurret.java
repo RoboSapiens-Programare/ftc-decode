@@ -22,9 +22,10 @@ import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 /*  THE GREAT TODO
 *       - tune pid
 *           - procedure:
-*               - first determine the max rpm for each motor using the motor test class ( must be modified )
+*               - !!IMPORTANT: disconnect the motors from the axle first
+*               - first determine the max TPS for each motor using the DualMotorTuner
 *               - then, by using ziegler-nichols (check google drive for `SFANTA ENCICLOPEDIE`) tune
-*
+*       - pray
 * */
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -45,14 +46,13 @@ public class FixedTurret extends Subsystem {
 
     private final PIDFController pidfController = new PIDFController(shootKp, shootKi, shootKd, shootKf);
 
-    public static double leftMotorMaxRPM = 0;
-    public static double rightMotorMaxRPM = 0;
+    public static double leftMotorMaxTPS = 0;
+    public static double rightMotorMaxTPS = 0;
 
-    private final Pose blueObeliskPose = new Pose();
-    private final Pose redObeliskPose = new Pose();
+    private final Pose blueObeliskPose = new Pose(12, 135);
+    private final Pose redObeliskPose = new Pose(133, 135);
 
     public static double velocityTolerance = 75;
-    public double curr = 0;
 
     public static double targetVelocity = 0;
 
@@ -81,6 +81,7 @@ public class FixedTurret extends Subsystem {
     }
 
     private double computeVelocity() {
+        // TODO: use real equation
         return computeDistance() * 37 / 7 + 785.67;
     }
 
@@ -98,6 +99,7 @@ public class FixedTurret extends Subsystem {
 
     @Override
     public void update() {
+        // TODO: remove after PID tuning
         pidfController.kP = shootKp;
         pidfController.kI = shootKi;
         pidfController.kD = shootKd;
@@ -121,9 +123,11 @@ public class FixedTurret extends Subsystem {
             shouldFollowTrack = false;
         }
 
-        double pidOutput = pidfController.updatePID(computeVelocity());
-        turretMotorLeft.setPower(pidOutput * (leftMotorMaxRPM / (leftMotorMaxRPM + rightMotorMaxRPM)));
-        turretMotorRight.setPower(pidOutput * (rightMotorMaxRPM / (leftMotorMaxRPM + rightMotorMaxRPM)));
+        targetVelocity = computeVelocity();
+
+        double pidOutput = pidfController.updatePID(targetVelocity);
+        turretMotorLeft.setPower(pidOutput * (rightMotorMaxTPS / (leftMotorMaxTPS + rightMotorMaxTPS)));
+        turretMotorRight.setPower(pidOutput * (leftMotorMaxTPS / (leftMotorMaxTPS + rightMotorMaxTPS)));
     }
 
     public void reset() {
