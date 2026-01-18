@@ -4,37 +4,65 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
+import com.pedropathing.ftc.localization.Encoder;
+import com.pedropathing.ftc.localization.constants.DriveEncoderConstants;
+import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.paths.PathConstraints;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
-    public static FollowerConstants followerConstants = new FollowerConstants();
+    public static FollowerConstants followerConstants = new FollowerConstants().mass(13);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
+//                .driveEncoderLocalizer(driveEncoderLocalizerConstants)
+                .mecanumDrivetrain(mecanumConstants)
+                .pinpointLocalizer(localizerConstants)
                 .build();
     }
 
     public static MecanumConstants mecanumConstants =
             new MecanumConstants()
                     .maxPower(1)
-                    .rightFrontMotorName("mec_rf")
-                    .rightRearMotorName("mec_rr")
-                    .leftRearMotorName("mec_lr")
-                    .leftFrontMotorName("mec_lf")
-                    .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+                    .rightFrontMotorName("rightFront")
+                    .rightRearMotorName("rightRear")
+                    .leftRearMotorName("leftRear")
+                    .leftFrontMotorName("leftFront")
+                    .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
                     .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-                    .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-                    .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
+                    .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+                    .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
+//                    .xVelocity(66.79517178272638)
+//                    .yVelocity();
 
-    public static Follower createMecanumFollower(HardwareMap hardwareMap) {
-        return new FollowerBuilder(followerConstants, hardwareMap)
-                .pathConstraints(pathConstraints)
-                .mecanumDrivetrain(mecanumConstants)
-                .build();
-    }
+    public static PinpointConstants localizerConstants =
+            new PinpointConstants()
+                    .forwardPodY(7.7)
+                    .strafePodX(5.6)
+                    .distanceUnit(DistanceUnit.CM)
+                    .hardwareMapName("pinpoint")
+                    .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
+                    .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
+                    .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+
+    public static DriveEncoderConstants driveEncoderLocalizerConstants = new DriveEncoderConstants()
+            .rightFrontMotorName("rightFront")
+            .rightRearMotorName("rightRear")
+            .leftRearMotorName("leftRear")
+            .leftFrontMotorName("leftFront")
+            .leftFrontEncoderDirection(Encoder.REVERSE)
+            .leftRearEncoderDirection(Encoder.FORWARD)
+            .rightFrontEncoderDirection(Encoder.FORWARD)
+            .rightRearEncoderDirection(Encoder.FORWARD)
+            .robotLength(27 / 2.5)
+            .robotWidth(35 / 2.5)
+            .forwardTicksToInches(26434.66703613705)
+            .strafeTicksToInches(-1.1441178787974106E7)
+            .turnTicksToInches(0.9991656241808676);
 }

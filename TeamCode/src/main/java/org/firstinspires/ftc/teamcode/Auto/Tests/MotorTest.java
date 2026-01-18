@@ -2,71 +2,58 @@ package org.firstinspires.ftc.teamcode.Auto.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
-import java.util.Arrays;
-import java.util.List;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 
 @Autonomous(name = "Motor test", group = "1. Auto Tests")
 public class MotorTest extends OpMode {
-    private DcMotorEx leftFront;
-    private DcMotorEx leftRear;
-    private DcMotorEx rightFront;
-    private DcMotorEx rightRear;
-    private List<DcMotorEx> motors;
+    private DcMotorEx motor;
+    private TouchSensor limitSwitch;
 
-    private void updateFollower(double power, double gx, double gy, double gr) {
-        double y = -gy * power; // Remember, this is reversed!
-        double x = gx * power; // this is strafing
-        double rx = gr * power;
+    private final PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio, but only when
-        // at least one is out of the range [-1, 1]
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double leftFrontPower = (y + x + rx) / denominator;
-        double leftRearPower = (y - x + rx) / denominator;
-        double rightFrontPower = (y - x - rx) / denominator;
-        double rightRearPower = (y + x - rx) / denominator;
+    public static double Kp = -0.0006;
+    public static double Ki = -0.00001;
+    public static double Kd = -0.000053;
+    public static double Kf = 0;
+    public static int target = 0;
+    public static int tolerance = 30;
 
-        leftFront.setPower(1);
-        leftRear.setPower(0);
-        rightFront.setPower(0);
-        rightRear.setPower(0);
-    }
+    private boolean doOnce = true;
 
     @Override
     public void init() {
-        // left front = left rear
-        // left rear = right front
-        // right front = right rear
-        // right rear = left front
-        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
-        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
-        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
-        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
-        leftFront.setDirection(Constants.mecanumConstants.leftFrontMotorDirection);
-        leftRear.setDirection(Constants.mecanumConstants.leftRearMotorDirection);
-        rightFront.setDirection(Constants.mecanumConstants.rightFrontMotorDirection);
-        rightRear.setDirection(Constants.mecanumConstants.rightRearMotorDirection);
+        motor = hardwareMap.get(DcMotorEx.class, "intake");
+        limitSwitch = hardwareMap.get(TouchSensor.class, "spindexerLimitSwitch");
 
-        motors = Arrays.asList(leftFront, leftRear, rightFront, rightRear);
-
-        for (DcMotorEx motor : motors) {
-            MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
-            motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
-            motor.setMotorType(motorConfigurationType);
-        }
-
-        for (DcMotorEx motor : motors) {
-            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
+        pidfController.setTolerance(tolerance);
     }
 
     @Override
     public void loop() {
-        updateFollower(1, 0, 1, 0);
+        //        while (!limitSwitch.isPressed() && doOnce) {
+        //            motor.setPower(0.2);
+        //        }
+        //
+        //        if (doOnce) {
+        //            doOnce = false;
+        //
+        //            motor.setPower(0);
+        //
+        //            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //        } else {
+        //            pidfController.kP = Kp;
+        //            pidfController.kI = Ki;
+        //            pidfController.kD = Kd;
+        //            pidfController.kF = Kf;
+        //
+        //            pidfController.setSetpoint(uV.homingOffset);
+        //
+        //            motor.setPower(pidfController.updatePID(motor.getCurrentPosition()));
+        //        }
+
+        motor.setPower(-1);
     }
 }

@@ -4,6 +4,7 @@ public abstract class Subsystem {
     public void init() {}
 
     public abstract void update();
+
     public void reset() {}
 
     public void stop() {}

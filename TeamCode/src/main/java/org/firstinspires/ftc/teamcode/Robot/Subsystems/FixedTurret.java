@@ -6,88 +6,89 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.TouchSensor;
-
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 
 /*  THE GREAT TODO
-*       - tune pid
-*           - procedure:
-*               - !!IMPORTANT: disconnect the motors from the axle first
-*               - first determine the max TPS for each motor using the DualMotorTuner
-*               - then, by using ziegler-nichols (check google drive for `SFANTA ENCICLOPEDIE`) tune
-*       - pray
-* */
+ *       - tune pid
+ *           - procedure:
+ *               - !!IMPORTANT: disconnect the motors from the axle first
+ *               - first determine the max TPS for each motor using the DualMotorTuner
+ *               - then, by using ziegler-nichols (check google drive for `SFANTA ENCICLOPEDIE`) tune
+ *       - pray
+ * */
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
 public class FixedTurret extends Subsystem {
-    public DcMotorEx turretMotorLeft;
-    public DcMotorEx turretMotorRight;
+    private final DcMotorEx turretMotorLeft;
+    private final DcMotorEx turretMotorRight;
 
     // PID values for turret
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
 
-    public static double shootKp = 0;
-    public static double shootKi = 0;
-    public static double shootKd = 0;
-    public static double shootKf = 0;
+    public static double shootKp = 0.07;
+    public static double shootKi = 0.00002;
+    public static double shootKd = 0.0000001;
+    public static double shootKf = 0.013;
 
-    private final PIDFController pidfController = new PIDFController(shootKp, shootKi, shootKd, shootKf);
-
-    public static double leftMotorMaxTPS = 0;
-    public static double rightMotorMaxTPS = 0;
+    private final PIDFController pidfController =
+            new PIDFController(shootKp, shootKi, shootKd, shootKf);
 
     private final Pose blueObeliskPose = new Pose(12, 135);
     private final Pose redObeliskPose = new Pose(133, 135);
 
-    public static double velocityTolerance = 75;
-
-    public static double targetVelocity = 0;
+    public static double targetVelocity = 1100;
 
     public boolean track = false;
+
+    public boolean shooting = false;
+
     private boolean shouldFollowTrack = true;
 
     public FixedTurret(HardwareMap hwMap) {
-        turretMotorLeft = hwMap.get(DcMotorEx.class, "turretMotorLeft");
-        turretMotorLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        turretMotorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        turretMotorRight = hwMap.get(DcMotorEx.class, "turretMotorRight");
+        turretMotorRight = hwMap.get(DcMotorEx.class, "natasha");
+        turretMotorLeft = hwMap.get(DcMotorEx.class, "starDestroyer");
         turretMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        turretMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+
+        pidfController.setTolerance(20);
+        pidfController.maxOut = 2;
+        pidfController.minOut = -2;
     }
 
     public boolean isShootReady() {
-        return Math.abs(turretMotorLeft.getVelocity() - targetVelocity) < velocityTolerance;
+        // TODO: add shootzone chechk
+        return pidfController.targetReached();
     }
 
     public double computeDistance() {
         Pose currentPose = Robot.follower.getPose();
-        Pose targetObeliskPose = Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
+        Pose targetObeliskPose =
+                Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
 
         return currentPose.distanceFrom(targetObeliskPose);
     }
 
     private double computeVelocity() {
-        // TODO: use real equation
-        return computeDistance() * 37 / 7 + 785.67;
+//        return computeDistance() > 120 ? 1400 : 1100;
+        return 0;
     }
 
     public double getAngle() {
         Pose currentPose = Robot.follower.getPose();
-        Pose targetObeliskPose = Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
+        Pose targetObeliskPose =
+                Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
 
         double dx = Math.abs(currentPose.getX() - targetObeliskPose.getX());
         double dy = Math.abs(currentPose.getY() - targetObeliskPose.getY());
@@ -105,29 +106,37 @@ public class FixedTurret extends Subsystem {
         pidfController.kD = shootKd;
         pidfController.kF = shootKf;
 
-        if (track && shouldFollowTrack) {
-            Path p = new Path(
-                    new BezierLine(
-                        Robot.follower.getPose(),
-                        Robot.follower.getPose()
-                    )
-            );
 
-            p.setHeadingInterpolation( HeadingInterpolator.linear(
-                    Robot.follower.getHeading(),
-                    this.getAngle()
-            ) );
+//        targetVelocity = computeVelocity();
+        pidfController.setSetpoint(targetVelocity);
+        if (shooting) {
+
+            double pidOutput = pidfController.updatePID(turretMotorRight.getVelocity());
+            ////
+            FtcDashboard.getInstance().getTelemetry().addData("pid vel", pidOutput);
+            turretMotorRight.setPower(pidOutput / 2);
+            turretMotorLeft.setPower(pidOutput / 2);
+        } else {
+            turretMotorRight.setPower(0);
+            turretMotorLeft.setPower(0);
+        }
+
+        if (track && shouldFollowTrack) {
+            Path p = new Path(new BezierLine(
+                    Robot.follower.getPose(),
+                    new Pose (
+                        Robot.follower.getPose().getX() + 1,
+                        Robot.follower.getPose().getY() + 1
+                    )
+            ));
+
+            p.setConstantHeadingInterpolation(this.getAngle());
 
             Robot.follower.followPath(p, true);
 
             shouldFollowTrack = false;
         }
 
-        targetVelocity = computeVelocity();
-
-        double pidOutput = pidfController.updatePID(targetVelocity);
-        turretMotorLeft.setPower(pidOutput * (rightMotorMaxTPS / (leftMotorMaxTPS + rightMotorMaxTPS)));
-        turretMotorRight.setPower(pidOutput * (leftMotorMaxTPS / (leftMotorMaxTPS + rightMotorMaxTPS)));
     }
 
     public void reset() {

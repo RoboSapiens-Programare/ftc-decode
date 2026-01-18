@@ -1,26 +1,15 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
-import static java.lang.Math.abs;
-
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Revolver;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Turret;
-import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 
 // bag pula coaie il fac maine pe asta fmm de fsm
 
 @Config
 @TeleOp(name = "TeleOp")
 public class FSM extends OpMode {
+    /*
     private Robot robot;
 
     enum State {
@@ -169,10 +158,11 @@ public class FSM extends OpMode {
                     if (robot.spindexer.getFullSlot() != -1) {
                         robot.spindexer.goToSlot(robot.spindexer.getFullSlot());
                     }
-//                    TODO: change to default to intake state when spindexer works consistently
-//                    else if (loadBallTimer.milliseconds() > 300) {
-//                        changeState(State.INTAKE);
-//                    }
+                    //                    TODO: change to default to intake state when spindexer
+                    // works consistently
+                    //                    else if (loadBallTimer.milliseconds() > 300) {
+                    //                        changeState(State.INTAKE);
+                    //                    }
                 }
 
                 if (gamepad2.dpad_right || gamepad2.dpad_left) {
@@ -323,8 +313,7 @@ public class FSM extends OpMode {
 
         dashboardTelemetry.addData("state", state);
         dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
-        dashboardTelemetry.addData(
-                "current position", robot.spindexer.motor.getCurrentPosition());
+        dashboardTelemetry.addData("current position", robot.spindexer.motor.getCurrentPosition());
 
         dashboardTelemetry.addData("power rotation: ", robot.spindexer.motor.getPower());
         dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
@@ -342,4 +331,12 @@ public class FSM extends OpMode {
 
     @Override
     public void stop() {}
+    *
+     */
+
+    @Override
+    public void init() {}
+
+    @Override
+    public void loop() {}
 }

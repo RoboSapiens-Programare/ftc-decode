@@ -38,10 +38,10 @@ public class Turret extends Subsystem {
     public static double Kd = 0.01;
     public static double Kf = 0; // Power to overcome inertia and friction
 
-    public static double shootKp = 400;
-    public static double shootKi = 0;
-    public static double shootKd = 100;
-    public static double shootKf = 13;
+    public static double shootKp = 0.07;
+    public static double shootKi = 0.00002;
+    public static double shootKd = 0.0000001;
+    public static double shootKf = 0.013;
 
     double limelightMountAngleDegrees = 15.0;
 

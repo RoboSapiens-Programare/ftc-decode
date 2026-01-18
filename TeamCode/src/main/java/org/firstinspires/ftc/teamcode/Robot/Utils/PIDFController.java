@@ -17,6 +17,10 @@ public class PIDFController {
     private double integral = 0;
     private double setpoint = 0;
     private double maxIntegral = 1.0; // Cap for the "I" term
+
+    public double maxOut = 1;
+    public double minOut = -1;
+
     private double tolerance = 0;
 
     private ElapsedTime timer = new ElapsedTime();
@@ -74,7 +78,7 @@ public class PIDFController {
         timer.reset();
 
         // 5. Clip result to motor limits
-        return Range.clip(output, -1.0, 1.0);
+        return Range.clip(output, minOut, maxOut);
     }
 
     public void reset() {
