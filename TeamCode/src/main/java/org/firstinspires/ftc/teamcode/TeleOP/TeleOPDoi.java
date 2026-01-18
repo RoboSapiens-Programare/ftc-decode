@@ -73,7 +73,7 @@ public class TeleOPDoi extends OpMode {
         }
 
         // magnetic homing (driver 2)
-        if (gamepad1.circle && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
+        if (gamepad2.circle && driverTwoInputTimer.milliseconds() > uV.inputDelayMS) {
             robot.spindexer.reset();
             robot.spindexer.home();
 
@@ -251,21 +251,21 @@ public class TeleOPDoi extends OpMode {
         }
 
 
-        dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
-        dashboardTelemetry.addData("current position", robot.spindexer.motor.getCurrentPosition());
-        dashboardTelemetry.addData("target position", robot.spindexer.targetPosition);
-        dashboardTelemetry.addData("power rotation", robot.spindexer.motor.getPower());
-        dashboardTelemetry.addData("slot 0", robot.spindexer.getSlotColor(0));
-        dashboardTelemetry.addData("slot 1", robot.spindexer.getSlotColor(1));
-        dashboardTelemetry.addData("slot 2", robot.spindexer.getSlotColor(2));
-        dashboardTelemetry.addData("turret ready", robot.turret.isShootReady());
-        dashboardTelemetry.addData("spindexer ready", robot.spindexer.isReady());
-
-        dashboardTelemetry.addData("0. Position: ", Robot.follower.getPose());
-        dashboardTelemetry.addData("1. Distance: ", robot.turret.computeDistance());
-        dashboardTelemetry.addData("2. Angle: ", Math.toDegrees(robot.turret.getAngle()));
-        dashboardTelemetry.update();
+//        dashboardTelemetry.addData("state", state);
+//        dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
+//        dashboardTelemetry.addData("current position", robot.spindexer.motor.getCurrentPosition());
+//        dashboardTelemetry.addData("target position", robot.spindexer.targetPosition);
+//        dashboardTelemetry.addData("power rotation", robot.spindexer.motor.getPower());
+//        dashboardTelemetry.addData("slot 0", robot.spindexer.getSlotColor(0));
+//        dashboardTelemetry.addData("slot 1", robot.spindexer.getSlotColor(1));
+//        dashboardTelemetry.addData("slot 2", robot.spindexer.getSlotColor(2));
+//        dashboardTelemetry.addData("turret ready", robot.turret.isShootReady());
+//        dashboardTelemetry.addData("spindexer ready", robot.spindexer.isReady());
+//
+//        dashboardTelemetry.addData("0. Position: ", Robot.follower.getPose());
+//        dashboardTelemetry.addData("1. Distance: ", robot.turret.computeDistance());
+//        dashboardTelemetry.addData("2. Angle: ", Math.toDegrees(robot.turret.getAngle()));
+//        dashboardTelemetry.update();
     }
 
     @Override
@@ -289,6 +289,9 @@ public class TeleOPDoi extends OpMode {
             case OUTTAKE:
                 handleOuttake();
                 break;
+
+            default:
+                Robot.follower.update();
         }
 
         // CRITICAL FIX: Always update all subsystems
@@ -346,20 +349,20 @@ public class TeleOPDoi extends OpMode {
 
         telemetry.update();
 
-        dashboardTelemetry.addData("state", state);
-        dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
-        dashboardTelemetry.addData("current position", robot.spindexer.motor.getCurrentPosition());
-        dashboardTelemetry.addData("target position", robot.spindexer.targetPosition);
-        dashboardTelemetry.addData("power rotation", robot.spindexer.motor.getPower());
-        dashboardTelemetry.addData("slot 0", robot.spindexer.getSlotColor(0));
-        dashboardTelemetry.addData("slot 1", robot.spindexer.getSlotColor(1));
-        dashboardTelemetry.addData("slot 2", robot.spindexer.getSlotColor(2));
-        dashboardTelemetry.addData("turret ready", robot.turret.isShootReady());
-        dashboardTelemetry.addData("spindexer ready", robot.spindexer.isReady());
-
-        dashboardTelemetry.addData("0. Position: ", Robot.follower.getPose());
-        dashboardTelemetry.addData("1. Distance: ", robot.turret.computeDistance());
-        dashboardTelemetry.addData("2. Angle: ", Math.toDegrees(robot.turret.getAngle()));
-        dashboardTelemetry.update();
+//        dashboardTelemetry.addData("state", state);
+//        dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
+//        dashboardTelemetry.addData("current position", robot.spindexer.motor.getCurrentPosition());
+//        dashboardTelemetry.addData("target position", robot.spindexer.targetPosition);
+//        dashboardTelemetry.addData("power rotation", robot.spindexer.motor.getPower());
+//        dashboardTelemetry.addData("slot 0", robot.spindexer.getSlotColor(0));
+//        dashboardTelemetry.addData("slot 1", robot.spindexer.getSlotColor(1));
+//        dashboardTelemetry.addData("slot 2", robot.spindexer.getSlotColor(2));
+//        dashboardTelemetry.addData("turret ready", robot.turret.isShootReady());
+//        dashboardTelemetry.addData("spindexer ready", robot.spindexer.isReady());
+//
+//        dashboardTelemetry.addData("0. Position: ", Robot.follower.getPose());
+//        dashboardTelemetry.addData("1. Distance: ", robot.turret.computeDistance());
+//        dashboardTelemetry.addData("2. Angle: ", Math.toDegrees(robot.turret.getAngle()));
+//        dashboardTelemetry.update();
     }
 }

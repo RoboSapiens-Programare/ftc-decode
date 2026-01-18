@@ -52,7 +52,7 @@ public class Intake extends Subsystem {
                         .enableLiveView(false)
                         .build();
 
-        FtcDashboard.getInstance().startCameraStream(portal, 30);
+//        FtcDashboard.getInstance().startCameraStream(portal, 30);
     }
 
     @Override
