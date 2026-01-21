@@ -9,8 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.FixedTurret;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
+import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
@@ -47,7 +46,7 @@ public class TeleOPDoi extends OpMode {
         stateTimer.reset();
 
 //        robot.spindexer.setTargetSlot((byte) 0);
-        robot.turret.shooting = state == State.OUTTAKE;
+        robot.shooter.shooting = state == State.OUTTAKE;
     }
 
     public void handleIntake() {
@@ -84,7 +83,7 @@ public class TeleOPDoi extends OpMode {
         if (robot.spindexer.isSlotFull(robot.spindexer.getTargetSlot())) {
             byte slot = robot.spindexer.getFreeSlot();
             if (slot != -1) {
-                robot.spindexer.setTargetSlot(slot);
+                robot.spindexer.goToSlot(slot);
             }
         }
 
@@ -99,48 +98,48 @@ public class TeleOPDoi extends OpMode {
 
     public void handleOuttake() {
         /* ----- STATE FUNCTIONS ----- */
-        // power off turret and change to intake state
+        // power off shooter and change to intake state
         if (gamepad1.cross && stateTimer.milliseconds() > uV.inputDelayMS) {
-            if (robot.turret.track) {
-                robot.turret.track = false;
+            if (robot.shooter.isTracking) {
+                robot.shooter.isTracking = false;
                 Robot.follower.breakFollowing();
             }
 
-            robot.turret.reset();
+            robot.shooter.reset();
 
-            robot.turret.stop();
+            robot.shooter.stop();
 
             changeState(State.INTAKE);
             stateTimer.reset();
         }
 
         /* ----- MECHANICAL FUNCTIONS ----- */
-        // turret tracking via chassis
+        // shooter tracking via chassis
         if (gamepad1.touchpad && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
-            robot.turret.reset();
-            robot.turret.track = !robot.turret.track;
+            robot.shooter.track();
+
             driverOneInputTimer.reset();
         }
 
         // shooting with proper debouncing - wait for spindexer to be ready
 
         if (gamepad1.left_bumper && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
-            FixedTurret.targetVelocity = 1400;
+            Shooter.targetVelocity = 1400;
             driverTwoInputTimer.reset();
         }
 
         if (gamepad1.right_bumper && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
-            FixedTurret.targetVelocity = 1100;
+            Shooter.targetVelocity = 1100;
             driverTwoInputTimer.reset();
         }
 
         if (gamepad1.right_trigger > 0.1) {  // Rising edge detection
             robot.intake.setPower(1);
-            if (robot.turret.isShootReady() && robot.spindexer.isReady()) {
+            if (robot.shooter.isShootReady() && robot.spindexer.isReady()) {
+                robot.spindexer.shoot();
 
-
+                /*
                 int slot = robot.spindexer.getTargetSlot();
-//
                 robot.spindexer.setSlotColor(slot, ColorEnum.UNDEFINED);
 
                 robot.spindexer.targetPosition -= 8192.0 / 3;
@@ -148,10 +147,7 @@ public class TeleOPDoi extends OpMode {
                 if (robot.spindexer.targetSlot == -1) {
                     robot.spindexer.targetSlot = 2;
                 }
-////                robot.spindexer.targetPosition -= 8192.0 / 3;
-//                robot.spindexer.shootDirection = 1;
-//                robot.spindexer.goToSlot(slot-3);
-//                robot.spindexer.targetSlot = 0;
+                 */
             }
         } else {
             robot.spindexer.shootDirection = -1;
@@ -161,8 +157,8 @@ public class TeleOPDoi extends OpMode {
         // Update gamepad LEDs
         updateGamepadLEDForSlotColor();
 
-        // change controller color when turret can shoot optimally
-        if (robot.turret.isShootReady() && robot.spindexer.isReady()) {
+        // change controller color when shooter can shoot optimally
+        if (robot.shooter.isShootReady() && robot.spindexer.isReady()) {
             gamepad1.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         } else {
             gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
@@ -184,10 +180,10 @@ public class TeleOPDoi extends OpMode {
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-        robot.turret.track = false;
+        robot.shooter.isTracking = false;
 
 
-        robot.spindexer.setTargetSlot((byte) 0);
+        robot.spindexer.goToSlot((byte) 0);
 
         initLoopTimer.reset();
 
@@ -197,22 +193,11 @@ public class TeleOPDoi extends OpMode {
 
         // TODO: remove in final version
         Robot.alliance = Robot.Alliance.BLUE;
-        robot.spindexer.home();
+//        robot.spindexer.home();
     }
 
     @Override
     public void init_loop() {
-        robot.intake.update();
-        robot.spindexer.update();
-
-        int current = robot.spindexer.getTargetSlot();
-
-        if (current < 2) {
-            if (robot.spindexer.isSlotFull(current)) {
-                robot.spindexer.goToSlot(current + 1);
-            }
-        }
-
         // blink driver 2 led
         if (((int) initLoopTimer.seconds()) % 2 == 0) {
             gamepad2.setLedColor(0, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
@@ -231,41 +216,6 @@ public class TeleOPDoi extends OpMode {
             driverOneInputTimer.reset();
         }
 
-        if (!robot.spindexer.homing && robot.spindexer.homingSingleton && robot.spindexer.getBallCount() == 3) {
-            homingExecOnce = true;
-            homingExecOnce2 = false;
-            homingFixTimer.reset();
-            robot.spindexer.homingSingleton = false;
-        }
-
-        if (homingExecOnce) {
-            if (homingFixTimer.milliseconds() > 500 && !homingExecOnce2) {
-                robot.spindexer.targetPosition += 8192.0 / 12;
-                homingExecOnce2 = true;
-            }
-            if (homingFixTimer.milliseconds() > 1500 && homingExecOnce2) {
-                robot.spindexer.targetPosition -= 8192.0 / 12;
-                homingExecOnce2 = false;
-                homingExecOnce = false;
-            }
-        }
-
-
-//        dashboardTelemetry.addData("state", state);
-//        dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
-//        dashboardTelemetry.addData("current position", robot.spindexer.motor.getCurrentPosition());
-//        dashboardTelemetry.addData("target position", robot.spindexer.targetPosition);
-//        dashboardTelemetry.addData("power rotation", robot.spindexer.motor.getPower());
-//        dashboardTelemetry.addData("slot 0", robot.spindexer.getSlotColor(0));
-//        dashboardTelemetry.addData("slot 1", robot.spindexer.getSlotColor(1));
-//        dashboardTelemetry.addData("slot 2", robot.spindexer.getSlotColor(2));
-//        dashboardTelemetry.addData("turret ready", robot.turret.isShootReady());
-//        dashboardTelemetry.addData("spindexer ready", robot.spindexer.isReady());
-//
-//        dashboardTelemetry.addData("0. Position: ", Robot.follower.getPose());
-//        dashboardTelemetry.addData("1. Distance: ", robot.turret.computeDistance());
-//        dashboardTelemetry.addData("2. Angle: ", Math.toDegrees(robot.turret.getAngle()));
-//        dashboardTelemetry.update();
     }
 
     @Override
@@ -298,7 +248,7 @@ public class TeleOPDoi extends OpMode {
         Robot.follower.update();
         robot.spindexer.update();
         robot.intake.update();
-        robot.turret.update();  // ALWAYS update turret, not just in OUTTAKE
+        robot.shooter.update();  // ALWAYS update shooter, not just in OUTTAKE
 
         if (!robot.spindexer.homing && robot.spindexer.homingSingleton && robot.spindexer.getBallCount() == 3) {
             homingExecOnce = true;
@@ -309,32 +259,46 @@ public class TeleOPDoi extends OpMode {
 
         if (homingExecOnce) {
             if (homingFixTimer.milliseconds() > 500 && !homingExecOnce2) {
-                robot.spindexer.targetPosition += 8192.0 / 12;
+                robot.spindexer.targetPosition += 8192.0 / 8;
                 homingExecOnce2 = true;
             }
             if (homingFixTimer.milliseconds() > 1500 && homingExecOnce2) {
-                robot.spindexer.targetPosition -= 8192.0 / 12;
+                robot.spindexer.targetPosition -= 8192.0 / 8;
                 homingExecOnce2 = false;
                 homingExecOnce = false;
             }
         }
 
         // Only allow manual drive when not tracking
-        if (!robot.turret.track) {
+        if ((Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1 || Math.abs(gamepad2.right_stick_y) > 0.1) && robot.shooter.isTracking) {
+            Robot.follower.breakFollowing();
+            Robot.follower.startTeleOpDrive();
+            robot.shooter.isTracking = false;
+        }
+
+        if (!robot.shooter.isTracking) {
             Robot.follower.setTeleOpDrive(
                     -gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
 
         if (gamepad1.dpad_left && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
-            robot.spindexer.targetPosition -= 8192.0/12;
+            robot.spindexer.targetPosition -= 8192.0/8;
 
             driverOneInputTimer.reset();
         }
 
         if (gamepad1.dpad_right && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
-            robot.spindexer.targetPosition += 8192.0/12;
+            robot.spindexer.targetPosition += 8192.0/8;
 
             driverOneInputTimer.reset();
+        }
+
+        if (gamepad2.left_trigger > 0.1) {
+            robot.intake.setRollerPower(1, -1);
+        }
+
+        if (gamepad2.right_trigger > 0.1) {
+            robot.intake.setRollerPower(-1, 1);
         }
 
         // Telemetry
@@ -345,24 +309,8 @@ public class TeleOPDoi extends OpMode {
         telemetry.addData("4. State", state);
         telemetry.addData("5. Homing", robot.spindexer.homing);
         telemetry.addData("6. Match Time", matchTimer.seconds());
-        telemetry.addData("7. Shoot mode", FixedTurret.targetVelocity == 1100 ? "close" : "far");
+        telemetry.addData("7. Shoot mode", Shooter.targetVelocity == 1100 ? "close" : "far");
 
         telemetry.update();
-
-//        dashboardTelemetry.addData("state", state);
-//        dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
-//        dashboardTelemetry.addData("current position", robot.spindexer.motor.getCurrentPosition());
-//        dashboardTelemetry.addData("target position", robot.spindexer.targetPosition);
-//        dashboardTelemetry.addData("power rotation", robot.spindexer.motor.getPower());
-//        dashboardTelemetry.addData("slot 0", robot.spindexer.getSlotColor(0));
-//        dashboardTelemetry.addData("slot 1", robot.spindexer.getSlotColor(1));
-//        dashboardTelemetry.addData("slot 2", robot.spindexer.getSlotColor(2));
-//        dashboardTelemetry.addData("turret ready", robot.turret.isShootReady());
-//        dashboardTelemetry.addData("spindexer ready", robot.spindexer.isReady());
-//
-//        dashboardTelemetry.addData("0. Position: ", Robot.follower.getPose());
-//        dashboardTelemetry.addData("1. Distance: ", robot.turret.computeDistance());
-//        dashboardTelemetry.addData("2. Angle: ", Math.toDegrees(robot.turret.getAngle()));
-//        dashboardTelemetry.update();
     }
 }

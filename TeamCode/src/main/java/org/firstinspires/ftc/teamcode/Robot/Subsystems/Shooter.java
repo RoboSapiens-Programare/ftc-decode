@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,22 +12,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 
-/*  THE GREAT TODO
- *       - tune pid
- *           - procedure:
- *               - !!IMPORTANT: disconnect the motors from the axle first
- *               - first determine the max TPS for each motor using the DualMotorTuner
- *               - then, by using ziegler-nichols (check google drive for `SFANTA ENCICLOPEDIE`) tune
- *       - pray
- * */
-
 @SuppressWarnings("FieldCanBeLocal")
 @Config
-public class FixedTurret extends Subsystem {
+public class Shooter extends Subsystem {
     private final DcMotorEx turretMotorLeft;
     private final DcMotorEx turretMotorRight;
 
-    // PID values for turret
+    // PID values for shooter
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
     // IT WAS MADE FOR THIS
     // LITERALLY FOR THIS
@@ -44,15 +34,15 @@ public class FixedTurret extends Subsystem {
     private final Pose blueObeliskPose = new Pose(12, 135);
     private final Pose redObeliskPose = new Pose(133, 135);
 
-    public static double targetVelocity = 1100;
+    public static double targetVelocity = 1200;
 
-    public boolean track = false;
+    public boolean isTracking = false;
 
     public boolean shooting = false;
 
     private boolean shouldFollowTrack = true;
 
-    public FixedTurret(HardwareMap hwMap) {
+    public Shooter(HardwareMap hwMap) {
         turretMotorRight = hwMap.get(DcMotorEx.class, "natasha");
         turretMotorLeft = hwMap.get(DcMotorEx.class, "starDestroyer");
         turretMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -98,6 +88,23 @@ public class FixedTurret extends Subsystem {
         return Robot.alliance == Robot.Alliance.RED ? alpha : Math.PI - alpha;
     }
 
+    public void track() {
+        Path p = new Path(new BezierLine(
+                Robot.follower.getPose(),
+                new Pose(
+                        Robot.follower.getPose().getX() + 1,
+                        Robot.follower.getPose().getY() + 1
+                )
+        ));
+
+        isTracking = true;
+
+        p.setLinearHeadingInterpolation(Robot.follower.getHeading(), getAngle());
+
+        Robot.follower.breakFollowing();
+        Robot.follower.followPath(p);
+    }
+
     @Override
     public void update() {
         // TODO: remove after PID tuning
@@ -121,7 +128,7 @@ public class FixedTurret extends Subsystem {
             turretMotorLeft.setPower(0);
         }
 
-        if (track && shouldFollowTrack) {
+        if (isTracking && shouldFollowTrack) {
             Path p = new Path(new BezierLine(
                     Robot.follower.getPose(),
                     new Pose (

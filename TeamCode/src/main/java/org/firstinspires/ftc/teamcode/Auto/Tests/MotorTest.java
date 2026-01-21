@@ -2,13 +2,16 @@ package org.firstinspires.ftc.teamcode.Auto.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 
 @Autonomous(name = "Motor test", group = "1. Auto Tests")
 public class MotorTest extends OpMode {
     private DcMotorEx motor;
+    private CRServo rollerLeft, rollerRight;
     private TouchSensor limitSwitch;
 
     private final PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
@@ -24,10 +27,14 @@ public class MotorTest extends OpMode {
 
     @Override
     public void init() {
-        motor = hardwareMap.get(DcMotorEx.class, "intake");
+        motor = hardwareMap.get(DcMotorEx.class, "spindexer");
         limitSwitch = hardwareMap.get(TouchSensor.class, "spindexerLimitSwitch");
 
         pidfController.setTolerance(tolerance);
+
+        rollerLeft = hardwareMap.get(CRServo.class, "rollerLeft");
+        rollerRight = hardwareMap.get(CRServo.class, "rollerRight");
+        rollerRight.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     @Override
@@ -54,6 +61,8 @@ public class MotorTest extends OpMode {
         //            motor.setPower(pidfController.updatePID(motor.getCurrentPosition()));
         //        }
 
-        motor.setPower(-1);
+        motor.setPower(0.7);
+        rollerRight.setPower(0.375);
+        rollerLeft.setPower(1);
     }
 }

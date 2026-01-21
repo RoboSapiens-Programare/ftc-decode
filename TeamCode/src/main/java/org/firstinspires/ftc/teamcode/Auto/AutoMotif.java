@@ -281,7 +281,7 @@ public class AutoMotif extends LinearOpMode {
         switch (pathStatePPG) {
             case 0:
                 follower.followPath(scorePreload);
-                robot.turret.update();
+                robot.shooter.update();
 
                 if (!follower.isBusy()) {}
 

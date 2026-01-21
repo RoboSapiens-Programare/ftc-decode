@@ -23,12 +23,12 @@ public class Spindexer extends Subsystem {
     public static double Kf = 0;
 
     public int targetSlot = 0;
-    public static double tolerance = 5;
+    public double tolerance = 200;
     public double targetPosition = 0;
     public boolean homing = false;
     public boolean homingSingleton = false;
 
-    private PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
+    private final PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
     public double shootDirection = -1;
 
@@ -51,7 +51,7 @@ public class Spindexer extends Subsystem {
         // uncomment if using pre-defined PID
         // motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        pidfController.setTolerance(200);
+        pidfController.setTolerance(tolerance);
 
         limitSwitch = hwMap.get(TouchSensor.class, "spindexerLimitSwitch");
     }
@@ -67,14 +67,16 @@ public class Spindexer extends Subsystem {
         pidfController.setSetpoint(targetPosition);
     }
 
-    public void shootCurrentSlot() {
+    public void shoot() {
         slotColors[targetSlot] = ColorEnum.UNDEFINED;
 
         targetPosition += shootDirection * ticksPerRevolution / 3;
 
         pidfController.setSetpoint(targetPosition);
 
-        targetSlot = (targetSlot + 1) % 3;
+        if (--targetSlot == -1) {
+            targetSlot = 2;
+        }
     }
 
     // Sorting functions
@@ -93,9 +95,9 @@ public class Spindexer extends Subsystem {
         return slotColors[targetSlot] != ColorEnum.UNDEFINED;
     }
 
-    public boolean isSlotFree(int targetSlot) {
-        return !isSlotFull(targetSlot);
-    }
+//    public boolean isSlotFree(int targetSlot) {
+//        return !isSlotFull(targetSlot);
+//    }
 
     public byte getFreeSlot() {
         for (byte b = 0; b < slotColors.length; ++b) {
@@ -107,20 +109,20 @@ public class Spindexer extends Subsystem {
         return -1;
     }
 
-    public int getFullSlot() {
-        for (int b = 0; b < slotColors.length; ++b) {
-            if (slotColors[b] != ColorEnum.UNDEFINED) {
-                return b;
-            }
-        }
-
-        return -1;
-    }
+//    public int getFullSlot() {
+//        for (int b = 0; b < slotColors.length; ++b) {
+//            if (slotColors[b] != ColorEnum.UNDEFINED) {
+//                return b;
+//            }
+//        }
+//
+//        return -1;
+//    }
 
     public int getBallCount() {
         int count = 0;
-        for (int i = 0; i < slotColors.length; ++i) {
-            if (slotColors[i] != ColorEnum.UNDEFINED) {
+        for (ColorEnum slotColor : slotColors) {
+            if (slotColor != ColorEnum.UNDEFINED) {
                 ++count;
             }
         }
@@ -169,9 +171,6 @@ public class Spindexer extends Subsystem {
         return pidfController.targetReached() && !homing;
     }
 
-    public void setTargetSlot(int targetSlot) {
-        goToSlot(targetSlot);
-    }
 
     public int getTargetSlot() {
         return targetSlot;

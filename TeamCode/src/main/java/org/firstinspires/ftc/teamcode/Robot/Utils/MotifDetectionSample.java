@@ -16,7 +16,7 @@ public class MotifDetectionSample extends OpMode {
 
     @Override
     public void loop() {
-        //        List<AprilTagDetection> result = robot.turret.tagProcessor.getDetections();
+        //        List<AprilTagDetection> result = robot.shooter.tagProcessor.getDetections();
 
         //        if (!result.isEmpty()) {
         //            for (AprilTagDetection tag : result) {

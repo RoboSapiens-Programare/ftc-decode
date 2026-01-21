@@ -73,8 +73,8 @@ public class FSM extends OpMode {
     }
 
     public void handleIntake() {
-        robot.turret.tracking = false;
-        robot.turret.turretMotor.setPower(0);
+        robot.shooter.tracking = false;
+        robot.shooter.turretMotor.setPower(0);
         robot.intake.update();
 
         if (gamepad1.right_trigger > 0.5) {
@@ -136,8 +136,8 @@ public class FSM extends OpMode {
     public void handleOuttake() {
         robot.spindexer.mode = Spindexer.Mode.OUTTAKE;
 
-        if (!robot.turret.tracking) {
-            robot.turret.turretMotor.setPower(1);
+        if (!robot.shooter.tracking) {
+            robot.shooter.turretMotor.setPower(1);
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
@@ -184,8 +184,8 @@ public class FSM extends OpMode {
             gamepad2.setLedColor(155, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        // change controller color when turret aligned
-        if (robot.turret.isShootReady()) {
+        // change controller color when shooter aligned
+        if (robot.shooter.isShootReady()) {
             gamepad1.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         } else gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
@@ -205,7 +205,7 @@ public class FSM extends OpMode {
             }
 
             if (loadBallTimer.milliseconds() > 100 && shootStep == 1) {
-                robot.spindexer.shootCurrentSlot();
+                robot.spindexer.shoot();
 
                 loadBallTimer.reset();
                 ++shootStep;
@@ -226,7 +226,7 @@ public class FSM extends OpMode {
                     shootStep = 0;
 
                 } else {
-                    robot.turret.turretMotor.setPower(0);
+                    robot.shooter.turretMotor.setPower(0);
 
                     loadBallTimer.reset();
                     shootStep = -1;
@@ -251,8 +251,8 @@ public class FSM extends OpMode {
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-        robot.turret.tracking = false;
-        robot.turret.enableCamera();
+        robot.shooter.tracking = false;
+        robot.shooter.enableCamera();
         inputTimer.reset();
 
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
@@ -263,11 +263,11 @@ public class FSM extends OpMode {
     @Override
     public void init_loop() {
         if (gamepad1.options && inputTimer.milliseconds() > 400) {
-            if (robot.turret.targetObelisk == Turret.TargetObelisk.RED) {
-                robot.turret.targetObelisk = Turret.TargetObelisk.BLUE;
+            if (robot.shooter.targetObelisk == Turret.TargetObelisk.RED) {
+                robot.shooter.targetObelisk = Turret.TargetObelisk.BLUE;
                 gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
             } else {
-                robot.turret.targetObelisk = Turret.TargetObelisk.RED;
+                robot.shooter.targetObelisk = Turret.TargetObelisk.RED;
                 gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
             }
             inputTimer.reset();
@@ -304,19 +304,19 @@ public class FSM extends OpMode {
 
         if (!homeSpindexer) robot.spindexer.update();
 
-        robot.turret.update();
-        robot.turret.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));
+        robot.shooter.update();
+        robot.shooter.turretRotationServo.setPower((float) (-gamepad2.left_stick_x));
 
         if (gamepad2.touchpad) {
-            robot.turret.tracking = true;
-        } else robot.turret.tracking = false;
+            robot.shooter.tracking = true;
+        } else robot.shooter.tracking = false;
 
         dashboardTelemetry.addData("state", state);
         dashboardTelemetry.addData("target Slot", robot.spindexer.getTargetSlot());
         dashboardTelemetry.addData("current position", robot.spindexer.motor.getCurrentPosition());
 
         dashboardTelemetry.addData("power rotation: ", robot.spindexer.motor.getPower());
-        dashboardTelemetry.addData("tracking state: ", robot.turret.tracking);
+        dashboardTelemetry.addData("tracking state: ", robot.shooter.tracking);
         dashboardTelemetry.addData("shoot step: ", shootStep);
 
         dashboardTelemetry.addData("slot 0", robot.spindexer.getSlotColor((byte) 0));

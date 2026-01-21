@@ -3,9 +3,12 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 import android.graphics.Color;
 import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
@@ -15,19 +18,26 @@ import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class Intake extends Subsystem {
-    private DcMotorEx intakeMotor;
-    private Spindexer spindexer;
+    private final DcMotorEx intakeMotor;
+    private final CRServo rollerLeft;
+    private final CRServo rollerRight;
+
+    private final TouchSensor intakeSensor;
+    private final Spindexer spindexer;
     private final ElapsedTime cooldown = new ElapsedTime();
 
-    private PredominantColorProcessor colorSensor;
-    private ColorEnum lastGuess = ColorEnum.UNDEFINED;
-    private boolean execOnce = true;
-
+    private final PredominantColorProcessor colorSensor;
     private VisionPortal portal;
 
     public Intake(HardwareMap hwMap, Spindexer revolver) {
         intakeMotor = hwMap.get(DcMotorEx.class, "intake");
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        rollerLeft = hwMap.get(CRServo.class, "rollerLeft");
+        rollerRight = hwMap.get(CRServo.class, "rollerRight");
+        rollerRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        intakeSensor = hwMap.get(TouchSensor.class, "intakeSensor");
 
         this.spindexer = revolver;
 
@@ -65,42 +75,42 @@ public class Intake extends Subsystem {
         FtcDashboard.getInstance().getTelemetry().addData("sat",result.HSV[1]);
         FtcDashboard.getInstance().getTelemetry().addData("val",result.HSV[2]);
 
-        if (execOnce) {
-            if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90) {
-                lastGuess = ColorEnum.GREEN;
-                execOnce = false;
-                return;
-            } else if (result.HSV[0] >= 120 && result.HSV[0] <= 170 && result.HSV[1] > 90) {
-                lastGuess = ColorEnum.PURPLE;
-                execOnce = false;
-                return;
-            }
-        }
-
-        if (cooldown.milliseconds() < 500 && !execOnce) {
+        if (cooldown.milliseconds() < 100) {
             return;
         }
 
-        cooldown.reset();
+        if (!intakeSensor.isPressed() && !spindexer.isReady()) {
+            return;
+        }
 
-        if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90 && lastGuess==ColorEnum.GREEN) {
+        if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90) {
             spindexer.setSlotColor(
                     spindexer.getTargetSlot(),
                     ColorEnum.GREEN);
 
-        } else if (result.HSV[0] >= 120 && result.HSV[0] <= 170 && result.HSV[1] > 90 && lastGuess == ColorEnum.PURPLE) {
+        } else if (result.HSV[0] >= 120 && result.HSV[0] <= 170 && result.HSV[1] > 90) {
             spindexer.setSlotColor(
                     spindexer.getTargetSlot(),
                     ColorEnum.PURPLE);
-        } else {
-            lastGuess = ColorEnum.UNDEFINED;
         }
 
-        execOnce = true;
+        cooldown.reset();
+
 
     }
 
     public void setPower(double power) {
+        setPower(power, true);
+    }
+
+    public void setPower(double power, boolean roller) {
         intakeMotor.setPower(power);
+        rollerRight.setPower(power*0.375 * (roller ? 1 : 0));
+        rollerLeft.setPower(power * (roller ? 1 : 0));
+    }
+
+    public void setRollerPower(double left, double right) {
+        rollerLeft.setPower(left);
+        rollerRight.setPower(right);
     }
 }
