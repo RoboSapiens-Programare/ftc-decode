@@ -20,6 +20,7 @@ public class TeleOPDoi extends OpMode {
 
     private boolean homingExecOnce = false;
     private boolean homingExecOnce2 = false;
+    private boolean ballShot = false;
     private ElapsedTime homingFixTimer = new ElapsedTime();
 
     enum State {
@@ -47,6 +48,7 @@ public class TeleOPDoi extends OpMode {
 
 //        robot.spindexer.setTargetSlot((byte) 0);
         robot.shooter.shooting = state == State.OUTTAKE;
+        ballShot = false;
     }
 
     public void handleIntake() {
@@ -64,11 +66,11 @@ public class TeleOPDoi extends OpMode {
 
         // power on the intake in either direction
         if (gamepad1.right_trigger > 0.2) {
-            robot.intake.setPower(uV.intakePower);
+            robot.intake.setPower(gamepad1.right_trigger);
         } else if (gamepad1.left_trigger > 0.2) {
             robot.intake.setPower(-uV.intakePower);
         } else {
-            robot.intake.setPower(0);
+            robot.intake.setPower(0, false);
         }
 
         // magnetic homing (driver 2)
@@ -137,6 +139,7 @@ public class TeleOPDoi extends OpMode {
             robot.intake.setPower(1);
             if (robot.shooter.isShootReady() && robot.spindexer.isReady()) {
                 robot.spindexer.shoot();
+//                ballShot = true;
 
                 /*
                 int slot = robot.spindexer.getTargetSlot();
@@ -223,7 +226,7 @@ public class TeleOPDoi extends OpMode {
         gamepad1.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         gamepad2.setLedColor(255, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
 
-        Robot.follower.startTeleopDrive();
+        Robot.follower.startTeleopDrive(true);
 
         robot.spindexer.home();
         matchTimer.reset();
@@ -272,7 +275,7 @@ public class TeleOPDoi extends OpMode {
         // Only allow manual drive when not tracking
         if ((Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1 || Math.abs(gamepad2.right_stick_y) > 0.1) && robot.shooter.isTracking) {
             Robot.follower.breakFollowing();
-            Robot.follower.startTeleOpDrive();
+            Robot.follower.startTeleOpDrive(true);
             robot.shooter.isTracking = false;
         }
 

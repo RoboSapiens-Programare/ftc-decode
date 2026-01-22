@@ -62,7 +62,7 @@ public class Intake extends Subsystem {
                         .enableLiveView(false)
                         .build();
 
-//        FtcDashboard.getInstance().startCameraStream(portal, 30);
+        FtcDashboard.getInstance().startCameraStream(portal, 30);
     }
 
     @Override
@@ -75,27 +75,22 @@ public class Intake extends Subsystem {
         FtcDashboard.getInstance().getTelemetry().addData("sat",result.HSV[1]);
         FtcDashboard.getInstance().getTelemetry().addData("val",result.HSV[2]);
 
-        if (cooldown.milliseconds() < 100) {
-            return;
+        if (cooldown.milliseconds() > 200 && intakeSensor.isPressed() && spindexer.isReady()) {
+            if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90) {
+                spindexer.setSlotColor(
+                        spindexer.getTargetSlot(),
+                        ColorEnum.GREEN);
+                cooldown.reset();
+
+
+            } else if (result.HSV[0] >= 120 && result.HSV[0] <= 170 && result.HSV[1] > 90) {
+                spindexer.setSlotColor(
+                        spindexer.getTargetSlot(),
+                        ColorEnum.PURPLE);
+                cooldown.reset();
+
+            }
         }
-
-        if (!intakeSensor.isPressed() && !spindexer.isReady()) {
-            return;
-        }
-
-        if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90) {
-            spindexer.setSlotColor(
-                    spindexer.getTargetSlot(),
-                    ColorEnum.GREEN);
-
-        } else if (result.HSV[0] >= 120 && result.HSV[0] <= 170 && result.HSV[1] > 90) {
-            spindexer.setSlotColor(
-                    spindexer.getTargetSlot(),
-                    ColorEnum.PURPLE);
-        }
-
-        cooldown.reset();
-
 
     }
 
@@ -105,8 +100,8 @@ public class Intake extends Subsystem {
 
     public void setPower(double power, boolean roller) {
         intakeMotor.setPower(power);
-        rollerRight.setPower(power*0.375 * (roller ? 1 : 0));
-        rollerLeft.setPower(power * (roller ? 1 : 0));
+        rollerRight.setPower(0.375 * (roller ? 1 : 0));
+        rollerLeft.setPower((roller ? 1 : 0));
     }
 
     public void setRollerPower(double left, double right) {

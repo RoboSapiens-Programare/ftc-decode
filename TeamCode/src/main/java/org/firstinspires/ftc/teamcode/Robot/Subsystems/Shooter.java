@@ -34,7 +34,7 @@ public class Shooter extends Subsystem {
     private final Pose blueObeliskPose = new Pose(12, 135);
     private final Pose redObeliskPose = new Pose(133, 135);
 
-    public static double targetVelocity = 1200;
+    public static double targetVelocity = 500;
 
     public boolean isTracking = false;
 
