@@ -34,7 +34,7 @@ public class Shooter extends Subsystem {
     private final Pose blueObeliskPose = new Pose(12, 135);
     private final Pose redObeliskPose = new Pose(133, 135);
 
-    public static double targetVelocity = 500;
+    public static double targetVelocity = 1300;
 
     public boolean isTracking = false;
 
@@ -49,8 +49,6 @@ public class Shooter extends Subsystem {
 
         turretMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
 
         pidfController.setTolerance(20);
         pidfController.maxOut = 2;
@@ -71,35 +69,42 @@ public class Shooter extends Subsystem {
     }
 
     private double computeVelocity() {
-//        return computeDistance() > 120 ? 1400 : 1100;
-        return 0;
+        return computeDistance() > 100 ? 1400 : 1100;
+        //        return 0;
     }
 
-    public double getAngle() {
-        Pose currentPose = Robot.follower.getPose();
+    public double getAngle(double x, double y) {
         Pose targetObeliskPose =
                 Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
 
-        double dx = Math.abs(currentPose.getX() - targetObeliskPose.getX());
-        double dy = Math.abs(currentPose.getY() - targetObeliskPose.getY());
+        double dx = Math.abs(x - targetObeliskPose.getX());
+        double dy = Math.abs(y - targetObeliskPose.getY());
 
         double alpha = Math.atan(dy / dx);
 
         return Robot.alliance == Robot.Alliance.RED ? alpha : Math.PI - alpha;
     }
 
+    public double getAngle() {
+        Pose currentPose = Robot.follower.getPose();
+
+        return getAngle(currentPose.getX(), currentPose.getY());
+    }
+
     public void track() {
-        Path p = new Path(new BezierLine(
-                Robot.follower.getPose(),
-                new Pose(
-                        Robot.follower.getPose().getX() + 1,
-                        Robot.follower.getPose().getY() + 1
-                )
-        ));
+        Path p =
+                new Path(
+                        new BezierLine(
+                                Robot.follower.getPose(),
+                                new Pose(
+                                        Robot.follower.getPose().getX() + 1,
+                                        Robot.follower.getPose().getY() + 1)));
 
         isTracking = true;
 
-        p.setLinearHeadingInterpolation(Robot.follower.getHeading(), getAngle());
+        p.setLinearHeadingInterpolation(
+                Robot.follower.getHeading(),
+                getAngle(Robot.follower.getPose().getX() + 1, Robot.follower.getPose().getY() + 1));
 
         Robot.follower.breakFollowing();
         Robot.follower.followPath(p);
@@ -113,9 +118,9 @@ public class Shooter extends Subsystem {
         pidfController.kD = shootKd;
         pidfController.kF = shootKf;
 
-
-//        targetVelocity = computeVelocity();
+        targetVelocity = computeVelocity();
         pidfController.setSetpoint(targetVelocity);
+
         if (shooting) {
 
             double pidOutput = pidfController.updatePID(turretMotorRight.getVelocity());
@@ -129,13 +134,13 @@ public class Shooter extends Subsystem {
         }
 
         if (isTracking && shouldFollowTrack) {
-            Path p = new Path(new BezierLine(
-                    Robot.follower.getPose(),
-                    new Pose (
-                        Robot.follower.getPose().getX() + 1,
-                        Robot.follower.getPose().getY() + 1
-                    )
-            ));
+            Path p =
+                    new Path(
+                            new BezierLine(
+                                    Robot.follower.getPose(),
+                                    new Pose(
+                                            Robot.follower.getPose().getX() + 1,
+                                            Robot.follower.getPose().getY() + 1)));
 
             p.setConstantHeadingInterpolation(this.getAngle());
 
@@ -143,7 +148,6 @@ public class Shooter extends Subsystem {
 
             shouldFollowTrack = false;
         }
-
     }
 
     public void reset() {

@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
 @Autonomous(name = "Leave", group = "1. Auto Tests")
@@ -18,7 +16,6 @@ public class LeaveFar extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap);
 
-
         Robot.follower.setStartingPose(new Pose(0, 0, 0));
     }
 
@@ -26,7 +23,6 @@ public class LeaveFar extends OpMode {
     public void start() {
         Robot.follower.startTeleOpDrive();
         timer.reset();
-
     }
 
     @Override
@@ -37,7 +33,5 @@ public class LeaveFar extends OpMode {
         if (timer.seconds() > 25) {
             Robot.follower.setTeleOpDrive(-1, 0, 0, true);
         }
-
-
     }
 }

@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.floor;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -23,7 +26,7 @@ public class Spindexer extends Subsystem {
     public static double Kf = 0;
 
     public int targetSlot = 0;
-    public double tolerance = 200;
+    public double tolerance = 100;
     public double targetPosition = 0;
     public boolean homing = false;
     public boolean homingSingleton = false;
@@ -58,7 +61,7 @@ public class Spindexer extends Subsystem {
 
     // Moving functions
     public void goToSlot(int slot) {
-        double distance = Math.abs(targetSlot - slot) * ticksPerRevolution / 3;
+        double distance = abs(targetSlot - slot) * ticksPerRevolution / 3;
 
         targetPosition += -1 * shootDirection * distance;
 
@@ -95,9 +98,9 @@ public class Spindexer extends Subsystem {
         return slotColors[targetSlot] != ColorEnum.UNDEFINED;
     }
 
-//    public boolean isSlotFree(int targetSlot) {
-//        return !isSlotFull(targetSlot);
-//    }
+    //    public boolean isSlotFree(int targetSlot) {
+    //        return !isSlotFull(targetSlot);
+    //    }
 
     public byte getFreeSlot() {
         for (byte b = 0; b < slotColors.length; ++b) {
@@ -109,15 +112,15 @@ public class Spindexer extends Subsystem {
         return -1;
     }
 
-//    public int getFullSlot() {
-//        for (int b = 0; b < slotColors.length; ++b) {
-//            if (slotColors[b] != ColorEnum.UNDEFINED) {
-//                return b;
-//            }
-//        }
-//
-//        return -1;
-//    }
+    //    public int getFullSlot() {
+    //        for (int b = 0; b < slotColors.length; ++b) {
+    //            if (slotColors[b] != ColorEnum.UNDEFINED) {
+    //                return b;
+    //            }
+    //        }
+    //
+    //        return -1;
+    //    }
 
     public int getBallCount() {
         int count = 0;
@@ -144,20 +147,27 @@ public class Spindexer extends Subsystem {
 
     public void motifGoToStart() {
         int greenSlot = getSlotByColor(ColorEnum.GREEN);
-        // Fixed modulo to handle negative values correctly
-        int begin = ((greenSlot - greenMotifPosition) % 3 + 3) % 3;
 
-        FtcDashboard.getInstance().getTelemetry().addData("g slot ", greenSlot);
-        FtcDashboard.getInstance().getTelemetry().addData("gm pos ", greenMotifPosition);
-        FtcDashboard.getInstance().getTelemetry().addData("Should go to slot ", begin);
+        if (greenSlot == -1) {
+            greenSlot = 0;
+        }
+        int begin = (4 + greenSlot + greenMotifPosition) % 3;
 
-        goToShootStartPose(begin);
+
+//        if (targetSlot != begin)
+//            goToShootStartPose(-begin);
+        goToSlot(begin);
     }
 
     public void goToShootStartPose(int slot) {
-        double distance = Math.abs(targetSlot - slot) * ticksPerRevolution / 3;
 
-        targetPosition += -1 * shootDirection * distance + uV.shootOffset;
+        double distance = abs(targetSlot - slot) * ticksPerRevolution / 3;
+
+//        distance = floor(distance-distance/ticksPerRevolution);
+
+//        targetPosition += shootDirection * distance + uV.shootOffset;
+        targetPosition -= shootDirection * distance - uV.shootOffset - ticksPerRevolution/3;
+
         pidfController.setSetpoint(targetPosition);
 
         // REMOVED BLOCKING WHILE LOOP
@@ -170,7 +180,6 @@ public class Spindexer extends Subsystem {
     public boolean isReady() {
         return pidfController.targetReached() && !homing;
     }
-
 
     public int getTargetSlot() {
         return targetSlot;
@@ -199,7 +208,7 @@ public class Spindexer extends Subsystem {
 
         // update PID controller
         if (homing) {
-            motor.setPower(-0.3);
+            motor.setPower(-0.2);
 
             if (limitSwitch.isPressed()) {
                 targetSlot = 0;
@@ -207,7 +216,7 @@ public class Spindexer extends Subsystem {
 
                 motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-                targetPosition = 8192.0/12 + uV.homingOffset;
+                targetPosition = 8192.0 / 12 + uV.homingOffset;
                 pidfController.setSetpoint(targetPosition);
 
                 while (!pidfController.targetReached()) {

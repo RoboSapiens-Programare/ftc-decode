@@ -1,25 +1,18 @@
 package org.firstinspires.ftc.teamcode.Auto.Calibration;
 
-import android.graphics.Color;
 import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import java.util.LinkedList;
+import java.util.List;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
-import java.util.LinkedList;
-import java.util.List;
-
 @SuppressWarnings("FieldCanBeLocal")
-@Autonomous(name="Color Sensor", group = "2. Calibration")
+@Autonomous(name = "Color Sensor", group = "2. Calibration")
 public class ColorSensorCalib extends OpMode {
     private PredominantColorProcessor colorSensor;
     private VisionPortal portal;
@@ -27,7 +20,6 @@ public class ColorSensorCalib extends OpMode {
     private List<Integer> hueList = new LinkedList<>();
     private int min = Integer.MAX_VALUE;
     private int max = Integer.MIN_VALUE;
-
 
     @Override
     public void init() {
@@ -64,9 +56,9 @@ public class ColorSensorCalib extends OpMode {
         FtcDashboard.getInstance().getTelemetry().addData("hue min", min);
         FtcDashboard.getInstance().getTelemetry().addData("hue max", max);
 
-        FtcDashboard.getInstance().getTelemetry().addData("hue",result.HSV[0]);
-        FtcDashboard.getInstance().getTelemetry().addData("sat",result.HSV[1]);
-        FtcDashboard.getInstance().getTelemetry().addData("val",result.HSV[2]);
+        FtcDashboard.getInstance().getTelemetry().addData("hue", result.HSV[0]);
+        FtcDashboard.getInstance().getTelemetry().addData("sat", result.HSV[1]);
+        FtcDashboard.getInstance().getTelemetry().addData("val", result.HSV[2]);
 
         FtcDashboard.getInstance().getTelemetry().update();
 

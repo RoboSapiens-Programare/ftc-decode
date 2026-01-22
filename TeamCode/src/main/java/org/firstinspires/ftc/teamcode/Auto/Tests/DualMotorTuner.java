@@ -66,12 +66,12 @@ public class DualMotorTuner extends OpMode {
         rightMotor.setPower(pidOutput / 2);
         leftMotor.setPower(pidOutput / 2);
 
-//        rightMotor.setPower(0.5);
-//        leftMotor.setPower(0.5);
+        //        rightMotor.setPower(0.5);
+        //        leftMotor.setPower(0.5);
 
-//        if (timer.seconds() > 6) {
-//            spindexer.setPower(0.5);
-//        }
+        //        if (timer.seconds() > 6) {
+        //            spindexer.setPower(0.5);
+        //        }
 
         dashboardTelemetry.addData("current", rightMotor.getVelocity());
         dashboardTelemetry.addData("target", targetVelocity);

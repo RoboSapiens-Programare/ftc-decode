@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import android.graphics.Color;
 import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -69,29 +67,30 @@ public class Intake extends Subsystem {
     public void update() {
         // check both are equal in order to ignore false positives
 
-//        if (spindexer.getBallCount() >= 3) return;
+        //        if (spindexer.getBallCount() >= 3) return;
         PredominantColorProcessor.Result result = colorSensor.getAnalysis();
-        FtcDashboard.getInstance().getTelemetry().addData("hue",result.HSV[0]);
-        FtcDashboard.getInstance().getTelemetry().addData("sat",result.HSV[1]);
-        FtcDashboard.getInstance().getTelemetry().addData("val",result.HSV[2]);
+        FtcDashboard.getInstance().getTelemetry().addData("hue", result.HSV[0]);
+        FtcDashboard.getInstance().getTelemetry().addData("sat", result.HSV[1]);
+        FtcDashboard.getInstance().getTelemetry().addData("val", result.HSV[2]);
 
-        if (cooldown.milliseconds() > 200 && intakeSensor.isPressed() && spindexer.isReady()) {
+        FtcDashboard.getInstance().getTelemetry().addData("rev ready", spindexer.isReady());
+        FtcDashboard.getInstance()
+                .getTelemetry()
+                .addData("intake sensor", intakeSensor.isPressed());
+        FtcDashboard.getInstance().getTelemetry().addData("cooldown", cooldown.milliseconds());
+
+        FtcDashboard.getInstance().getTelemetry().update();
+
+        if (cooldown.milliseconds() > 50 && !intakeSensor.isPressed() && spindexer.isReady()) {
             if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90) {
-                spindexer.setSlotColor(
-                        spindexer.getTargetSlot(),
-                        ColorEnum.GREEN);
+                spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.GREEN);
                 cooldown.reset();
-
 
             } else if (result.HSV[0] >= 120 && result.HSV[0] <= 170 && result.HSV[1] > 90) {
-                spindexer.setSlotColor(
-                        spindexer.getTargetSlot(),
-                        ColorEnum.PURPLE);
+                spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.PURPLE);
                 cooldown.reset();
-
             }
         }
-
     }
 
     public void setPower(double power) {

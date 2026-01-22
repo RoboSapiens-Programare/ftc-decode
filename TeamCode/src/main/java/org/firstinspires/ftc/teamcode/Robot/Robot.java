@@ -4,8 +4,8 @@ import com.bylazar.configurables.PanelsConfigurables;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.util.PoseHistory;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Intake;
+import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 

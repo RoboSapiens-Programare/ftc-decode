@@ -21,7 +21,7 @@ public class Constants {
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
-//                .driveEncoderLocalizer(driveEncoderLocalizerConstants)
+                //                .driveEncoderLocalizer(driveEncoderLocalizerConstants)
                 .mecanumDrivetrain(mecanumConstants)
                 .pinpointLocalizer(localizerConstants)
                 .build();
@@ -38,8 +38,8 @@ public class Constants {
                     .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
                     .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
                     .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
-//                    .xVelocity(66.79517178272638)
-//                    .yVelocity();
+    //                    .xVelocity(66.79517178272638)
+    //                    .yVelocity();
 
     public static PinpointConstants localizerConstants =
             new PinpointConstants()
@@ -51,18 +51,19 @@ public class Constants {
                     .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
                     .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
-    public static DriveEncoderConstants driveEncoderLocalizerConstants = new DriveEncoderConstants()
-            .rightFrontMotorName("rightFront")
-            .rightRearMotorName("rightRear")
-            .leftRearMotorName("leftRear")
-            .leftFrontMotorName("leftFront")
-            .leftFrontEncoderDirection(Encoder.REVERSE)
-            .leftRearEncoderDirection(Encoder.FORWARD)
-            .rightFrontEncoderDirection(Encoder.FORWARD)
-            .rightRearEncoderDirection(Encoder.FORWARD)
-            .robotLength(27 / 2.5)
-            .robotWidth(35 / 2.5)
-            .forwardTicksToInches(26434.66703613705)
-            .strafeTicksToInches(-1.1441178787974106E7)
-            .turnTicksToInches(0.9991656241808676);
+    public static DriveEncoderConstants driveEncoderLocalizerConstants =
+            new DriveEncoderConstants()
+                    .rightFrontMotorName("rightFront")
+                    .rightRearMotorName("rightRear")
+                    .leftRearMotorName("leftRear")
+                    .leftFrontMotorName("leftFront")
+                    .leftFrontEncoderDirection(Encoder.REVERSE)
+                    .leftRearEncoderDirection(Encoder.FORWARD)
+                    .rightFrontEncoderDirection(Encoder.FORWARD)
+                    .rightRearEncoderDirection(Encoder.FORWARD)
+                    .robotLength(27 / 2.5)
+                    .robotWidth(35 / 2.5)
+                    .forwardTicksToInches(26434.66703613705)
+                    .strafeTicksToInches(-1.1441178787974106E7)
+                    .turnTicksToInches(0.9991656241808676);
 }
