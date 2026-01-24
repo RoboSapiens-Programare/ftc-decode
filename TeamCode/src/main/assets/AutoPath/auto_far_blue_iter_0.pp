@@ -1,8 +1,8 @@
 {
   "version": 1,
   "startPoint": {
-    "x": 56,
-    "y": 8,
+    "x": 62.9,
+    "y": 9.3,
     "heading": "linear",
     "startDeg": 90,
     "endDeg": 180,
@@ -10,21 +10,40 @@
   },
   "lines": [
     {
-      "id": "line-ujjv1b4b88p",
-      "name": "goToGrab0",
+      "id": "mkr0krj6-9639zo",
+      "name": "shootPreload",
       "endPoint": {
-        "x": 35,
-        "y": 35,
+        "x": 59,
+        "y": 20,
         "heading": "linear",
-        "startDeg": 90,
-        "endDeg": 180
+        "reverse": false,
+        "startDeg": 270,
+        "endDeg": 111
       },
       "controlPoints": [
         {
-          "x": 43.754855130011954,
-          "y": 28.422152823322733
+          "x": 50.46169491404876,
+          "y": 16.456913742296237
         }
       ],
+      "color": "#6CB9C9",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "eventMarkers": []
+    },
+    {
+      "id": "line-ujjv1b4b88p",
+      "name": "goToGrab0",
+      "endPoint": {
+        "x": 40,
+        "y": 35,
+        "heading": "linear",
+        "startDeg": 116,
+        "endDeg": 180
+      },
+      "controlPoints": [],
       "color": "#DCD7AB",
       "eventMarkers": [],
       "locked": false,
@@ -35,9 +54,9 @@
     },
     {
       "id": "mko1s68k-mhr339",
-      "name": "grab0",
+      "name": "grab0_0",
       "endPoint": {
-        "x": 16,
+        "x": 34,
         "y": 35,
         "heading": "constant",
         "reverse": false,
@@ -45,13 +64,42 @@
         "endDeg": 180,
         "degrees": 180
       },
-      "controlPoints": [
-        {
-          "x": 25.78619553793198,
-          "y": 37.05678800399073
-        }
-      ],
+      "controlPoints": [],
       "color": "#BC57D6",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "eventMarkers": []
+    },
+    {
+      "id": "mkr11wbl-0fdtn6",
+      "name": "grab0_1",
+      "endPoint": {
+        "x": 29,
+        "y": 35,
+        "heading": "tangential",
+        "reverse": false
+      },
+      "controlPoints": [],
+      "color": "#D98BDC",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mkr14o8u-pyvupq",
+      "endPoint": {
+        "x": 24,
+        "y": 35,
+        "heading": "tangential",
+        "reverse": false
+      },
+      "controlPoints": [],
+      "color": "#A77D76",
+      "name": "grab0_2",
+      "eventMarkers": [],
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
@@ -69,62 +117,95 @@
         "startDeg": 180,
         "endDeg": 116
       },
-      "controlPoints": [
-        {
-          "x": 39.739634833796146,
-          "y": 33.73993860697503
-        },
-        {
-          "x": 50.74810360625192,
-          "y": 25.648557860803706
-        }
-      ],
+      "controlPoints": [],
       "color": "#5C999B",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": []
     },
     {
       "id": "mko1w41z-crq1wr",
       "name": "goToGrab1",
       "endPoint": {
-        "x": 35,
+        "x": 40,
         "y": 60,
         "heading": "tangential",
         "reverse": false
       },
       "controlPoints": [
         {
-          "x": 47.02041604565872,
-          "y": 44.52492465236999
+          "x": 48.72412536300779,
+          "y": 41.05589988512056
         },
         {
-          "x": 53.92223296258224,
-          "y": 30.0411534516228
+          "x": 59.10973967263129,
+          "y": 33.84587251920333
         },
         {
-          "x": 47.19283559890834,
-          "y": 60.029633144829226
+          "x": 49.999999194491856,
+          "y": 59.9959862533375
         }
       ],
       "color": "#C756AA",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": []
     },
     {
       "id": "mko1x7vd-6abguc",
-      "name": "grab1",
+      "name": "grab1_0",
       "endPoint": {
-        "x": 16,
+        "x": 34,
         "y": 60,
-        "heading": "tangential",
-        "reverse": false
+        "heading": "constant",
+        "reverse": false,
+        "degrees": 180
       },
       "controlPoints": [],
       "color": "#7C8A68",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "eventMarkers": []
+    },
+    {
+      "id": "mkr15vmf-fzch0b",
+      "endPoint": {
+        "x": 29,
+        "y": 60,
+        "heading": "constant",
+        "reverse": false,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#967959",
+      "name": "grab1_1",
+      "eventMarkers": [],
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mkr15vc0-f9stmb",
+      "endPoint": {
+        "x": 24,
+        "y": 60,
+        "heading": "constant",
+        "reverse": false,
+        "startDeg": 0,
+        "endDeg": 0,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#8B97CC",
+      "name": "grab1_2",
+      "eventMarkers": [],
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
@@ -141,111 +222,32 @@
         "startDeg": 180,
         "endDeg": 135
       },
-      "controlPoints": [
-        {
-          "x": 64.93580649919919,
-          "y": 63.385903970486595
-        }
-      ],
+      "controlPoints": [],
       "color": "#977A7B",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
-    },
-    {
-      "id": "mko1yl77-rx57fx",
-      "name": "goToGrab2",
-      "endPoint": {
-        "x": 35,
-        "y": 85,
-        "heading": "linear",
-        "reverse": false,
-        "degrees": 0,
-        "startDeg": 135,
-        "endDeg": 180
-      },
-      "controlPoints": [
-        {
-          "x": 52.70053475935829,
-          "y": 79.30160427807488
-        }
-      ],
-      "color": "#D975C9",
-      "waitBeforeMs": 0,
-      "waitAfterMs": 0,
-      "waitBeforeName": "",
-      "waitAfterName": ""
-    },
-    {
-      "id": "mko22j27-pkhjuq",
-      "name": "grab2",
-      "endPoint": {
-        "x": 17,
-        "y": 85,
-        "heading": "tangential",
-        "reverse": false
-      },
-      "controlPoints": [],
-      "color": "#8657AC",
-      "waitBeforeMs": 0,
-      "waitAfterMs": 0,
-      "waitBeforeName": "",
-      "waitAfterName": ""
-    },
-    {
-      "id": "mko24int-gjxl4t",
-      "name": "shoot2",
-      "endPoint": {
-        "x": 45,
-        "y": 95,
-        "heading": "linear",
-        "reverse": false,
-        "startDeg": 180,
-        "endDeg": 135
-      },
-      "controlPoints": [
-        {
-          "x": 30.692628000882557,
-          "y": 91.13124060408678
-        },
-        {
-          "x": 32.22239009734591,
-          "y": 90.4655233477021
-        },
-        {
-          "x": 24.93758220128758,
-          "y": 89.61796290431043
-        }
-      ],
-      "color": "#A7B6BA",
-      "waitBeforeMs": 0,
-      "waitAfterMs": 0,
-      "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": []
     },
     {
       "id": "mko37394-iqxoo7",
       "name": "leave",
       "endPoint": {
-        "x": 20,
+        "x": 21.563721657544956,
         "y": 95,
         "heading": "linear",
         "reverse": false,
         "startDeg": 135,
         "endDeg": 270
       },
-      "controlPoints": [
-        {
-          "x": 34.980806957315515,
-          "y": 96.86341486140589
-        }
-      ],
+      "controlPoints": [],
       "color": "#A55C77",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": []
     }
   ],
   "settings": {
@@ -934,11 +936,15 @@
     "recentFiles": [
       "/home/stefan/Work/Robo-Sapiens/ftc-decode/TeamCode/src/main/assets/AutoPath/auto_far_blue_iter_0.pp"
     ],
-    "lastSeenVersion": "",
+    "lastSeenVersion": "1.6.2",
     "showDebugSequence": false,
     "fileManagerSortMode": "date"
   },
   "sequence": [
+    {
+      "kind": "path",
+      "lineId": "mkr0krj6-9639zo"
+    },
     {
       "kind": "path",
       "lineId": "line-ujjv1b4b88p"
@@ -946,6 +952,14 @@
     {
       "kind": "path",
       "lineId": "mko1s68k-mhr339"
+    },
+    {
+      "kind": "path",
+      "lineId": "mkr11wbl-0fdtn6"
+    },
+    {
+      "kind": "path",
+      "lineId": "mkr14o8u-pyvupq"
     },
     {
       "kind": "path",
@@ -961,19 +975,15 @@
     },
     {
       "kind": "path",
+      "lineId": "mkr15vmf-fzch0b"
+    },
+    {
+      "kind": "path",
+      "lineId": "mkr15vc0-f9stmb"
+    },
+    {
+      "kind": "path",
       "lineId": "mko1zhe8-zhme72"
-    },
-    {
-      "kind": "path",
-      "lineId": "mko1yl77-rx57fx"
-    },
-    {
-      "kind": "path",
-      "lineId": "mko22j27-pkhjuq"
-    },
-    {
-      "kind": "path",
-      "lineId": "mko24int-gjxl4t"
     },
     {
       "kind": "path",

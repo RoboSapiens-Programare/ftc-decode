@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -14,7 +15,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
-    public static FollowerConstants followerConstants = new FollowerConstants().mass(13);
+
+    public static FollowerConstants followerConstants =
+            new FollowerConstants()
+                    .mass(15)
+                    .forwardZeroPowerAcceleration(-43.5)
+                    .lateralZeroPowerAcceleration(-65.3)
+                    .headingPIDFCoefficients(new PIDFCoefficients(3, 1, 0, 0));
+
+    //                    .useSecondaryTranslationalPIDF(true)
+    //                    .useSecondaryHeadingPIDF(true)
+    //                    .useSecondaryDrivePIDF(true);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
@@ -37,13 +48,13 @@ public class Constants {
                     .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
                     .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
                     .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-                    .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
-    //                    .xVelocity(66.79517178272638)
-    //                    .yVelocity();
+                    .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+                    .xVelocity(69.8)
+                    .yVelocity(53.3);
 
     public static PinpointConstants localizerConstants =
             new PinpointConstants()
-                    .forwardPodY(7.7)
+                    .forwardPodY(12.4)
                     .strafePodX(5.6)
                     .distanceUnit(DistanceUnit.CM)
                     .hardwareMapName("pinpoint")

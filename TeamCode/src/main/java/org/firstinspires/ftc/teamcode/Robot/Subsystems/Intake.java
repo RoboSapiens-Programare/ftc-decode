@@ -81,7 +81,7 @@ public class Intake extends Subsystem {
 
         FtcDashboard.getInstance().getTelemetry().update();
 
-        if (cooldown.milliseconds() > 50 && !intakeSensor.isPressed() && spindexer.isReady()) {
+        if (cooldown.milliseconds() > 100 && !intakeSensor.isPressed() && spindexer.isReady()) {
             if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90) {
                 spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.GREEN);
                 cooldown.reset();

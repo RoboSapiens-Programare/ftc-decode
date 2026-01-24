@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.floor;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -26,6 +25,7 @@ public class Spindexer extends Subsystem {
     public static double Kf = 0;
 
     public int targetSlot = 0;
+    public int begin = 0;
     public double tolerance = 100;
     public double targetPosition = 0;
     public boolean homing = false;
@@ -37,8 +37,8 @@ public class Spindexer extends Subsystem {
 
     /* greenMotifPosition means the position [0, 1, 2] of the green ball in the motif
      * 0 -> GPP
-     * 1 -> PGP
-     * 2 -> PPG
+     * 1 -> PPG
+     * 2 -> PGP
      */
     public static int greenMotifPosition = 0;
 
@@ -76,6 +76,8 @@ public class Spindexer extends Subsystem {
         targetPosition += shootDirection * ticksPerRevolution / 3;
 
         pidfController.setSetpoint(targetPosition);
+
+        setSlotColor(targetSlot, ColorEnum.UNDEFINED);
 
         if (--targetSlot == -1) {
             targetSlot = 2;
@@ -148,32 +150,37 @@ public class Spindexer extends Subsystem {
     public void motifGoToStart() {
         int greenSlot = getSlotByColor(ColorEnum.GREEN);
 
-        if (greenSlot == -1) {
-            greenSlot = 0;
+        begin = greenSlot + greenMotifPosition - getSlotByColor(ColorEnum.GREEN) + 2;
+
+        if (greenSlot == 0) {
+            begin--;
+        } else if (greenSlot == 1) {
+            begin++;
         }
-        int begin = (4 + greenSlot + greenMotifPosition) % 3;
 
+        if (begin >= 3) {
+            begin = begin - 3;
+        }
 
-//        if (targetSlot != begin)
-//            goToShootStartPose(-begin);
         goToSlot(begin);
+        targetPosition += uV.shootOffset;
     }
 
-    public void goToShootStartPose(int slot) {
-
-        double distance = abs(targetSlot - slot) * ticksPerRevolution / 3;
-
-//        distance = floor(distance-distance/ticksPerRevolution);
-
-//        targetPosition += shootDirection * distance + uV.shootOffset;
-        targetPosition -= shootDirection * distance - uV.shootOffset - ticksPerRevolution/3;
-
-        pidfController.setSetpoint(targetPosition);
-
-        // REMOVED BLOCKING WHILE LOOP
-        // Let update() handle the movement - this is now non-blocking
-        // The position will be reached when isReady() returns true
-    }
+    //    public void goToShootStartPose(int slot) {
+    //
+    //        double distance = abs(targetSlot - slot) * ticksPerRevolution / 3;
+    //
+    ////        distance = floor(distance-distance/ticksPerRevolution);
+    //
+    ////        targetPosition += shootDirection * distance + uV.shootOffset;
+    //        targetPosition -= shootDirection * distance - uV.shootOffset - ticksPerRevolution/3;
+    //
+    //        pidfController.setSetpoint(targetPosition);
+    //
+    //        // REMOVED BLOCKING WHILE LOOP
+    //        // Let update() handle the movement - this is now non-blocking
+    //        // The position will be reached when isReady() returns true
+    //    }
 
     // system-status functions
 
@@ -234,6 +241,12 @@ public class Spindexer extends Subsystem {
             double pidOut = pidfController.updatePID(motor.getCurrentPosition());
             motor.setPower(pidOut * uV.revolverPowerMultiplier);
         }
+
+        FtcDashboard.getInstance()
+                .getTelemetry()
+                .addData("green slot", getSlotByColor(ColorEnum.GREEN));
+        FtcDashboard.getInstance().getTelemetry().addData("motif pos", greenMotifPosition);
+        FtcDashboard.getInstance().getTelemetry().update();
 
         // uncomment if using pre-defined PID
         // motor.setTargetPosition()

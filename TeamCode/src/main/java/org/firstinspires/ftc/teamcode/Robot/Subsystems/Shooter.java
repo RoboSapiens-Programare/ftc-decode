@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 @Config
 public class Shooter extends Subsystem {
     private final DcMotorEx turretMotorLeft;
-    private final DcMotorEx turretMotorRight;
+    public final DcMotorEx turretMotorRight;
 
     // PID values for shooter
     // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
@@ -56,8 +56,12 @@ public class Shooter extends Subsystem {
     }
 
     public boolean isShootReady() {
-        // TODO: add shootzone chechk
-        return pidfController.targetReached();
+        boolean aligned =
+                Robot.follower.getPose().getHeading() >= getAngle() - 5 * 2 * Math.PI / 360
+                        && Robot.follower.getPose().getHeading()
+                                <= getAngle() + 5 * 2 * Math.PI / 360;
+
+        return pidfController.targetReached() && aligned;
     }
 
     public double computeDistance() {
@@ -69,8 +73,14 @@ public class Shooter extends Subsystem {
     }
 
     private double computeVelocity() {
-        return computeDistance() > 100 ? 1400 : 1100;
-        //        return 0;
+        double dist = computeDistance();
+        if (dist > 100) {
+            return 1450;
+        }
+        if (dist < 65) {
+            return 1100;
+        }
+        return dist * 1.45 + 1065;
     }
 
     public double getAngle(double x, double y) {

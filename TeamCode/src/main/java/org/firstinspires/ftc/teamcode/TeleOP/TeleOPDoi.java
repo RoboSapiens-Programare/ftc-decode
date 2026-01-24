@@ -2,14 +2,12 @@ package org.firstinspires.ftc.teamcode.TeleOP;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
@@ -22,7 +20,7 @@ public class TeleOPDoi extends OpMode {
     private boolean homingExecOnce = false;
     private boolean homingExecOnce2 = false;
     private boolean ballShot = false;
-    private ElapsedTime homingFixTimer = new ElapsedTime();
+    private final ElapsedTime homingFixTimer = new ElapsedTime();
 
     enum State {
         INTAKE,
@@ -31,8 +29,6 @@ public class TeleOPDoi extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
-
-    private final Pose startPose = new Pose(63, 9, Math.PI / 2);
 
     private State state = State.INTAKE;
 
@@ -53,6 +49,9 @@ public class TeleOPDoi extends OpMode {
 
         if (newState == State.INTAKE) {
             robot.spindexer.home();
+            robot.shooter.isTracking = false;
+            Robot.follower.breakFollowing();
+            Robot.follower.startTeleOpDrive(true);
         }
 
         if (newState == State.OUTTAKE) {
@@ -111,10 +110,6 @@ public class TeleOPDoi extends OpMode {
         /* ----- STATE FUNCTIONS ----- */
         // power off shooter and change to intake state
         if (gamepad1.cross && stateTimer.milliseconds() > uV.inputDelayMS) {
-            if (robot.shooter.isTracking) {
-                robot.shooter.isTracking = false;
-                Robot.follower.breakFollowing();
-            }
 
             robot.shooter.reset();
 
@@ -123,6 +118,8 @@ public class TeleOPDoi extends OpMode {
             changeState(State.INTAKE);
             stateTimer.reset();
         }
+
+        //        Robot.follower.setTeleOpDrive(0, 0, -gamepad2.right_stick_x * 0.2);
 
         /* ----- MECHANICAL FUNCTIONS ----- */
         // shooter tracking via chassis
@@ -139,20 +136,7 @@ public class TeleOPDoi extends OpMode {
             if (robot.shooter.isShootReady() && robot.spindexer.isReady()) {
                 robot.spindexer.shoot();
                 ballShot = true;
-
-                /*
-                int slot = robot.spindexer.getTargetSlot();
-                robot.spindexer.setSlotColor(slot, ColorEnum.UNDEFINED);
-
-                robot.spindexer.targetPosition -= 8192.0 / 3;
-                robot.spindexer.targetSlot -= 1;
-                if (robot.spindexer.targetSlot == -1) {
-                    robot.spindexer.targetSlot = 2;
-                }
-                 */
             }
-        } else {
-            robot.spindexer.shootDirection = -1;
         }
 
         if (gamepad1.right_trigger < 0.1 && ballShot) {
@@ -187,18 +171,16 @@ public class TeleOPDoi extends OpMode {
         robot = new Robot(hardwareMap);
         robot.shooter.isTracking = false;
 
-        robot.spindexer.greenMotifPosition = 0;
-
         robot.spindexer.goToSlot((byte) 0);
 
         initLoopTimer.reset();
 
-        Robot.follower.setStartingPose(startPose);
+        Robot.follower.setStartingPose(Robot.transitionPose);
 
         changeState(State.INTAKE);
 
         // TODO: remove in final version
-        Robot.alliance = Robot.Alliance.BLUE;
+        //        Robot.alliance = Robot.Alliance.BLUE;
         //        robot.spindexer.home();
     }
 
@@ -280,7 +262,8 @@ public class TeleOPDoi extends OpMode {
         if ((Math.abs(gamepad1.left_stick_y) > 0.1
                         || Math.abs(gamepad1.left_stick_y) > 0.1
                         || Math.abs(gamepad1.right_stick_x) > 0.1
-                        || Math.abs(gamepad1.right_stick_y) > 0.1)
+                        || Math.abs(gamepad1.right_stick_y) > 0.1
+                        || Math.abs(gamepad2.right_stick_x) > 0.1)
                 && robot.shooter.isTracking) {
             Robot.follower.breakFollowing();
             Robot.follower.startTeleOpDrive(true);
@@ -289,7 +272,10 @@ public class TeleOPDoi extends OpMode {
 
         if (!robot.shooter.isTracking) {
             Robot.follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    -gamepad1.right_stick_x - 0.2 * gamepad2.right_stick_x,
+                    true);
         }
 
         if (gamepad1.dpad_left && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
@@ -334,10 +320,25 @@ public class TeleOPDoi extends OpMode {
         telemetry.addData(" 2.   slot 1", robot.spindexer.getSlotColor(1));
         telemetry.addData(" 3.   slot 2", robot.spindexer.getSlotColor(2));
         telemetry.addData(" 4.", "---------------------------------");
-        StringBuilder motifString = new StringBuilder("PPP");
-        motifString.setCharAt(Spindexer.greenMotifPosition, 'G');
 
-        telemetry.addData(" 5. Pattern", motifString);
+        switch (Spindexer.greenMotifPosition) {
+            case 0:
+                {
+                    telemetry.addData(" 5. Pattern", "GPP");
+                }
+                break;
+            case 1:
+                {
+                    telemetry.addData(" 5. Pattern", "PPG");
+                }
+                break;
+            case 2:
+                {
+                    telemetry.addData(" 5. Pattern", "PGP");
+                }
+                break;
+        }
+
         telemetry.addData(" 6. State", state);
         telemetry.addData(" 7. Homing", robot.spindexer.homing);
         telemetry.addData(" 8. Alliance", Robot.alliance);
@@ -345,14 +346,18 @@ public class TeleOPDoi extends OpMode {
         telemetry.addData(" 9.", "---------------------------------");
         telemetry.addData("10. Match Time", matchTimer.seconds());
 
-
-
         dashboardTelemetry.addData("angle", Math.toDegrees(robot.shooter.getAngle()));
         dashboardTelemetry.addData("current angle", Math.toDegrees(Robot.follower.getHeading()));
         dashboardTelemetry.addData("distance", robot.shooter.computeDistance());
         dashboardTelemetry.addData("motif start", Spindexer.greenMotifPosition);
+        dashboardTelemetry.addData("velocity", robot.shooter.turretMotorRight.getVelocity());
         dashboardTelemetry.update();
 
         telemetry.update();
+    }
+
+    @Override
+    public void stop() {
+        Robot.transitionPose = Robot.follower.getPose();
     }
 }
