@@ -31,8 +31,8 @@ public class Shooter extends Subsystem {
     private final PIDFController pidfController =
             new PIDFController(shootKp, shootKi, shootKd, shootKf);
 
-    private final Pose blueObeliskPose = new Pose(12, 135);
-    private final Pose redObeliskPose = new Pose(133, 135);
+    private final Pose blueObeliskPose = new Pose(12, 134);
+    private final Pose redObeliskPose = new Pose(133, 134);
 
     public static double targetVelocity = 1300;
 
@@ -57,11 +57,15 @@ public class Shooter extends Subsystem {
 
     public boolean isShootReady() {
         boolean aligned =
-                Robot.follower.getPose().getHeading() >= getAngle() - 5 * 2 * Math.PI / 360
+                Robot.follower.getPose().getHeading() >= getAngle() - 2 * 2 * Math.PI / 360
                         && Robot.follower.getPose().getHeading()
-                                <= getAngle() + 5 * 2 * Math.PI / 360;
+                                <= getAngle() + 2 * 2 * Math.PI / 360;
 
         return pidfController.targetReached() && aligned;
+    }
+
+    public boolean velocityReached() {
+        return pidfController.targetReached();
     }
 
     public double computeDistance() {
@@ -75,13 +79,14 @@ public class Shooter extends Subsystem {
     private double computeVelocity() {
         double dist = computeDistance();
         if (dist > 100) {
-            return 1450;
+            return 1500;
         }
         if (dist < 65) {
             return 1100;
         }
-        return dist * 1.45 + 1065;
-    }
+        return dist * 1.42 + 1060;
+//        return 500;
+   }
 
     public double getAngle(double x, double y) {
         Pose targetObeliskPose =

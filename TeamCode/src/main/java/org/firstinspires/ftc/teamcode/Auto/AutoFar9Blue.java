@@ -23,30 +23,53 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Autonomous(name = "Auto Far x9 BLUE", group = "0. Auto")
 public class AutoFar9Blue extends OpMode {
 
-    public Limelight3A limelight;
+    private static final Logger log = LoggerFactory.getLogger(AutoFar9Blue.class);
+    private AprilTagProcessor aprilTag;
+    private VisionPortal visionPortal;
 
     private int pathState; // Current autonomous path state (state machine)
     private ElapsedTime pathTimer; // Timer for path state machine
+    private boolean singleton;
     private Paths paths; // Paths defined in the Paths class
 
     private static Robot robot;
 
     private final double ballWait = 5;
 
+
     private final ElapsedTime timer = new ElapsedTime();
+    private final ElapsedTime autoTimer = new ElapsedTime();
 
     Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
 
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        aprilTag = new AprilTagProcessor.Builder().build();
+
+        // Adjust Image Decimation to trade-off detection-range for detection-rate.
+        aprilTag.setDecimation(2);
+
+        visionPortal =
+                new VisionPortal.Builder()
+                        .setCamera(hardwareMap.get(WebcamName.class, "aprilWebcam"))
+                        .addProcessor(aprilTag)
+                        .build();
+
+        visionPortal.resumeStreaming();
 
         Robot.alliance = Robot.Alliance.BLUE;
 
@@ -55,7 +78,6 @@ public class AutoFar9Blue extends OpMode {
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
 
-        limelight.start();
         robot.spindexer.home();
     }
 
@@ -64,14 +86,19 @@ public class AutoFar9Blue extends OpMode {
         robot.intake.update();
         robot.spindexer.update();
 
-        LLResult result = limelight.getLatestResult();
-
-        if (result.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-                int id = fiducial.getFiducialId();
-                if (id == 21 || id == 22 || id == 23) {
-                    Spindexer.greenMotifPosition = id - 21;
-                }
+        for (AprilTagDetection detection : aprilTag.getDetections())  {
+            switch (detection.id) {
+                case 21:
+                    Spindexer.greenMotifPosition = 0;
+                    break;
+                case 22:
+                    Spindexer.greenMotifPosition = 2;
+                    break;
+                case 23:
+                    Spindexer.greenMotifPosition = 1;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -82,10 +109,21 @@ public class AutoFar9Blue extends OpMode {
         if (robot.spindexer.getBallCount() < 3) {
             robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
         }
+
+        autoTimer.reset();
+    }
+
+    @Override
+    public void start() {
+        visionPortal.stopStreaming();
     }
 
     @Override
     public void loop() {
+//        if (autoTimer.seconds() < 20) {
+//            return;
+//        }
+
         Robot.follower.update(); // Update Pedro Pathing
         robot.intake.update();
         robot.spindexer.update();
@@ -136,25 +174,25 @@ public class AutoFar9Blue extends OpMode {
 
             goToGrab0 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(59.000, 20.000), new Pose(44.500, 40)))
-                            .setLinearHeadingInterpolation(Math.toRadians(116), Math.toRadians(180))
+                            .addPath(new BezierLine(new Pose(59.000, 20.000), new Pose(47, 40)))
+                            .setLinearHeadingInterpolation(robot.shooter.getAngle(59, 20), Math.toRadians(180))
                             .build();
 
             grab00 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(44.500, 40.000), new Pose(41.500, 40)))
+                            .addPath(new BezierLine(new Pose(47, 40), new Pose(41, 40)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab01 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(41.500, 40.000), new Pose(37.000, 40)))
+                            .addPath(new BezierLine(new Pose(41, 40.000), new Pose(35.5, 40)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab02 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(37.000, 40.000), new Pose(31.000, 40)))
+                            .addPath(new BezierLine(new Pose(35.5, 40.000), new Pose(31.000, 40)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -175,7 +213,7 @@ public class AutoFar9Blue extends OpMode {
                                             new Pose(48.724, 41.056),
                                             new Pose(59.110, 33.846),
                                             new Pose(50.000, 59.996),
-                                            new Pose(49.000, 64.000)))
+                                            new Pose(47, 64.000)))
                             .setLinearHeadingInterpolation(
                                     robot.shooter.getAngle(59, 20), Math.toRadians(180))
                             .build();
@@ -184,7 +222,7 @@ public class AutoFar9Blue extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(49.000, 64.000), new Pose(43.000, 64.000)))
+                                            new Pose(47, 64.000), new Pose(41, 64.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -192,7 +230,7 @@ public class AutoFar9Blue extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(43.000, 64.000), new Pose(37.000, 64.000)))
+                                            new Pose(41, 64.000), new Pose(35.5, 64.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -200,7 +238,7 @@ public class AutoFar9Blue extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(37.000, 64.000), new Pose(30.000, 64.000)))
+                                            new Pose(37.000, 64.000), new Pose(31, 64.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -230,6 +268,7 @@ public class AutoFar9Blue extends OpMode {
                 Robot.follower.followPath(paths.shootPreload, true);
                 robot.shooter.shooting = true;
                 robot.spindexer.motifGoToStart();
+                robot.intake.setPower(-1);
                 setPathState(1);
                 break;
             case 1:
@@ -261,30 +300,41 @@ public class AutoFar9Blue extends OpMode {
                 break;
             case 4:
                 // GRAB FIRST BALL
-                if (robot.spindexer.isReady()) {
-                    Robot.follower.followPath(paths.grab00, true);
-                    timer.reset();
-                    setPathState(5);
+                if (robot.spindexer.isReady() && !Robot.follower.isBusy()) {
+                    if (singleton)
+                    {
+                        timer.reset();
+                        singleton = false;
+                    }
+                    if (timer.seconds() > 2.5)
+                    {
+                        Robot.follower.followPath(paths.grab00, true);
+//                        robot.intake.setPower(0.5);
+                        Robot.follower.setMaxPower(0.25);
+                        setPathState(5);
+                    }
                 }
                 break;
             case 5:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 1 || timer.seconds() > 5)) {
+                        && (robot.spindexer.getBallCount() == 1 || timer.seconds() > 5) && robot.spindexer.isReady()) {
+
                     setPathState(6);
                 }
                 break;
             case 6:
                 // GRAB SECOND BALL
-                Robot.follower.followPath(paths.grab01, true);
                 robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                Robot.follower.followPath(paths.grab01, true);
+
                 timer.reset();
                 setPathState(7);
                 break;
             case 7:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 2 || timer.seconds() > 5)) {
+                        && (robot.spindexer.getBallCount() == 2 || timer.seconds() > 5) && robot.spindexer.isReady()) {
                     setPathState(8);
                 }
                 break;
@@ -305,9 +355,10 @@ public class AutoFar9Blue extends OpMode {
             case 10:
                 // SHOOT 1ST
                 Robot.follower.followPath(paths.shoot0, true);
+                Robot.follower.setMaxPower(1);
+                robot.intake.setPower(-1);
                 robot.shooter.shooting = true;
                 robot.spindexer.motifGoToStart();
-                robot.intake.setPower(0);
                 setPathState(11);
                 break;
             case 11:
@@ -339,10 +390,19 @@ public class AutoFar9Blue extends OpMode {
                 break;
             case 14:
                 // GRAB FIRST BALL
-                if (robot.spindexer.isReady()) {
-                    Robot.follower.followPath(paths.grab10, true);
-                    timer.reset();
-                    setPathState(15);
+                if (robot.spindexer.isReady() && !Robot.follower.isBusy()) {
+                    if (singleton)
+                    {
+                        timer.reset();
+                        singleton = false;
+                    }
+                    if (timer.seconds() > 2.5)
+                    {
+                        Robot.follower.followPath(paths.grab10, true);
+//                        robot.intake.setPower(0.5);
+                        Robot.follower.setMaxPower(0.25);
+                        setPathState(15);
+                    }
                 }
                 break;
             case 15:
@@ -358,11 +418,12 @@ public class AutoFar9Blue extends OpMode {
                 robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
                 timer.reset();
                 setPathState(17);
+
                 break;
             case 17:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 2 || timer.seconds() > 5)) {
+                        && (robot.spindexer.getBallCount() == 2 || timer.seconds() > 5) && robot.spindexer.isReady()) {
                     setPathState(18);
                 }
                 break;
@@ -383,9 +444,10 @@ public class AutoFar9Blue extends OpMode {
             case 20:
                 // SHOOT 1ST
                 Robot.follower.followPath(paths.shoot1, true);
+                Robot.follower.setMaxPower(1);
                 robot.shooter.shooting = true;
                 robot.spindexer.motifGoToStart();
-                robot.intake.setPower(0);
+                robot.intake.setPower(-1);
                 setPathState(21);
                 break;
             case 21:
@@ -409,6 +471,7 @@ public class AutoFar9Blue extends OpMode {
                 }
                 break;
             case 24:
+                robot.intake.setPower(0);
                 requestOpModeStop();
                 pathState = -1;
                 break;
@@ -418,6 +481,7 @@ public class AutoFar9Blue extends OpMode {
 
     public void setPathState(int pState) {
         timer.reset();
+        singleton = true;
         pathState = pState;
         pathTimer.reset();
     }

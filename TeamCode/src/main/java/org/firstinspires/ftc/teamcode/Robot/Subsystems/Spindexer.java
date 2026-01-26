@@ -16,17 +16,16 @@ public class Spindexer extends Subsystem {
     public DcMotorEx motor;
     public TouchSensor limitSwitch;
 
-    // TODO: change to actual value
     public static double ticksPerRevolution = 8192;
 
-    public static double Kp = -0.0008;
-    public static double Ki = -0.00001;
-    public static double Kd = -0.000053;
+    public static double Kp = -0.0006;
+    public static double Ki = -0.0000051;
+    public static double Kd = -0.000043;
     public static double Kf = 0;
 
     public int targetSlot = 0;
     public int begin = 0;
-    public double tolerance = 100;
+    public double tolerance = 150;
     public double targetPosition = 0;
     public boolean homing = false;
     public boolean homingSingleton = false;
@@ -192,6 +191,7 @@ public class Spindexer extends Subsystem {
         return targetSlot;
     }
 
+
     // homing functions
     public void home() {
         reset();
@@ -214,6 +214,9 @@ public class Spindexer extends Subsystem {
         // motor.setVelocityPIDFCoefficients(Kp, Ki, Kd, Kf);
 
         // update PID controller
+//        FtcDashboard.getInstance().getTelemetry().addData("limit switch", limitSwitch.isPressed());
+//        FtcDashboard.getInstance().getTelemetry().addData("spindexer pos", motor.getCurrentPosition());
+
         if (homing) {
             motor.setPower(-0.2);
 

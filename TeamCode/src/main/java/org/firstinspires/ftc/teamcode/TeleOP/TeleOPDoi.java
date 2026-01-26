@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOP;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.uV;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Config
 @TeleOp(name = "TeleOp dos FIXED")
@@ -48,6 +50,7 @@ public class TeleOPDoi extends OpMode {
         ballShot = false;
 
         if (newState == State.INTAKE) {
+            robot.spindexer.reset();
             robot.spindexer.home();
             robot.shooter.isTracking = false;
             Robot.follower.breakFollowing();
@@ -87,6 +90,12 @@ public class TeleOPDoi extends OpMode {
             robot.spindexer.home();
 
             driverTwoInputTimer.reset();
+        }
+
+        if (gamepad1.dpad_down && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
+            robot.spindexer.home();
+
+            driverOneInputTimer.reset();
         }
 
         /* ----- SORTING SNIPPETS ----- */
@@ -133,7 +142,7 @@ public class TeleOPDoi extends OpMode {
 
         if (gamepad1.right_trigger > 0.1) { // Rising edge detection
             robot.intake.setPower(1);
-            if (robot.shooter.isShootReady() && robot.spindexer.isReady()) {
+            if (robot.spindexer.isReady() && robot.shooter.velocityReached()) {
                 robot.spindexer.shoot();
                 ballShot = true;
             }
@@ -226,9 +235,6 @@ public class TeleOPDoi extends OpMode {
             case OUTTAKE:
                 handleOuttake();
                 break;
-
-            default:
-                Robot.follower.update();
         }
 
         // CRITICAL FIX: Always update all subsystems
@@ -298,6 +304,21 @@ public class TeleOPDoi extends OpMode {
             robot.intake.setRollerPower(-1, 1);
         }
 
+        if (gamepad1.dpad_up && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
+            telemetry.addData("resetting", "true");
+            if (Robot.alliance == Robot.Alliance.RED)
+                Robot.transitionPose = new Pose(9, 9, Math.PI / 2);
+            else Robot.transitionPose = new Pose(135, 9, Math.PI / 2);
+            Robot.follower = Constants.createFollower(hardwareMap);
+            Robot.follower.setStartingPose(Robot.transitionPose);
+            Robot.follower.startTeleOpDrive(true);
+
+            driverOneInputTimer.reset();
+        }
+
+        telemetry.addData("gmp1 dpad up", gamepad1.dpad_up);
+        telemetry.addData("timer", driverOneInputTimer.milliseconds());
+
         if (gamepad2.dpad_left && driverTwoInputTimer.milliseconds() > uV.inputDelayMS) {
             if (--Spindexer.greenMotifPosition == -1) {
                 Spindexer.greenMotifPosition = 2;
@@ -310,6 +331,27 @@ public class TeleOPDoi extends OpMode {
             if (++Spindexer.greenMotifPosition == 3) {
                 Spindexer.greenMotifPosition = 0;
             }
+
+            driverTwoInputTimer.reset();
+        }
+
+        if (gamepad2.left_bumper && driverTwoInputTimer.milliseconds() > uV.inputDelayMS) {
+            if(--robot.spindexer.targetSlot == -1) {
+                robot.spindexer.targetSlot = 2;
+            }
+
+            robot.spindexer.setSlotColor(robot.spindexer.getTargetSlot(), ColorEnum.UNDEFINED);
+
+            driverTwoInputTimer.reset();
+        }
+
+
+        if (gamepad2.left_bumper && driverTwoInputTimer.milliseconds() > uV.inputDelayMS) {
+            if(++robot.spindexer.targetSlot == 3) {
+                robot.spindexer.targetSlot = 0;
+            }
+
+            robot.spindexer.setSlotColor(robot.spindexer.getTargetSlot(), ColorEnum.UNDEFINED);
 
             driverTwoInputTimer.reset();
         }
@@ -345,6 +387,7 @@ public class TeleOPDoi extends OpMode {
 
         telemetry.addData(" 9.", "---------------------------------");
         telemetry.addData("10. Match Time", matchTimer.seconds());
+        telemetry.addData("11. Pose", Robot.follower.getPose());
 
         dashboardTelemetry.addData("angle", Math.toDegrees(robot.shooter.getAngle()));
         dashboardTelemetry.addData("current angle", Math.toDegrees(Robot.follower.getHeading()));
