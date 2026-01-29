@@ -143,7 +143,7 @@ public class TeleOPDoi extends OpMode {
         if (gamepad1.right_trigger > 0.1) { // Rising edge detection
             robot.intake.setPower(1);
             if (robot.spindexer.isReady() && robot.shooter.velocityReached()) {
-                robot.spindexer.shoot(-1);
+                robot.spindexer.shoot(1);
                 ballShot = true;
             }
         }
@@ -205,12 +205,19 @@ public class TeleOPDoi extends OpMode {
         if (gamepad1.options && driverOneInputTimer.milliseconds() > uV.inputDelayMS) {
             if (Robot.alliance == Robot.Alliance.RED) {
                 Robot.alliance = Robot.Alliance.BLUE;
-                gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
             } else {
                 Robot.alliance = Robot.Alliance.RED;
-                gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
             }
             driverOneInputTimer.reset();
+        }
+
+        switch (Robot.alliance) {
+            case RED:
+                gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
+                break;
+            case BLUE:
+                gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
+                break;
         }
     }
 
@@ -280,7 +287,7 @@ public class TeleOPDoi extends OpMode {
             Robot.follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x - 0.2 * gamepad2.right_stick_x,
+                    -gamepad1.right_stick_x - 0.1 * gamepad2.right_stick_x,
                     true);
         }
 

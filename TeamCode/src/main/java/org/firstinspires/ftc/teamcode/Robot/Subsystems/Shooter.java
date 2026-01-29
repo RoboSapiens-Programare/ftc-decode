@@ -56,10 +56,11 @@ public class Shooter extends Subsystem {
     }
 
     public boolean isShootReady() {
+        double tolerance = Math.toRadians(2);
         boolean aligned =
-                Robot.follower.getPose().getHeading() >= getAngle() - 3 * 2 * Math.PI / 360
+                Robot.follower.getPose().getHeading() >= getAngle() - tolerance
                         && Robot.follower.getPose().getHeading()
-                                <= getAngle() + 3 * 2 * Math.PI / 360;
+                                <= getAngle() + tolerance;
 
         FtcDashboard.getInstance().getTelemetry().addData("Angle delta", Math.toDegrees(Robot.follower.getHeading() - getAngle()));
 
