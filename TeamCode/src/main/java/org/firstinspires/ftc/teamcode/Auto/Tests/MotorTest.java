@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 
@@ -32,9 +31,9 @@ public class MotorTest extends OpMode {
 
         pidfController.setTolerance(tolerance);
 
-        rollerLeft = hardwareMap.get(CRServo.class, "rollerLeft");
-        rollerRight = hardwareMap.get(CRServo.class, "rollerRight");
-        rollerRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        //        rollerLeft = hardwareMap.get(CRServo.class, "rollerLeft");
+        //        rollerRight = hardwareMap.get(CRServo.class, "rollerRight");
+        //        rollerRight.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     @Override
@@ -62,7 +61,7 @@ public class MotorTest extends OpMode {
         //        }
 
         motor.setPower(0.7);
-        rollerRight.setPower(0.375);
-        rollerLeft.setPower(1);
+        //        rollerRight.setPower(0.375);
+        //        rollerLeft.setPower(1);
     }
 }

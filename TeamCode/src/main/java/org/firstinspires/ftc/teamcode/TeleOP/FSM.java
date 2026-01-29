@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
-import com.acmerobotics.dashboard.config.Config;
+// import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 // bag pula coaie il fac maine pe asta fmm de fsm
 
-@Config
+// @Config
 @TeleOp(name = "TeleOp")
 public class FSM extends OpMode {
     /*

@@ -11,8 +11,6 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -21,7 +19,6 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
@@ -41,11 +38,10 @@ public class AutoPreloadRed extends OpMode {
     private VisionPortal visionPortal;
     private ElapsedTime autoTimer = new ElapsedTime();
 
-
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-        Robot.follower.setStartingPose(new Pose(144-72, 8, Math.toRadians(270)));
+        Robot.follower.setStartingPose(new Pose(144 - 72, 8, Math.toRadians(270)));
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -71,7 +67,7 @@ public class AutoPreloadRed extends OpMode {
         robot.intake.update();
         robot.spindexer.update();
 
-        for (AprilTagDetection detection : aprilTag.getDetections())  {
+        for (AprilTagDetection detection : aprilTag.getDetections()) {
             switch (detection.id) {
                 case 21:
                     Spindexer.greenMotifPosition = 0;
@@ -94,7 +90,6 @@ public class AutoPreloadRed extends OpMode {
         if (robot.spindexer.getBallCount() < 3) {
             robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
         }
-
     }
 
     @Override
@@ -103,7 +98,6 @@ public class AutoPreloadRed extends OpMode {
         robot.spindexer.motifGoToStart();
         autoTimer.reset();
     }
-
 
     @Override
     public void loop() {
@@ -131,26 +125,27 @@ public class AutoPreloadRed extends OpMode {
         public PathChain leave;
 
         public Paths(Follower follower) {
-            shoot = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(144-63.000, 9.000),
-                                    new Pose(144-35.729, 26.808),
-                                    new Pose(144-64.550, 38.913),
-                                    new Pose(144-59.000, 22.000)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(270), robot.shooter.getAngle(144-59, 22))
-                    .build();
+            shoot =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(144 - 63.000, 9.000),
+                                            new Pose(144 - 35.729, 26.808),
+                                            new Pose(144 - 64.550, 38.913),
+                                            new Pose(144 - 59.000, 22.000)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(270), robot.shooter.getAngle(144 - 59, 22))
+                            .build();
 
-            leave = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(144-59.000, 22.000), new Pose(144-19.000, 10.000))
-                    )
-                    .setLinearHeadingInterpolation(robot.shooter.getAngle(144-59, 22), Math.toRadians(0))
-                    .build();
+            leave =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(144 - 59.000, 22.000),
+                                            new Pose(144 - 19.000, 10.000)))
+                            .setLinearHeadingInterpolation(
+                                    robot.shooter.getAngle(144 - 59, 22), Math.toRadians(0))
+                            .build();
         }
     }
 

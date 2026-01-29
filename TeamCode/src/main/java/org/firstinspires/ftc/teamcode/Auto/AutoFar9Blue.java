@@ -16,9 +16,6 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,6 +23,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
+import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -47,7 +45,7 @@ public class AutoFar9Blue extends OpMode {
     private static Robot robot;
 
     private final double ballWait = 5;
-
+    private final double artefactMaxPower = 0.27;
 
     private final ElapsedTime timer = new ElapsedTime();
     private final ElapsedTime autoTimer = new ElapsedTime();
@@ -73,7 +71,7 @@ public class AutoFar9Blue extends OpMode {
 
         Robot.alliance = Robot.Alliance.BLUE;
 
-        Robot.follower.setStartingPose(new Pose(63, 9, Math.toRadians(270)));
+        Robot.follower.setStartingPose(new Pose(63, 9, Math.toRadians(90)));
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -83,10 +81,9 @@ public class AutoFar9Blue extends OpMode {
 
     @Override
     public void init_loop() {
-        robot.intake.update();
         robot.spindexer.update();
 
-        for (AprilTagDetection detection : aprilTag.getDetections())  {
+        for (AprilTagDetection detection : aprilTag.getDetections()) {
             switch (detection.id) {
                 case 21:
                     Spindexer.greenMotifPosition = 0;
@@ -108,21 +105,30 @@ public class AutoFar9Blue extends OpMode {
 
         if (robot.spindexer.getBallCount() < 3) {
             robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+            robot.intake.update();
         }
 
         autoTimer.reset();
+
+        dashboardTelemetry.addData(" 0. Ball count", robot.spindexer.getBallCount());
+        dashboardTelemetry.addData(" 1.   slot 0", robot.spindexer.getSlotColor(0));
+        dashboardTelemetry.addData(" 2.   slot 1", robot.spindexer.getSlotColor(1));
+        dashboardTelemetry.addData(" 3.   slot 2", robot.spindexer.getSlotColor(2));
+
+        dashboardTelemetry.update();
     }
 
     @Override
     public void start() {
         visionPortal.stopStreaming();
+
     }
 
     @Override
     public void loop() {
-//        if (autoTimer.seconds() < 20) {
-//            return;
-//        }
+        //        if (autoTimer.seconds() < 20) {
+        //            return;
+        //        }
 
         Robot.follower.update(); // Update Pedro Pathing
         robot.intake.update();
@@ -136,6 +142,11 @@ public class AutoFar9Blue extends OpMode {
         dashboardTelemetry.addData("Y", Robot.follower.getPose().getY());
         dashboardTelemetry.addData("Heading", Robot.follower.getPose().getHeading());
         dashboardTelemetry.addData("balls", robot.spindexer.getBallCount());
+
+        dashboardTelemetry.addData(" 0. Ball count", robot.spindexer.getBallCount());
+        dashboardTelemetry.addData(" 1.   slot 0", robot.spindexer.getSlotColor(0));
+        dashboardTelemetry.addData(" 2.   slot 1", robot.spindexer.getSlotColor(1));
+        dashboardTelemetry.addData(" 3.   slot 2", robot.spindexer.getSlotColor(2));
 
         dashboardTelemetry.update();
     }
@@ -164,35 +175,35 @@ public class AutoFar9Blue extends OpMode {
             shootPreload =
                     follower.pathBuilder()
                             .addPath(
-                                    new BezierCurve(
+                                    new BezierLine(
                                             new Pose(63.000, 9.000),
-                                            new Pose(50.462, 16.457),
                                             new Pose(59.000, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    Math.toRadians(270), robot.shooter.getAngle(59, 20))
+                                    Math.toRadians(90), robot.shooter.getAngle(59, 20))
                             .build();
 
             goToGrab0 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(59.000, 20.000), new Pose(47, 40)))
-                            .setLinearHeadingInterpolation(robot.shooter.getAngle(59, 20), Math.toRadians(180))
+                            .addPath(new BezierLine(new Pose(59.000, 20.000), new Pose(42, 36)))
+                            .setLinearHeadingInterpolation(
+                                    robot.shooter.getAngle(59, 20), Math.toRadians(180))
                             .build();
 
             grab00 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(47, 40), new Pose(41, 40)))
+                            .addPath(new BezierLine(new Pose(42, 36), new Pose(36, 36)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab01 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(41, 40.000), new Pose(35.5, 40)))
+                            .addPath(new BezierLine(new Pose(36, 36.000), new Pose(31.25, 36)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab02 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(35.5, 40.000), new Pose(31.000, 40)))
+                            .addPath(new BezierLine(new Pose(31.25, 36.000), new Pose(15, 36)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -200,7 +211,7 @@ public class AutoFar9Blue extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(31.500, 40.000), new Pose(60.500, 20.000)))
+                                            new Pose(15, 36.000), new Pose(60.500, 20.000)))
                             .setLinearHeadingInterpolation(
                                     Math.toRadians(180), robot.shooter.getAngle(59, 20))
                             .build();
@@ -213,32 +224,26 @@ public class AutoFar9Blue extends OpMode {
                                             new Pose(48.724, 41.056),
                                             new Pose(59.110, 33.846),
                                             new Pose(50.000, 59.996),
-                                            new Pose(47, 64.000)))
+                                            new Pose(42, 60)))
                             .setLinearHeadingInterpolation(
                                     robot.shooter.getAngle(59, 20), Math.toRadians(180))
                             .build();
 
             grab10 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(47, 64.000), new Pose(41, 64.000)))
+                            .addPath(new BezierLine(new Pose(40, 60.000), new Pose(36, 60.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab11 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(41, 64.000), new Pose(35.5, 64.000)))
+                            .addPath(new BezierLine(new Pose(36, 60.000), new Pose(31.25, 60.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab12 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(37.000, 64.000), new Pose(31, 64.000)))
+                            .addPath(new BezierLine(new Pose(31.25, 60.000), new Pose(15, 60.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -246,17 +251,17 @@ public class AutoFar9Blue extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(30.000, 64.000), new Pose(45.000, 95.000)))
+                                            new Pose(15, 60.000), new Pose(60.500, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    Math.toRadians(180), robot.shooter.getAngle(45, 95))
+                                    Math.toRadians(180), robot.shooter.getAngle(60.5, 20))
                             .build();
 
             leave =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(45.000, 95.000), new Pose(20.000, 95.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(270))
+                                            new Pose(60.000, 20.000), new Pose(30.000, 20.000)))
+                            .setLinearHeadingInterpolation(robot.shooter.getAngle(60.5, 20), Math.toRadians(180))
                             .build();
         }
     }
@@ -276,7 +281,7 @@ public class AutoFar9Blue extends OpMode {
                 if (!Robot.follower.isBusy()) {
                     if (robot.spindexer.getBallCount() > 0) {
                         if (robot.shooter.isShootReady() && robot.spindexer.isReady()) {
-                            robot.spindexer.shoot();
+                            robot.spindexer.shoot(1);
                         }
                     } else if (robot.spindexer.isReady()) {
                         setPathState(2);
@@ -295,67 +300,71 @@ public class AutoFar9Blue extends OpMode {
                 // ARRIVED
                 if (!Robot.follower.isBusy()) {
                     robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
-                    setPathState(4);
+                    if (robot.spindexer.isReady()) {
+                        setPathState(4);
+                    }
                 }
                 break;
             case 4:
                 // GRAB FIRST BALL
                 if (robot.spindexer.isReady() && !Robot.follower.isBusy()) {
-                    if (singleton)
-                    {
-                        timer.reset();
-                        singleton = false;
-                    }
-                    if (timer.seconds() > 2.5)
-                    {
-                        Robot.follower.followPath(paths.grab00, true);
-//                        robot.intake.setPower(0.5);
-                        Robot.follower.setMaxPower(0.25);
-                        setPathState(5);
-                    }
+                    Robot.follower.followPath(paths.grab00, true);
+                    Robot.follower.setMaxPower(artefactMaxPower);
+                    setPathState(5);
                 }
                 break;
             case 5:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 1 || timer.seconds() > 5) && robot.spindexer.isReady()) {
-
+                        && (robot.spindexer.getBallCount() == 1 || timer.seconds() > ballWait)
+                        && robot.spindexer.isReady()) {
+                    robot.spindexer.setSlotColor(1, ColorEnum.UNDEFINED);
+                    robot.spindexer.setSlotColor(2, ColorEnum.UNDEFINED);
+                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
                     setPathState(6);
                 }
                 break;
             case 6:
                 // GRAB SECOND BALL
-                robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
-                Robot.follower.followPath(paths.grab01, true);
 
-                timer.reset();
-                setPathState(7);
+                if (robot.spindexer.isReady()) {
+                    Robot.follower.followPath(paths.grab01, true);
+                    setPathState(7);
+                }
+
                 break;
             case 7:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 2 || timer.seconds() > 5) && robot.spindexer.isReady()) {
-                    setPathState(8);
+                        && (robot.spindexer.getBallCount() == 2 || timer.seconds() > ballWait)
+                        && robot.spindexer.isReady()) {
+                    robot.spindexer.setSlotColor(2, ColorEnum.UNDEFINED);
+                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                    if (robot.spindexer.isReady())
+                    {
+                        Robot.follower.setMaxPower(1);
+                        setPathState(8);
+                    }
                 }
                 break;
             case 8:
                 // GRAB THIRD
-                Robot.follower.followPath(paths.grab02, true);
-                robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
-                timer.reset();
-                setPathState(9);
+                if (robot.spindexer.isReady()) {
+                    Robot.follower.followPath(paths.grab02, true);
+                    setPathState(9);
+                }
                 break;
             case 9:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 3 || timer.seconds() > 5)) {
+                        && (robot.spindexer.getBallCount() == 3 || timer.seconds() > ballWait)) {
                     setPathState(10);
                 }
                 break;
             case 10:
                 // SHOOT 1ST
                 Robot.follower.followPath(paths.shoot0, true);
-                Robot.follower.setMaxPower(1);
+
                 robot.intake.setPower(-1);
                 robot.shooter.shooting = true;
                 robot.spindexer.motifGoToStart();
@@ -366,7 +375,7 @@ public class AutoFar9Blue extends OpMode {
                 if (!Robot.follower.isBusy()) {
                     if (robot.spindexer.getBallCount() > 0) {
                         if (robot.shooter.isShootReady() && robot.spindexer.isReady()) {
-                            robot.spindexer.shoot();
+                            robot.spindexer.shoot(1);
                         }
                     } else if (robot.spindexer.isReady()) {
                         setPathState(12);
@@ -374,7 +383,7 @@ public class AutoFar9Blue extends OpMode {
                 }
                 break;
             case 12:
-                // GO TO 2ND GRAB
+                // GO TO 1ST GRAB
                 Robot.follower.followPath(paths.goToGrab1, true);
                 robot.shooter.shooting = false;
                 robot.spindexer.home();
@@ -385,59 +394,64 @@ public class AutoFar9Blue extends OpMode {
                 // ARRIVED
                 if (!Robot.follower.isBusy()) {
                     robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
-                    setPathState(14);
+                    if (robot.spindexer.isReady()) {
+                        setPathState(14);
+                    }
                 }
                 break;
             case 14:
                 // GRAB FIRST BALL
                 if (robot.spindexer.isReady() && !Robot.follower.isBusy()) {
-                    if (singleton)
-                    {
-                        timer.reset();
-                        singleton = false;
-                    }
-                    if (timer.seconds() > 2.5)
-                    {
-                        Robot.follower.followPath(paths.grab10, true);
-//                        robot.intake.setPower(0.5);
-                        Robot.follower.setMaxPower(0.25);
-                        setPathState(15);
-                    }
+                    Robot.follower.followPath(paths.grab10, true);
+                    Robot.follower.setMaxPower(artefactMaxPower);
+                    setPathState(15);
                 }
                 break;
             case 15:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 1 || timer.seconds() > 5)) {
+                        && (robot.spindexer.getBallCount() == 1 || timer.seconds() > ballWait)
+                        && robot.spindexer.isReady()) {
+                    robot.spindexer.setSlotColor(1, ColorEnum.UNDEFINED);
+                    robot.spindexer.setSlotColor(2, ColorEnum.UNDEFINED);
+                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
                     setPathState(16);
                 }
                 break;
             case 16:
                 // GRAB SECOND BALL
-                Robot.follower.followPath(paths.grab11, true);
-                robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
-                timer.reset();
-                setPathState(17);
+
+                if (robot.spindexer.isReady()) {
+                    Robot.follower.followPath(paths.grab11, true);
+                    setPathState(17);
+                }
 
                 break;
             case 17:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 2 || timer.seconds() > 5) && robot.spindexer.isReady()) {
-                    setPathState(18);
+                        && (robot.spindexer.getBallCount() == 2 || timer.seconds() > ballWait)
+                        && robot.spindexer.isReady()) {
+                    robot.spindexer.setSlotColor(2, ColorEnum.UNDEFINED);
+                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                    if (robot.spindexer.isReady())
+                    {
+                        Robot.follower.setMaxPower(1);
+                        setPathState(18);
+                    }
                 }
                 break;
             case 18:
                 // GRAB THIRD
-                Robot.follower.followPath(paths.grab12, true);
-                robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
-                timer.reset();
-                setPathState(19);
+                if (robot.spindexer.isReady()) {
+                    Robot.follower.followPath(paths.grab12, true);
+                    setPathState(19);
+                }
                 break;
             case 19:
                 // ARRIVED
                 if (!Robot.follower.isBusy()
-                        && (robot.spindexer.getBallCount() == 3 || timer.seconds() > 5)) {
+                        && (robot.spindexer.getBallCount() == 3 || timer.seconds() > ballWait)) {
                     setPathState(20);
                 }
                 break;
@@ -454,7 +468,7 @@ public class AutoFar9Blue extends OpMode {
                 if (!Robot.follower.isBusy()) {
                     if (robot.spindexer.getBallCount() > 0) {
                         if (robot.shooter.isShootReady() && robot.spindexer.isReady()) {
-                            robot.spindexer.shoot();
+                            robot.spindexer.shoot(1);
                         }
                     } else if (robot.spindexer.isReady()) {
                         setPathState(22);

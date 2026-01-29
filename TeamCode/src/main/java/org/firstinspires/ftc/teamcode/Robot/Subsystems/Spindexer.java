@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 import static java.lang.Math.abs;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -12,23 +13,26 @@ import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
+@Config
 public class Spindexer extends Subsystem {
     public DcMotorEx motor;
     public TouchSensor limitSwitch;
 
     public static double ticksPerRevolution = 8192;
 
-    public static double Kp = -0.0006;
-    public static double Ki = -0.0000051;
+    public static double Kp = -0.0009;
+    public static double Ki = -0.001;
     public static double Kd = -0.000043;
     public static double Kf = 0;
 
     public int targetSlot = 0;
     public int begin = 0;
-    public double tolerance = 150;
+    public double tolerance = 75;
     public double targetPosition = 0;
     public boolean homing = false;
     public boolean homingSingleton = false;
+
+    private boolean wentToStart = false;
 
     private final PIDFController pidfController = new PIDFController(Kp, Ki, Kd, Kf);
 
@@ -46,12 +50,8 @@ public class Spindexer extends Subsystem {
     public Spindexer(HardwareMap hwMap) {
         motor = hwMap.get(DcMotorEx.class, "spindexer");
 
-        // if using custom PID controller
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // uncomment if using pre-defined PID
-        // motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         pidfController.setTolerance(tolerance);
 
@@ -69,18 +69,40 @@ public class Spindexer extends Subsystem {
         pidfController.setSetpoint(targetPosition);
     }
 
-    public void shoot() {
-        slotColors[targetSlot] = ColorEnum.UNDEFINED;
+    public void shoot(int n) {
+        if (n == -1) {
+            n = getBallCount();
+        }
 
-        targetPosition += shootDirection * ticksPerRevolution / 3;
+        if (wentToStart) {
+            wentToStart = false;
+            targetPosition -= uV.shootOffset;
+            pidfController.setSetpoint(targetPosition);
+
+            while (!pidfController.targetReached()) {
+                motor.setPower(pidfController.updatePID(motor.getCurrentPosition()));
+            }
+        }
+
+        for (int i = 0; i < n; ++i) {
+            slotColors[targetSlot] = ColorEnum.UNDEFINED;
+
+            targetPosition += shootDirection * ticksPerRevolution / 3;
+
+            setSlotColor(targetSlot, ColorEnum.UNDEFINED);
+
+            if (--targetSlot == -1) {
+                targetSlot = 2;
+            }
+
+
+        }
 
         pidfController.setSetpoint(targetPosition);
+    }
 
-        setSlotColor(targetSlot, ColorEnum.UNDEFINED);
-
-        if (--targetSlot == -1) {
-            targetSlot = 2;
-        }
+    public void shoot() {
+        shoot(1);
     }
 
     // Sorting functions
@@ -99,10 +121,6 @@ public class Spindexer extends Subsystem {
         return slotColors[targetSlot] != ColorEnum.UNDEFINED;
     }
 
-    //    public boolean isSlotFree(int targetSlot) {
-    //        return !isSlotFull(targetSlot);
-    //    }
-
     public byte getFreeSlot() {
         for (byte b = 0; b < slotColors.length; ++b) {
             if (slotColors[b] == ColorEnum.UNDEFINED) {
@@ -112,16 +130,6 @@ public class Spindexer extends Subsystem {
 
         return -1;
     }
-
-    //    public int getFullSlot() {
-    //        for (int b = 0; b < slotColors.length; ++b) {
-    //            if (slotColors[b] != ColorEnum.UNDEFINED) {
-    //                return b;
-    //            }
-    //        }
-    //
-    //        return -1;
-    //    }
 
     public int getBallCount() {
         int count = 0;
@@ -163,23 +171,11 @@ public class Spindexer extends Subsystem {
 
         goToSlot(begin);
         targetPosition += uV.shootOffset;
-    }
+        pidfController.setSetpoint(targetPosition);
 
-    //    public void goToShootStartPose(int slot) {
-    //
-    //        double distance = abs(targetSlot - slot) * ticksPerRevolution / 3;
-    //
-    ////        distance = floor(distance-distance/ticksPerRevolution);
-    //
-    ////        targetPosition += shootDirection * distance + uV.shootOffset;
-    //        targetPosition -= shootDirection * distance - uV.shootOffset - ticksPerRevolution/3;
-    //
-    //        pidfController.setSetpoint(targetPosition);
-    //
-    //        // REMOVED BLOCKING WHILE LOOP
-    //        // Let update() handle the movement - this is now non-blocking
-    //        // The position will be reached when isReady() returns true
-    //    }
+        wentToStart = true;
+
+    }
 
     // system-status functions
 
@@ -190,7 +186,6 @@ public class Spindexer extends Subsystem {
     public int getTargetSlot() {
         return targetSlot;
     }
-
 
     // homing functions
     public void home() {
@@ -209,13 +204,6 @@ public class Spindexer extends Subsystem {
         pidfController.kI = Ki;
         pidfController.kD = Kd;
         pidfController.kF = Kf;
-
-        // uncomment if using pre-defined PID
-        // motor.setVelocityPIDFCoefficients(Kp, Ki, Kd, Kf);
-
-        // update PID controller
-//        FtcDashboard.getInstance().getTelemetry().addData("limit switch", limitSwitch.isPressed());
-//        FtcDashboard.getInstance().getTelemetry().addData("spindexer pos", motor.getCurrentPosition());
 
         if (homing) {
             motor.setPower(-0.2);
@@ -250,8 +238,5 @@ public class Spindexer extends Subsystem {
                 .addData("green slot", getSlotByColor(ColorEnum.GREEN));
         FtcDashboard.getInstance().getTelemetry().addData("motif pos", greenMotifPosition);
         FtcDashboard.getInstance().getTelemetry().update();
-
-        // uncomment if using pre-defined PID
-        // motor.setTargetPosition()
     }
 }

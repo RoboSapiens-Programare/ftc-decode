@@ -143,7 +143,7 @@ public class TeleOPDoi extends OpMode {
         if (gamepad1.right_trigger > 0.1) { // Rising edge detection
             robot.intake.setPower(1);
             if (robot.spindexer.isReady() && robot.shooter.velocityReached()) {
-                robot.spindexer.shoot();
+                robot.spindexer.shoot(-1);
                 ballShot = true;
             }
         }
@@ -336,7 +336,7 @@ public class TeleOPDoi extends OpMode {
         }
 
         if (gamepad2.left_bumper && driverTwoInputTimer.milliseconds() > uV.inputDelayMS) {
-            if(--robot.spindexer.targetSlot == -1) {
+            if (--robot.spindexer.targetSlot == -1) {
                 robot.spindexer.targetSlot = 2;
             }
 
@@ -345,9 +345,8 @@ public class TeleOPDoi extends OpMode {
             driverTwoInputTimer.reset();
         }
 
-
         if (gamepad2.left_bumper && driverTwoInputTimer.milliseconds() > uV.inputDelayMS) {
-            if(++robot.spindexer.targetSlot == 3) {
+            if (++robot.spindexer.targetSlot == 3) {
                 robot.spindexer.targetSlot = 0;
             }
 

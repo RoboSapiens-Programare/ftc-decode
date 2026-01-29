@@ -57,9 +57,11 @@ public class Shooter extends Subsystem {
 
     public boolean isShootReady() {
         boolean aligned =
-                Robot.follower.getPose().getHeading() >= getAngle() - 2 * 2 * Math.PI / 360
+                Robot.follower.getPose().getHeading() >= getAngle() - 3 * 2 * Math.PI / 360
                         && Robot.follower.getPose().getHeading()
-                                <= getAngle() + 2 * 2 * Math.PI / 360;
+                                <= getAngle() + 3 * 2 * Math.PI / 360;
+
+        FtcDashboard.getInstance().getTelemetry().addData("Angle delta", Math.toDegrees(Robot.follower.getHeading() - getAngle()));
 
         return pidfController.targetReached() && aligned;
     }
@@ -79,14 +81,14 @@ public class Shooter extends Subsystem {
     private double computeVelocity() {
         double dist = computeDistance();
         if (dist > 100) {
-            return 1500;
+            return 1400;
         }
         if (dist < 65) {
             return 1100;
         }
         return dist * 1.42 + 1060;
-//        return 500;
-   }
+//                return 500;
+    }
 
     public double getAngle(double x, double y) {
         Pose targetObeliskPose =

@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -11,8 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
@@ -34,8 +30,9 @@ public class Intake extends Subsystem {
     private final Limelight3A ll;
 
     public Intake(HardwareMap hwMap, Spindexer revolver) {
+
         intakeMotor = hwMap.get(DcMotorEx.class, "intake");
-        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         rollerLeft = hwMap.get(CRServo.class, "rollerLeft");
         rollerRight = hwMap.get(CRServo.class, "rollerRight");
@@ -58,72 +55,67 @@ public class Intake extends Subsystem {
                                 PredominantColorProcessor.Swatch.WHITE)
                         .build();
 
-//        portal =
-//                new VisionPortal.Builder()
-//                        .addProcessor(colorSensor)
-//                        .setCameraResolution(new Size(320, 240))
-//                        .setCamera(hwMap.get(WebcamName.class, "IntakeCam"))
-//                        .enableLiveView(false)
-//                        .build();
-
         ll = hwMap.get(Limelight3A.class, "limelight");
 
         ll.start();
         FtcDashboard.getInstance().startCameraStream(ll, 30);
-//        ll.
+        //        ll.
 
-//        FtcDashboard.getInstance().startCameraStream(portal, 30);
+        ll.pipelineSwitch(0);
+
+        //        FtcDashboard.getInstance().startCameraStream(portal, 30);
     }
 
     @Override
     public void update() {
         // check both are equal in order to ignore false positives
 
-        //        if (spindexer.getBallCount() >= 3) return;
-//        PredominantColorProcessor.Result result = colorSensor.getAnalysis();
-//        FtcDashboard.getInstance().getTelemetry().addData("hue", result.HSV[0]);
-//        FtcDashboard.getInstance().getTelemetry().addData("sat", result.HSV[1]);
-//        FtcDashboard.getInstance().getTelemetry().addData("val", result.HSV[2]);
+        if (spindexer.getBallCount() >= 3) return;
+        //        PredominantColorProcessor.Result result = colorSensor.getAnalysis();
+        //        FtcDashboard.getInstance().getTelemetry().addData("hue", result.HSV[0]);
+        //        FtcDashboard.getInstance().getTelemetry().addData("sat", result.HSV[1]);
+        //        FtcDashboard.getInstance().getTelemetry().addData("val", result.HSV[2]);
 
         FtcDashboard.getInstance().getTelemetry().addData("rev ready", spindexer.isReady());
         FtcDashboard.getInstance()
                 .getTelemetry()
                 .addData("intake sensor", intakeSensor.isPressed());
         FtcDashboard.getInstance().getTelemetry().addData("cooldown", cooldown.milliseconds());
-        FtcDashboard.getInstance().getTelemetry().addData("intake detected", cooldown.milliseconds() > 100 && !intakeSensor.isPressed() && spindexer.isReady());
+        FtcDashboard.getInstance()
+                .getTelemetry()
+                .addData(
+                        "intake detected",
+                        cooldown.milliseconds() > 100
+                                && !intakeSensor.isPressed()
+                                && spindexer.isReady());
 
         FtcDashboard.getInstance().getTelemetry().update();
 
-        if (cooldown.milliseconds() > 10 && !intakeSensor.isPressed() && spindexer.isReady()) {
-            ll.pipelineSwitch(0);
-            LLResult result = ll.getLatestResult();
+        if (cooldown.milliseconds() > 75 && !intakeSensor.isPressed() && spindexer.isReady()) {
 
-            if (result.isValid()) {
-                FtcDashboard.getInstance().getTelemetry().addData("RESULT ON PIPELINE", result.getPipelineIndex());
+
+            LLResult resultP1 = ll.getLatestResult();
+
+            if (resultP1.isValid()) {
                 spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.PURPLE);
                 cooldown.reset();
-            }
-
-            ll.pipelineSwitch(1);
-            result = ll.getLatestResult();
-
-            if (result.isValid()) {
-                FtcDashboard.getInstance().getTelemetry().addData("RESULT ON PIPELINE", result.getPipelineIndex());
+            } else {
                 spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.GREEN);
                 cooldown.reset();
             }
 
-//            if (result.RGB[0] > 235 && result.RGB[1] > 235 && result.RGB[2] > 235) {
-//                spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.GREEN);
-//                cooldown.reset();
-//            } if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90) {
-//                spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.GREEN);
-//                cooldown.reset();
-//
-//            } else if (result.HSV[0] >= 120 && result.HSV[0] <= 170 && result.HSV[1] > 90) {
-//                spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.PURPLE);
-//                cooldown.reset();
-//            }
+            //            if (result.RGB[0] > 235 && result.RGB[1] > 235 && result.RGB[2] > 235) {
+            //                spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.GREEN);
+            //                cooldown.reset();
+            //            } if (result.HSV[0] >= 70 && result.HSV[0] <= 95 && result.HSV[1] > 90) {
+            //                spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.GREEN);
+            //                cooldown.reset();
+            //
+            //            } else if (result.HSV[0] >= 120 && result.HSV[0] <= 170 && result.HSV[1] >
+            // 90) {
+            //                spindexer.setSlotColor(spindexer.getTargetSlot(), ColorEnum.PURPLE);
+            //                cooldown.reset();
+            //            }
         }
     }
 
