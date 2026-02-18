@@ -10,11 +10,17 @@ public class uV {
     public static double D = 0;
     public static double F = 0;
 
-    public static double intakePower = 1;
+    // Intake Servo Values
+    public static double intakeDown = 0;
+    public static double intakeUp = 1;
 
-    public static int inputDelayMS = 300;
-    public static int shootOffset = 800;
+    public static double gateOpen = 0;
+    public static double gateClosed = 1;
 
-    public static int homingOffset = 400;
-    public static double revolverPowerMultiplier = 1;
+    // Transfer
+    public static double rollerOneP = 1;
+    public static double rollerTwoP = 1;
+
+    // Outtake
+
 }

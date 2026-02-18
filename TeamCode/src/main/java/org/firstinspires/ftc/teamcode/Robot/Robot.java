@@ -4,16 +4,16 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.PoseHistory;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
-import org.firstinspires.ftc.teamcode.Robot.Subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 public class Robot {
     public boolean initialize;
-    public Spindexer spindexer;
-    public Intake intake;
+
     public Shooter shooter;
+    public Intake intake;
     public static Follower follower;
     public static PoseHistory poseHistory;
 
@@ -28,10 +28,9 @@ public class Robot {
     public Robot(HardwareMap hwMap) {
         initialize = true;
 
-        spindexer = new Spindexer(hwMap);
-
         shooter = new Shooter(hwMap);
-        intake = new Intake(hwMap, spindexer);
+
+        intake = new Intake(hwMap);
 
         follower = Constants.createFollower(hwMap);
 

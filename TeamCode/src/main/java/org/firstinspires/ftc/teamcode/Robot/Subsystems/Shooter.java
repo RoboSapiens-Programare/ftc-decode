@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 
@@ -18,10 +20,9 @@ public class Shooter extends Subsystem {
     private final DcMotorEx turretMotorLeft;
     public final DcMotorEx turretMotorRight;
 
+    private final Servo lobServo;
+
     // PID values for shooter
-    // WHEN TUNING USE ZIEGLER-NICHOLS METHOD
-    // IT WAS MADE FOR THIS
-    // LITERALLY FOR THIS
 
     public static double shootKp = 0.07;
     public static double shootKi = 0.00002;
@@ -43,8 +44,10 @@ public class Shooter extends Subsystem {
     private boolean shouldFollowTrack = true;
 
     public Shooter(HardwareMap hwMap) {
-        turretMotorRight = hwMap.get(DcMotorEx.class, "natasha");
-        turretMotorLeft = hwMap.get(DcMotorEx.class, "starDestroyer");
+        lobServo = hwMap.get(Servo.class, "lobServo");
+
+        turretMotorRight = hwMap.get(DcMotorEx.class, "turretMotorLeft");
+        turretMotorLeft = hwMap.get(DcMotorEx.class, "turretMotorRight");
         turretMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         turretMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -57,14 +60,14 @@ public class Shooter extends Subsystem {
 
     public boolean isShootReady() {
         double tolerance = Math.toRadians(2);
-        boolean aligned =
-                Robot.follower.getPose().getHeading() >= getAngle() - tolerance
-                        && Robot.follower.getPose().getHeading()
-                                <= getAngle() + tolerance;
+//        boolean aligned =
+
+        // TODO: implement pivoting turret here
 
         FtcDashboard.getInstance().getTelemetry().addData("Angle delta", Math.toDegrees(Robot.follower.getHeading() - getAngle()));
 
-        return pidfController.targetReached() && aligned;
+//        return pidfController.targetReached() && aligned;
+        return false;
     }
 
     public boolean velocityReached() {
@@ -79,6 +82,23 @@ public class Shooter extends Subsystem {
         return currentPose.distanceFrom(targetObeliskPose);
     }
 
+    private double computeLob() {
+        // TODO: implement this
+
+        double dist = computeDistance();
+        if (dist > 100) {
+            return 1;
+        }
+        if (dist < 65) {
+            return 0;
+        }
+
+        // should output a servo value (0 -> 1)
+        // modify with telemetry for best results and change formula
+        return dist * Math.pow(1, -100);
+
+    }
+
     private double computeVelocity() {
         double dist = computeDistance();
         if (dist > 100) {
@@ -88,7 +108,6 @@ public class Shooter extends Subsystem {
             return 1100;
         }
         return dist * 1.42 + 1060;
-//                return 500;
     }
 
     public double getAngle(double x, double y) {
@@ -110,27 +129,11 @@ public class Shooter extends Subsystem {
     }
 
     public void track() {
-        Path p =
-                new Path(
-                        new BezierLine(
-                                Robot.follower.getPose(),
-                                new Pose(
-                                        Robot.follower.getPose().getX() + 1,
-                                        Robot.follower.getPose().getY() + 1)));
-
-        isTracking = true;
-
-        p.setLinearHeadingInterpolation(
-                Robot.follower.getHeading(),
-                getAngle(Robot.follower.getPose().getX() + 1, Robot.follower.getPose().getY() + 1));
-
-        Robot.follower.breakFollowing();
-        Robot.follower.followPath(p);
+        // TODO: implement turret pivot
     }
 
     @Override
     public void update() {
-        // TODO: remove after PID tuning
         pidfController.kP = shootKp;
         pidfController.kI = shootKi;
         pidfController.kD = shootKd;
@@ -140,35 +143,23 @@ public class Shooter extends Subsystem {
         pidfController.setSetpoint(targetVelocity);
 
         if (shooting) {
-
             double pidOutput = pidfController.updatePID(turretMotorRight.getVelocity());
-            ////
+
             FtcDashboard.getInstance().getTelemetry().addData("pid vel", pidOutput);
             turretMotorRight.setPower(pidOutput / 2);
             turretMotorLeft.setPower(pidOutput / 2);
+
+            lobServo.setPosition(computeLob());
         } else {
             turretMotorRight.setPower(0);
             turretMotorLeft.setPower(0);
         }
 
-        if (isTracking && shouldFollowTrack) {
-            Path p =
-                    new Path(
-                            new BezierLine(
-                                    Robot.follower.getPose(),
-                                    new Pose(
-                                            Robot.follower.getPose().getX() + 1,
-                                            Robot.follower.getPose().getY() + 1)));
+        if (isTracking) {
 
-            p.setConstantHeadingInterpolation(this.getAngle());
+            // TODO: implement
 
-            Robot.follower.followPath(p, true);
-
-            shouldFollowTrack = false;
         }
     }
 
-    public void reset() {
-        shouldFollowTrack = true;
-    }
 }
