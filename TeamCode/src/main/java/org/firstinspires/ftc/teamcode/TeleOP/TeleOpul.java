@@ -77,5 +77,9 @@ public class TeleOpul extends OpMode {
                 handleOuttake();
                 break;
         }
+
+        Robot.follower.startTeleOpDrive(true);
     }
+
+
 }
