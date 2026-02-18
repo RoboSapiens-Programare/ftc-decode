@@ -11,8 +11,14 @@ public class uV {
     public static double F = 0;
 
     // Intake Servo Values
-    public static double intakeDown = 0;
-    public static double intakeUp = 1;
+    public static double intakeLeftMid = 0.6;
+    public static double intakeRightMid = 0.5;
+
+    public static double intakeUpLeft = 0.1;
+    public static double intakeUpRight = 0;
+
+    public static double intakeDownLeft = 0.9;
+    public static double intakeDownRight = 1;
 
     public static double gateOpen = 0;
     public static double gateClosed = 1;

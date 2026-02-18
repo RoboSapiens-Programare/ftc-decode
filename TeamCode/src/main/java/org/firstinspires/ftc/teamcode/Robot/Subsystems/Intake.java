@@ -55,26 +55,37 @@ public class Intake extends Subsystem {
     public void pullBalls() {
         rollerOne.setPower(uV.rollerOneP);
         rollerTwo.setPower(uV.rollerTwoP);
-
-        intakeUp();
+        intakeMid();
     }
 
     public void spitBalls() {
         rollerOne.setPower(-uV.rollerOneP);
         rollerTwo.setPower(-uV.rollerTwoP);
+        intakeUp();
+    }
 
-        intakeDown();
+    public void rest()
+    {
+        rollerOne.setPower(0);
+        rollerTwo.setPower(0);
+        intakeMid();
     }
 
     public void intakeDown()
     {
-        pivotLeft.setPosition(uV.intakeDown);
-        pivotRight.setPosition(uV.intakeDown);
+        pivotLeft.setPosition(uV.intakeDownLeft);
+        pivotRight.setPosition(uV.intakeDownRight);
     }
 
     public void intakeUp()
     {
-        pivotLeft.setPosition(uV.intakeUp);
-        pivotRight.setPosition(uV.intakeUp);
+        pivotLeft.setPosition(uV.intakeUpLeft);
+        pivotRight.setPosition(uV.intakeUpRight);
+    }
+
+    public void intakeMid()
+    {
+        pivotLeft.setPosition(uV.intakeLeftMid);
+        pivotRight.setPosition(uV.intakeRightMid);
     }
 }
