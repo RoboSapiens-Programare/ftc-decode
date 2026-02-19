@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -30,61 +29,52 @@ public class Intake extends Subsystem {
     }
 
     @Override
-    public void update() {
+    public void update() {}
 
-    }
-
-    public void openGate()
-    {
+    public void openGate() {
         gate.setPosition(uV.gateOpen);
     }
 
-    public void closeGate()
-    {
+    public void closeGate() {
         gate.setPosition(uV.gateClosed);
     }
 
-    public void shoot()
-    {
+    public void shoot() {
         rollerOne.setPower(uV.rollerOneP);
         rollerTwo.setPower(uV.rollerTwoP);
 
-        intakeDown();
+//        intakeDown();
     }
 
     public void pullBalls() {
         rollerOne.setPower(uV.rollerOneP);
         rollerTwo.setPower(uV.rollerTwoP);
-        intakeMid();
+//        intakeMid();
     }
 
     public void spitBalls() {
         rollerOne.setPower(-uV.rollerOneP);
         rollerTwo.setPower(-uV.rollerTwoP);
-        intakeUp();
+//        intakeUp();
     }
 
-    public void rest()
-    {
+    public void rest() {
         rollerOne.setPower(0);
         rollerTwo.setPower(0);
-        intakeMid();
+//        intakeMid();
     }
 
-    public void intakeDown()
-    {
+    public void intakeDown() {
         pivotLeft.setPosition(uV.intakeDownLeft);
         pivotRight.setPosition(uV.intakeDownRight);
     }
 
-    public void intakeUp()
-    {
+    public void intakeUp() {
         pivotLeft.setPosition(uV.intakeUpLeft);
         pivotRight.setPosition(uV.intakeUpRight);
     }
 
-    public void intakeMid()
-    {
+    public void intakeMid() {
         pivotLeft.setPosition(uV.intakeLeftMid);
         pivotRight.setPosition(uV.intakeRightMid);
     }

@@ -1,14 +1,8 @@
 package org.firstinspires.ftc.teamcode.Auto.Tests;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -25,9 +19,7 @@ public class DriveTrainTest extends OpMode {
 
         Robot.follower.startTeleOpDrive(true);
 
-
-
-        Robot.follower.setStartingPose(new Pose(0,0));
+        Robot.follower.setStartingPose(new Pose(0, 0));
     }
 
     @Override
@@ -40,6 +32,4 @@ public class DriveTrainTest extends OpMode {
 
         Robot.follower.update();
     }
-
-
 }

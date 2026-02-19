@@ -2,15 +2,12 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 
@@ -60,13 +57,15 @@ public class Shooter extends Subsystem {
 
     public boolean isShootReady() {
         double tolerance = Math.toRadians(2);
-//        boolean aligned =
+        //        boolean aligned =
 
         // TODO: implement pivoting turret here
 
-        FtcDashboard.getInstance().getTelemetry().addData("Angle delta", Math.toDegrees(Robot.follower.getHeading() - getAngle()));
+        FtcDashboard.getInstance()
+                .getTelemetry()
+                .addData("Angle delta", Math.toDegrees(Robot.follower.getHeading() - getAngle()));
 
-//        return pidfController.targetReached() && aligned;
+        //        return pidfController.targetReached() && aligned;
         return false;
     }
 
@@ -96,7 +95,6 @@ public class Shooter extends Subsystem {
         // should output a servo value (0 -> 1)
         // modify with telemetry for best results and change formula
         return dist * Math.pow(1, -100);
-
     }
 
     private double computeVelocity() {
@@ -161,5 +159,4 @@ public class Shooter extends Subsystem {
 
         }
     }
-
 }

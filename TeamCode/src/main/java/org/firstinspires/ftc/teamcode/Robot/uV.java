@@ -17,8 +17,8 @@ public class uV {
     public static double intakeUpLeft = 0.1;
     public static double intakeUpRight = 0;
 
-    public static double intakeDownLeft = 0.9;
-    public static double intakeDownRight = 1;
+    public static double intakeDownLeft = 0.5;
+    public static double intakeDownRight = 0.6;
 
     public static double gateOpen = 0;
     public static double gateClosed = 1;

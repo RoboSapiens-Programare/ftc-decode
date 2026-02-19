@@ -9,8 +9,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp")
-public class TeleOpul extends OpMode {
+@TeleOp(name = "TeleOp doi")
+public class TeleOpDoi extends OpMode {
 
     private Robot robot;
 
@@ -35,8 +35,6 @@ public class TeleOpul extends OpMode {
         } else {
             robot.intake.intakeUp();
         }
-
-        robot.shooter.shooting = newState == State.OUTTAKE;
     }
 
     private void handleIntake() {
