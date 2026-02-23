@@ -94,8 +94,6 @@ public class Spindexer extends Subsystem {
             if (--targetSlot == -1) {
                 targetSlot = 2;
             }
-
-
         }
 
         pidfController.setSetpoint(targetPosition);
@@ -174,7 +172,6 @@ public class Spindexer extends Subsystem {
         pidfController.setSetpoint(targetPosition);
 
         wentToStart = true;
-
     }
 
     // system-status functions

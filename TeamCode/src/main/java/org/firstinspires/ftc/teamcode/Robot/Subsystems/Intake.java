@@ -74,7 +74,7 @@ public class Intake extends Subsystem {
     @Override
     public void update() {
 
-//        if (spindexer.getBallCount() >= 3) return;
+        //        if (spindexer.getBallCount() >= 3) return;
 
         if (doOnce) {
             pipelineIndex = (pipelineIndex + 1) % 2;
@@ -84,7 +84,9 @@ public class Intake extends Subsystem {
             doOnce = false;
         }
 
-        FtcDashboard.getInstance().getTelemetry().addData("pipeline timer", pipelineTimer.milliseconds());
+        FtcDashboard.getInstance()
+                .getTelemetry()
+                .addData("pipeline timer", pipelineTimer.milliseconds());
         if (pipelineTimer.milliseconds() > 100) {
             LLResult result = ll.getLatestResult();
             FtcDashboard.getInstance().getTelemetry().addData("result", result.isValid());
@@ -101,16 +103,12 @@ public class Intake extends Subsystem {
                         doOnce = true;
                         break;
                 }
-
             }
 
             if (pipelineTimer.milliseconds() > 200) {
                 doOnce = true;
             }
         }
-
-
-
 
         FtcDashboard.getInstance().getTelemetry().addData("rev ready", spindexer.isReady());
         FtcDashboard.getInstance()
@@ -125,7 +123,6 @@ public class Intake extends Subsystem {
                                 && !intakeSensor.isPressed()
                                 && spindexer.isReady());
         FtcDashboard.getInstance().getTelemetry().addData("ballcount", spindexer.getBallCount());
-
     }
 
     public void setPower(double power) {

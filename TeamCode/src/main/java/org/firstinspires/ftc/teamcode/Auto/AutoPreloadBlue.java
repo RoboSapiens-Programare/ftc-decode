@@ -12,7 +12,6 @@ package org.firstinspires.ftc.teamcode.Auto;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -42,7 +41,7 @@ public class AutoPreloadBlue extends OpMode {
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-        Robot.follower.setStartingPose(new Pose(72, 8, Math.toRadians(270)));
+        Robot.follower.setStartingPose(new Pose(63, 9, Math.toRadians(90)));
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -102,14 +101,15 @@ public class AutoPreloadBlue extends OpMode {
 
     @Override
     public void loop() {
-        Robot.follower.update(); // Update Pedro Pathing
-        robot.spindexer.update();
-
         if (autoTimer.seconds() < 20) {
-            robot.shooter.update();
             return;
         }
 
+        Robot.follower.update(); // Update Pedro Pathing
+        robot.spindexer.update();
+
+
+        robot.shooter.update();
         pathState = autonomousPathUpdate(); // Update autonomous state machine
 
         // Log values to Panels and Driver Station
@@ -129,22 +129,19 @@ public class AutoPreloadBlue extends OpMode {
             shoot =
                     follower.pathBuilder()
                             .addPath(
-                                    new BezierCurve(
-                                            new Pose(63.000, 9.000),
-                                            new Pose(35.729, 26.808),
-                                            new Pose(64.550, 38.913),
-                                            new Pose(59.000, 22.000)))
+                                    new BezierLine(
+                                            new Pose(63.000, 9.000), new Pose(59.000, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    Math.toRadians(270), robot.shooter.getAngle(59, 22))
+                                    Math.toRadians(90), robot.shooter.getAngle(59, 20) + Math.toRadians(2))
                             .build();
 
             leave =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(59.000, 22.000), new Pose(19.000, 10.000)))
+                                            new Pose(59.000, 20.000), new Pose(19.000, 10.000)))
                             .setLinearHeadingInterpolation(
-                                    robot.shooter.getAngle(59, 22), Math.toRadians(90))
+                                    robot.shooter.getAngle(59, 20), Math.toRadians(90) + Math.toRadians(2))
                             .build();
         }
     }

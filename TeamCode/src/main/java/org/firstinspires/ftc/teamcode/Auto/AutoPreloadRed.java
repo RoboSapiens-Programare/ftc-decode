@@ -10,9 +10,9 @@
 
 package org.firstinspires.ftc.teamcode.Auto;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -36,15 +36,12 @@ public class AutoPreloadRed extends OpMode {
     private Paths paths;
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
+
     private ElapsedTime autoTimer = new ElapsedTime();
 
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
-        Robot.follower.setStartingPose(new Pose(144 - 72, 8, Math.toRadians(270)));
-
-        pathTimer = new ElapsedTime();
-        paths = new Paths(Robot.follower); // Build paths
 
         aprilTag = new AprilTagProcessor.Builder().build();
 
@@ -57,9 +54,17 @@ public class AutoPreloadRed extends OpMode {
                         .addProcessor(aprilTag)
                         .build();
 
-        robot.spindexer.home();
+        visionPortal.resumeStreaming();
+        FtcDashboard.getInstance().startCameraStream(visionPortal, 30);
 
-        Robot.alliance = Robot.Alliance.RED;
+        Robot.alliance = Robot.Alliance.BLUE;
+
+        Robot.follower.setStartingPose(new Pose(63, 9, Math.toRadians(90)));
+
+        pathTimer = new ElapsedTime();
+        paths = new AutoPreloadRed.Paths(Robot.follower); // Build paths
+
+        robot.spindexer.home();
     }
 
     @Override
@@ -90,6 +95,8 @@ public class AutoPreloadRed extends OpMode {
         if (robot.spindexer.getBallCount() < 3) {
             robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
         }
+
+        Robot.alliance = Robot.Alliance.RED;
     }
 
     @Override
@@ -97,6 +104,8 @@ public class AutoPreloadRed extends OpMode {
         robot.shooter.shooting = true;
         robot.spindexer.motifGoToStart();
         autoTimer.reset();
+
+        Robot.alliance = Robot.Alliance.RED;
     }
 
     @Override
@@ -104,9 +113,9 @@ public class AutoPreloadRed extends OpMode {
         Robot.follower.update(); // Update Pedro Pathing
         robot.spindexer.update();
 
-        if (autoTimer.seconds() < 20) {
-            return;
-        }
+        //        if (autoTimer.seconds() < 20) {
+        //            return;
+        //        }
         robot.shooter.update();
 
         pathState = autonomousPathUpdate(); // Update autonomous state machine
@@ -128,23 +137,21 @@ public class AutoPreloadRed extends OpMode {
             shoot =
                     follower.pathBuilder()
                             .addPath(
-                                    new BezierCurve(
+                                    new BezierLine(
                                             new Pose(144 - 63.000, 9.000),
-                                            new Pose(144 - 35.729, 26.808),
-                                            new Pose(144 - 64.550, 38.913),
-                                            new Pose(144 - 59.000, 22.000)))
+                                            new Pose(144 - 59.000, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    Math.toRadians(270), robot.shooter.getAngle(144 - 59, 22))
+                                    Math.toRadians(90), robot.shooter.getAngle(85, 20))
                             .build();
 
             leave =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(144 - 59.000, 22.000),
+                                            new Pose(144 - 59.000, 20.000),
                                             new Pose(144 - 19.000, 10.000)))
                             .setLinearHeadingInterpolation(
-                                    robot.shooter.getAngle(144 - 59, 22), Math.toRadians(0))
+                                    robot.shooter.getAngle(85, 20), Math.toRadians(90))
                             .build();
         }
     }

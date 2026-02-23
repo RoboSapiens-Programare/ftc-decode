@@ -30,16 +30,17 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Autonomous(name = "Auto Far x9 RED", group = "0. Auto")
-public class AutoFar9Red extends OpMode {
+@Autonomous(name = "Auto preload far blue mirsav", group = "0. Auto")
+public class AutoPreloadBlueMirsav extends OpMode {
 
+//    private static final Logger log = LoggerFactory.getLogger(AutoFar9Blue.class);
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
 
     private int pathState; // Current autonomous path state (state machine)
     private ElapsedTime pathTimer; // Timer for path state machine
     private boolean singleton;
-    private AutoFar9Red.PathsRed paths; // Paths defined in the Paths class
+    private Paths paths; // Paths defined in the Paths class
 
     private static Robot robot;
 
@@ -69,12 +70,12 @@ public class AutoFar9Red extends OpMode {
         visionPortal.resumeStreaming();
         FtcDashboard.getInstance().startCameraStream(visionPortal, 30);
 
-        Robot.alliance = Robot.Alliance.RED;
+        Robot.alliance = Robot.Alliance.BLUE;
 
-        Robot.follower.setStartingPose(new Pose(144-63, 9, Math.toRadians(90)));
+        Robot.follower.setStartingPose(new Pose(63, 9, Math.toRadians(90)));
 
         pathTimer = new ElapsedTime();
-        paths = new PathsRed(Robot.follower); // Build paths
+        paths = new Paths(Robot.follower); // Build paths
 
         robot.spindexer.home();
     }
@@ -121,6 +122,7 @@ public class AutoFar9Red extends OpMode {
     @Override
     public void start() {
         visionPortal.stopStreaming();
+        timer.reset();
     }
 
     @Override
@@ -161,7 +163,8 @@ public class AutoFar9Red extends OpMode {
         Robot.transitionPose = Robot.follower.getPose();
     }
 
-    public static class PathsRed {
+    public static class Paths {
+
         public PathChain shootPreload;
         public PathChain goToGrab0;
         public PathChain grab00;
@@ -174,115 +177,94 @@ public class AutoFar9Red extends OpMode {
         public PathChain grab12;
         public PathChain shoot1;
         public PathChain leave;
-    public PathsRed(Follower follower) {
+
+        public Paths(Follower follower) {
             shootPreload =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(144 - 63.000, 9.000),
-                                            new Pose(144 - 59.000, 20.000)))
+                                            new Pose(63.000, 9.000), new Pose(59.000, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    Math.toRadians(90), robot.shooter.getAngle(144 - 59, 20)+ Math.toRadians(1))
+                                    Math.toRadians(90), robot.shooter.getAngle(59, 20))
                             .build();
 
             goToGrab0 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(144 - 59.000, 20.000), new Pose(144 - 47, 32)))
+                            .addPath(new BezierLine(new Pose(59.000, 20.000), new Pose(30, 14)))
                             .setLinearHeadingInterpolation(
-                                    robot.shooter.getAngle(144 - 59, 20)+ Math.toRadians(1), Math.toRadians(0))
+                                    robot.shooter.getAngle(59, 20), Math.toRadians(180))
                             .build();
 
             grab00 =
                     follower.pathBuilder()
-                            .addPath(new BezierLine(new Pose(144 - 47, 32), new Pose(144 - 37, 32)))
-                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .addPath(new BezierLine(new Pose(42, 36), new Pose(36, 36)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab01 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(144 - 37, 32.000), new Pose(144 - 32.25, 32)))
-                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .addPath(new BezierLine(new Pose(36, 36.000), new Pose(31.25, 36)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab02 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(144 - 32.25, 32.000), new Pose(144 - 16, 32)))
-                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .addPath(new BezierLine(new Pose(31.25, 36.000), new Pose(15, 36)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             shoot0 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(144 - 15, 32.000),
-                                            new Pose(144 - 60.500, 20.000)))
+                            .addPath(new BezierLine(new Pose(15, 36.000), new Pose(60.500, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    Math.toRadians(0), robot.shooter.getAngle(144 - 59, 20)+ Math.toRadians(1))
+                                    Math.toRadians(180), robot.shooter.getAngle(59, 20))
                             .build();
 
             goToGrab1 =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(144 - 60.500, 20.000),
-                                            new Pose(144-48.724, 41.056),
-                                            new Pose(144-59.110, 33.846),
-                                            new Pose(144-50.000, 59.996),
-                                            new Pose(144 - 47, 57)))
+                                            new Pose(59.000, 20.000),
+                                            new Pose(48.724, 41.056),
+                                            new Pose(59.110, 33.846),
+                                            new Pose(50.000, 59.996),
+                                            new Pose(42, 61)))
                             .setLinearHeadingInterpolation(
-                                    robot.shooter.getAngle(144 - 60.5, 20)+ Math.toRadians(1), Math.toRadians(0))
+                                    robot.shooter.getAngle(59, 20), Math.toRadians(180))
                             .build();
 
             grab10 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(144 - 47, 57.000), new Pose(144 - 37, 57.000)))
-                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .addPath(new BezierLine(new Pose(40, 61.000), new Pose(35, 61.000)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab11 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(144 - 37, 57.000),
-                                            new Pose(144 - 32.25, 57.000)))
-                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .addPath(new BezierLine(new Pose(35, 61.000), new Pose(30.25, 61.000)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             grab12 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(144 - 32.25, 57.000),
-                                            new Pose(144 - 16, 57.000)))
-                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .addPath(new BezierLine(new Pose(30.25, 61.000), new Pose(15, 61.000)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
             shoot1 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(144 - 16, 57.000),
-                                            new Pose(144 - 60.500, 20.000)))
+                            .addPath(new BezierLine(new Pose(15, 61.000), new Pose(60.500, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    Math.toRadians(0), robot.shooter.getAngle(144 - 60.5, 20) + Math.toRadians(1))
+                                    Math.toRadians(180), robot.shooter.getAngle(60.5, 20))
                             .build();
 
             leave =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(144 - 60.500, 20.000),
-                                            new Pose(144 - 30.000, 20.000)))
+                                            new Pose(60.000, 20.000), new Pose(30.000, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    robot.shooter.getAngle(144 - 60.5, 20) + Math.toRadians(1), Math.toRadians(0))
+                                    robot.shooter.getAngle(60.5, 20), Math.toRadians(180))
                             .build();
         }
     }
@@ -291,11 +273,14 @@ public class AutoFar9Red extends OpMode {
         switch (pathState) {
             case 0:
                 // GO TO PRELOAD SHOOTING
-                Robot.follower.followPath(paths.shootPreload, true);
-                robot.shooter.shooting = true;
-                robot.spindexer.motifGoToStart();
-                robot.intake.setPower(-1);
-                setPathState(1);
+                if (timer.seconds()>0)
+                {
+                    Robot.follower.followPath(paths.shootPreload, true);
+                    robot.shooter.shooting = true;
+                    robot.spindexer.motifGoToStart();
+                    robot.intake.setPower(-1);
+                    setPathState(1);
+                }
                 break;
             case 1:
                 // ARRIVED TO PRELOAD SHOOTING
@@ -314,8 +299,8 @@ public class AutoFar9Red extends OpMode {
                 Robot.follower.followPath(paths.goToGrab0, true);
                 robot.shooter.shooting = false;
                 robot.spindexer.home();
-                robot.intake.setPower(1);
-                setPathState(3);
+//                robot.intake.setPower(1);
+//                setPathState(3);
                 break;
             case 3:
                 // ARRIVED

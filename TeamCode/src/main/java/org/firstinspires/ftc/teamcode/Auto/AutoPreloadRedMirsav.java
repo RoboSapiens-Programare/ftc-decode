@@ -30,8 +30,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Autonomous(name = "Auto Far x9 RED", group = "0. Auto")
-public class AutoFar9Red extends OpMode {
+@Autonomous(name = "ASTA E AUTONOMIA PENTRU VICYBER", group = "0. Auto")
+public class AutoPreloadRedMirsav extends OpMode {
 
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
@@ -39,7 +39,7 @@ public class AutoFar9Red extends OpMode {
     private int pathState; // Current autonomous path state (state machine)
     private ElapsedTime pathTimer; // Timer for path state machine
     private boolean singleton;
-    private AutoFar9Red.PathsRed paths; // Paths defined in the Paths class
+    private PathsRed2 paths; // Paths defined in the Paths class
 
     private static Robot robot;
 
@@ -74,7 +74,7 @@ public class AutoFar9Red extends OpMode {
         Robot.follower.setStartingPose(new Pose(144-63, 9, Math.toRadians(90)));
 
         pathTimer = new ElapsedTime();
-        paths = new PathsRed(Robot.follower); // Build paths
+        paths = new PathsRed2(Robot.follower); // Build paths
 
         robot.spindexer.home();
     }
@@ -161,7 +161,7 @@ public class AutoFar9Red extends OpMode {
         Robot.transitionPose = Robot.follower.getPose();
     }
 
-    public static class PathsRed {
+    public static class PathsRed2 {
         public PathChain shootPreload;
         public PathChain goToGrab0;
         public PathChain grab00;
@@ -174,24 +174,24 @@ public class AutoFar9Red extends OpMode {
         public PathChain grab12;
         public PathChain shoot1;
         public PathChain leave;
-    public PathsRed(Follower follower) {
+        public PathsRed2(Follower follower) {
             shootPreload =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(144 - 63.000, 9.000),
-                                            new Pose(144 - 59.000, 20.000)))
+                                            new Pose(81, 9.000),
+                                            new Pose(85, 20.000)))
                             .setLinearHeadingInterpolation(
-                                    Math.toRadians(90), robot.shooter.getAngle(144 - 59, 20)+ Math.toRadians(1))
+                                    Math.toRadians(90), robot.shooter.getAngle(85, 20) + Math.toRadians(1))
                             .build();
 
             goToGrab0 =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(144 - 59.000, 20.000), new Pose(144 - 47, 32)))
+                                            new Pose(85.000, 20.000), new Pose(105, 2)))
                             .setLinearHeadingInterpolation(
-                                    robot.shooter.getAngle(144 - 59, 20)+ Math.toRadians(1), Math.toRadians(0))
+                                    robot.shooter.getAngle(85, 20)+ Math.toRadians(1), Math.toRadians(0))
                             .build();
 
             grab00 =
@@ -311,11 +311,16 @@ public class AutoFar9Red extends OpMode {
                 break;
             case 2:
                 // GO TO 1ST GRAB
-                Robot.follower.followPath(paths.goToGrab0, true);
+                if (singleton)
+                {
+
+                    Robot.follower.followPath(paths.goToGrab0, true);
+                    singleton = false;
+                }
                 robot.shooter.shooting = false;
-                robot.spindexer.home();
-                robot.intake.setPower(1);
-                setPathState(3);
+//                robot.spindexer.home();
+//                robot.intake.setPower(1);
+//                setPathState(3);
                 break;
             case 3:
                 // ARRIVED

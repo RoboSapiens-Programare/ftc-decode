@@ -47,6 +47,7 @@ public class TeleOPDoi extends OpMode {
 
         //        robot.spindexer.setTargetSlot((byte) 0);
         robot.shooter.shooting = state == State.OUTTAKE;
+//        robot.shooter.shooting = true;
         ballShot = false;
 
         if (newState == State.INTAKE) {
@@ -287,7 +288,7 @@ public class TeleOPDoi extends OpMode {
             Robot.follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x - 0.1 * gamepad2.right_stick_x,
+                    -gamepad1.right_stick_x - 0.167 * gamepad2.right_stick_x,
                     true);
         }
 

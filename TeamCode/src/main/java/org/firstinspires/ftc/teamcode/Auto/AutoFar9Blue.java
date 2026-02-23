@@ -122,7 +122,6 @@ public class AutoFar9Blue extends OpMode {
     @Override
     public void start() {
         visionPortal.stopStreaming();
-
     }
 
     @Override
@@ -183,8 +182,7 @@ public class AutoFar9Blue extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(63.000, 9.000),
-                                            new Pose(59.000, 20.000)))
+                                            new Pose(63.000, 9.000), new Pose(59.000, 20.000)))
                             .setLinearHeadingInterpolation(
                                     Math.toRadians(90), robot.shooter.getAngle(59, 20))
                             .build();
@@ -216,9 +214,7 @@ public class AutoFar9Blue extends OpMode {
 
             shoot0 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(15, 36.000), new Pose(60.500, 20.000)))
+                            .addPath(new BezierLine(new Pose(15, 36.000), new Pose(60.500, 20.000)))
                             .setLinearHeadingInterpolation(
                                     Math.toRadians(180), robot.shooter.getAngle(59, 20))
                             .build();
@@ -256,9 +252,7 @@ public class AutoFar9Blue extends OpMode {
 
             shoot1 =
                     follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(15, 61.000), new Pose(60.500, 20.000)))
+                            .addPath(new BezierLine(new Pose(15, 61.000), new Pose(60.500, 20.000)))
                             .setLinearHeadingInterpolation(
                                     Math.toRadians(180), robot.shooter.getAngle(60.5, 20))
                             .build();
@@ -268,7 +262,8 @@ public class AutoFar9Blue extends OpMode {
                             .addPath(
                                     new BezierLine(
                                             new Pose(60.000, 20.000), new Pose(30.000, 20.000)))
-                            .setLinearHeadingInterpolation(robot.shooter.getAngle(60.5, 20), Math.toRadians(180))
+                            .setLinearHeadingInterpolation(
+                                    robot.shooter.getAngle(60.5, 20), Math.toRadians(180))
                             .build();
         }
     }
@@ -306,7 +301,7 @@ public class AutoFar9Blue extends OpMode {
             case 3:
                 // ARRIVED
                 if (!Robot.follower.isBusy()) {
-//                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                    //                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
                     if (robot.spindexer.isReady()) {
                         setPathState(4);
                     }
@@ -327,7 +322,7 @@ public class AutoFar9Blue extends OpMode {
                         && robot.spindexer.isReady()) {
                     robot.spindexer.setSlotColor(1, ColorEnum.UNDEFINED);
                     robot.spindexer.setSlotColor(2, ColorEnum.UNDEFINED);
-//                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                    //                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
                     setPathState(6);
                 }
                 break;
@@ -346,9 +341,8 @@ public class AutoFar9Blue extends OpMode {
                         && (robot.spindexer.getBallCount() == 2 || timer.seconds() > ballWait)
                         && robot.spindexer.isReady()) {
                     robot.spindexer.setSlotColor(2, ColorEnum.UNDEFINED);
-//                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
-                    if (robot.spindexer.isReady())
-                    {
+                    //                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                    if (robot.spindexer.isReady()) {
                         setPathState(8);
                     }
                 }
@@ -400,7 +394,7 @@ public class AutoFar9Blue extends OpMode {
             case 13:
                 // ARRIVED
                 if (!Robot.follower.isBusy()) {
-//                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                    //                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
                     if (robot.spindexer.isReady()) {
                         setPathState(14);
                     }
@@ -421,7 +415,7 @@ public class AutoFar9Blue extends OpMode {
                         && robot.spindexer.isReady()) {
                     robot.spindexer.setSlotColor(1, ColorEnum.UNDEFINED);
                     robot.spindexer.setSlotColor(2, ColorEnum.UNDEFINED);
-//                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                    //                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
                     setPathState(16);
                 }
                 break;
@@ -440,9 +434,8 @@ public class AutoFar9Blue extends OpMode {
                         && (robot.spindexer.getBallCount() == 2 || timer.seconds() > ballWait)
                         && robot.spindexer.isReady()) {
                     robot.spindexer.setSlotColor(2, ColorEnum.UNDEFINED);
-//                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
-                    if (robot.spindexer.isReady())
-                    {
+                    //                    robot.spindexer.goToSlot(robot.spindexer.getFreeSlot());
+                    if (robot.spindexer.isReady()) {
                         setPathState(18);
                     }
                 }

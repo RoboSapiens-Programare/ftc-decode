@@ -50,19 +50,20 @@ public class Shooter extends Subsystem {
         turretMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        pidfController.setTolerance(20);
+        pidfController.setTolerance(10);
         pidfController.maxOut = 2;
         pidfController.minOut = -2;
     }
 
     public boolean isShootReady() {
-        double tolerance = Math.toRadians(2);
+        double tolerance = Math.toRadians(1.5);
         boolean aligned =
                 Robot.follower.getPose().getHeading() >= getAngle() - tolerance
-                        && Robot.follower.getPose().getHeading()
-                                <= getAngle() + tolerance;
+                        && Robot.follower.getPose().getHeading() <= getAngle() + tolerance;
 
-        FtcDashboard.getInstance().getTelemetry().addData("Angle delta", Math.toDegrees(Robot.follower.getHeading() - getAngle()));
+        FtcDashboard.getInstance()
+                .getTelemetry()
+                .addData("Angle delta", Math.toDegrees(Robot.follower.getHeading() - getAngle()));
 
         return pidfController.targetReached() && aligned;
     }
@@ -82,13 +83,13 @@ public class Shooter extends Subsystem {
     private double computeVelocity() {
         double dist = computeDistance();
         if (dist > 100) {
-            return 1400;
+            return 1380;
         }
         if (dist < 65) {
             return 1100;
         }
         return dist * 1.42 + 1060;
-//                return 500;
+        //                return 500;
     }
 
     public double getAngle(double x, double y) {
@@ -139,17 +140,13 @@ public class Shooter extends Subsystem {
         targetVelocity = computeVelocity();
         pidfController.setSetpoint(targetVelocity);
 
-        if (shooting) {
+        if (!shooting) { targetVelocity /= 2;}
 
-            double pidOutput = pidfController.updatePID(turretMotorRight.getVelocity());
+        double pidOutput = pidfController.updatePID(turretMotorRight.getVelocity());
             ////
-            FtcDashboard.getInstance().getTelemetry().addData("pid vel", pidOutput);
-            turretMotorRight.setPower(pidOutput / 2);
-            turretMotorLeft.setPower(pidOutput / 2);
-        } else {
-            turretMotorRight.setPower(0);
-            turretMotorLeft.setPower(0);
-        }
+        FtcDashboard.getInstance().getTelemetry().addData("pid vel", pidOutput);
+        turretMotorRight.setPower(pidOutput / 2);
+        turretMotorLeft.setPower(pidOutput / 2);
 
         if (isTracking && shouldFollowTrack) {
             Path p =
