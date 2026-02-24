@@ -33,13 +33,15 @@ public class TeleOpul extends OpMode {
         if (newState == State.INTAKE) {
             robot.intake.intakeMid();
         } else {
-            robot.intake.intakeUp();
+            robot.intake.intakeDown();
         }
 
         robot.shooter.shooting = newState == State.OUTTAKE;
     }
 
     private void handleIntake() {
+//        robot.shooter.shooting = false;
+
         robot.intake.closeGate();
 
         if (gamepad1.right_trigger > 0.1 && !(gamepad1.left_trigger > 0.1)) {
@@ -56,19 +58,27 @@ public class TeleOpul extends OpMode {
     }
 
     private void handleOuttake() {
+//        robot.shooter.shooting = true;
+
         robot.intake.openGate();
 
-        robot.shooter.track();
-        robot.shooter.update();
+//        robot.shooter.track();
 
-        if (robot.shooter.velocityReached()
-                && robot.shooter.isShootReady()
-                && gamepad1.right_trigger > 0.1) {
+//        if (robot.shooter.velocityReached()
+//                && robot.shooter.isShootReady()
+//                && gamepad1.right_trigger > 0.1) {
+//            robot.intake.shoot();
+//        }
+
+        if (gamepad1.right_trigger > 0.1) {
             robot.intake.shoot();
+        } else {
+            robot.intake.rest();
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             changeState(State.INTAKE);
+
         }
     }
 
@@ -100,12 +110,16 @@ public class TeleOpul extends OpMode {
                 break;
         }
 
+        telemetry.addData("encoder 1", robot.shooter.turretMotorRight.getCurrentPosition());
+        telemetry.addData("encoder 2", robot.shooter.turretMotorLeft.getVelocity());
+
         Robot.follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
-                gamepad1.left_stick_x,
+                -gamepad1.left_stick_x,
                 -gamepad1.right_stick_x - 0.1 * gamepad2.right_stick_x,
                 true);
 
         Robot.follower.update();
+        robot.shooter.update();
     }
 }

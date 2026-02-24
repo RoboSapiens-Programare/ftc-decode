@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -19,10 +20,15 @@ public class Intake extends Subsystem {
         rollerOne = hwMap.get(DcMotorEx.class, "rollerOne");
         rollerTwo = hwMap.get(DcMotorEx.class, "rollerTwo");
 
-        rollerOne.setDirection(DcMotorSimple.Direction.FORWARD);
-        rollerTwo.setDirection(DcMotorSimple.Direction.FORWARD);
+        rollerOne.setDirection(DcMotorSimple.Direction.REVERSE);
+        rollerTwo.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        rollerOne.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rollerTwo.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pivotLeft = hwMap.get(Servo.class, "intakePivotLeft");
+        pivotLeft.setDirection(Servo.Direction.REVERSE);
+
         pivotRight = hwMap.get(Servo.class, "intakePivotRight");
 
         gate = hwMap.get(Servo.class, "gate");
@@ -43,35 +49,30 @@ public class Intake extends Subsystem {
         rollerOne.setPower(uV.rollerOneP);
         rollerTwo.setPower(uV.rollerTwoP);
 
-//        intakeDown();
+        intakeDown();
     }
 
     public void pullBalls() {
         rollerOne.setPower(uV.rollerOneP);
         rollerTwo.setPower(uV.rollerTwoP);
-//        intakeMid();
+        intakeMid();
     }
 
     public void spitBalls() {
         rollerOne.setPower(-uV.rollerOneP);
         rollerTwo.setPower(-uV.rollerTwoP);
-//        intakeUp();
+        intakeMid();
     }
 
     public void rest() {
         rollerOne.setPower(0);
         rollerTwo.setPower(0);
-//        intakeMid();
+        intakeMid();
     }
 
     public void intakeDown() {
         pivotLeft.setPosition(uV.intakeDownLeft);
         pivotRight.setPosition(uV.intakeDownRight);
-    }
-
-    public void intakeUp() {
-        pivotLeft.setPosition(uV.intakeUpLeft);
-        pivotRight.setPosition(uV.intakeUpRight);
     }
 
     public void intakeMid() {

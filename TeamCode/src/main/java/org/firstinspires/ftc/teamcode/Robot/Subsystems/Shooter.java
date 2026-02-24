@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -10,14 +14,18 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
+import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
 public class Shooter extends Subsystem {
-    private final DcMotorEx turretMotorLeft;
+    public final DcMotorEx turretMotorLeft;
     public final DcMotorEx turretMotorRight;
 
     private final Servo lobServo;
+    private final CRServo turretPivot;
+
+    private final Limelight3A ll;
 
     // PID values for shooter
 
@@ -28,6 +36,9 @@ public class Shooter extends Subsystem {
 
     private final PIDFController pidfController =
             new PIDFController(shootKp, shootKi, shootKd, shootKf);
+
+    private final PIDFController odometryTrackingController = new PIDFController(uV.odometryKp, uV.odometryKi, uV.odometryKd, uV.odometryKf);
+    private final PIDFController limelightTrackingController = new PIDFController(uV.limelightKp, uV.limelightKi, uV.limelightKd, uV.limelightKf);
 
     private final Pose blueObeliskPose = new Pose(12, 134);
     private final Pose redObeliskPose = new Pose(133, 134);
@@ -43,16 +54,27 @@ public class Shooter extends Subsystem {
     public Shooter(HardwareMap hwMap) {
         lobServo = hwMap.get(Servo.class, "lobServo");
 
-        turretMotorRight = hwMap.get(DcMotorEx.class, "turretMotorLeft");
-        turretMotorLeft = hwMap.get(DcMotorEx.class, "turretMotorRight");
+        turretMotorRight = hwMap.get(DcMotorEx.class, "turretMotorRight");
+        turretMotorLeft = hwMap.get(DcMotorEx.class, "turretMotorLeft");
         turretMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        turretMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         turretMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         pidfController.setTolerance(20);
         pidfController.maxOut = 2;
         pidfController.minOut = -2;
+
+        ll = hwMap.get(Limelight3A.class, "limelight");
+        ll.pipelineSwitch(2);
+        limelightTrackingController.setSetpoint(0);
+        limelightTrackingController.setTolerance(0.3);
+
+        odometryTrackingController.setTolerance(20);
+
+        turretPivot = hwMap.get(CRServo.class, "turretPivot");
     }
 
     public boolean isShootReady() {
@@ -92,20 +114,24 @@ public class Shooter extends Subsystem {
             return 0;
         }
 
+        return 0;
+
         // should output a servo value (0 -> 1)
         // modify with telemetry for best results and change formula
-        return dist * Math.pow(1, -100);
+//        return dist * Math.pow(1, -100);
     }
 
     private double computeVelocity() {
-        double dist = computeDistance();
-        if (dist > 100) {
-            return 1400;
-        }
-        if (dist < 65) {
-            return 1100;
-        }
-        return dist * 1.42 + 1060;
+//        double dist = computeDistance();
+//        if (dist > 100) {
+//            return 1400;
+//        }
+//        if (dist < 65) {
+//            return 1100;
+//        }
+//        return dist * 1.42 + 1060;
+
+        return 2700;
     }
 
     public double getAngle(double x, double y) {
@@ -127,7 +153,33 @@ public class Shooter extends Subsystem {
     }
 
     public void track() {
-        // TODO: implement turret pivot
+        LLResult result = ll.getLatestResult();
+
+        boolean found = false;
+        double output = 0;
+
+        if (result.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
+                    output = limelightTrackingController.updatePID(result.getTx());
+
+                    found = true;
+                }
+            }
+        }
+
+        if (!found) {
+            double delta = getAngle() - Robot.follower.getHeading();
+
+            double deltaTicks = delta * 2048 / Math.PI;
+
+            odometryTrackingController.setSetpoint(deltaTicks);
+
+            output = odometryTrackingController.updatePID(turretMotorRight.getCurrentPosition());
+        }
+
+        turretPivot.setPower(output);
+
     }
 
     @Override
@@ -141,7 +193,7 @@ public class Shooter extends Subsystem {
         pidfController.setSetpoint(targetVelocity);
 
         if (shooting) {
-            double pidOutput = pidfController.updatePID(turretMotorRight.getVelocity());
+            double pidOutput = pidfController.updatePID(turretMotorLeft.getVelocity());
 
             FtcDashboard.getInstance().getTelemetry().addData("pid vel", pidOutput);
             turretMotorRight.setPower(pidOutput / 2);
@@ -154,9 +206,7 @@ public class Shooter extends Subsystem {
         }
 
         if (isTracking) {
-
-            // TODO: implement
-
+            track();
         }
     }
 }

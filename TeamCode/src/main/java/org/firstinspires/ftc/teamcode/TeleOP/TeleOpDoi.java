@@ -33,7 +33,7 @@ public class TeleOpDoi extends OpMode {
         if (newState == State.INTAKE) {
             robot.intake.intakeMid();
         } else {
-            robot.intake.intakeUp();
+            robot.intake.intakeDown();
         }
     }
 
