@@ -22,7 +22,7 @@ public class Shooter extends Subsystem {
     public final DcMotorEx turretMotorLeft;
     public final DcMotorEx turretMotorRight;
 
-    private final Servo lobServo;
+    public final Servo lobServo;
     private final CRServo turretPivot;
 
     private final Limelight3A ll;
@@ -45,11 +45,19 @@ public class Shooter extends Subsystem {
 
     public static double targetVelocity = 1300;
 
-    public boolean isTracking = false;
 
     public boolean shooting = false;
 
-    private boolean shouldFollowTrack = true;
+    private final Servo gate;
+
+    enum TrackingMethod {
+        ODOMETRY,
+        LIMELIGHT
+    };
+
+    private TrackingMethod trackingMethod = TrackingMethod.ODOMETRY;
+    double llDistance = 0;
+
 
     public Shooter(HardwareMap hwMap) {
         lobServo = hwMap.get(Servo.class, "lobServo");
@@ -70,12 +78,28 @@ public class Shooter extends Subsystem {
         ll = hwMap.get(Limelight3A.class, "limelight");
         ll.pipelineSwitch(2);
         limelightTrackingController.setSetpoint(0);
-        limelightTrackingController.setTolerance(0.3);
+        limelightTrackingController.setTolerance(1);
+
+        ll.start();
+
+        FtcDashboard.getInstance().startCameraStream(ll, 30);
 
         odometryTrackingController.setTolerance(20);
 
         turretPivot = hwMap.get(CRServo.class, "turretPivot");
+
+        gate = hwMap.get(Servo.class, "gate");
+
     }
+
+    public void openGate() {
+        gate.setPosition(uV.gateOpen);
+    }
+
+    public void closeGate() {
+        gate.setPosition(uV.gateClosed);
+    }
+
 
     public boolean isShootReady() {
         double tolerance = Math.toRadians(2);
@@ -95,7 +119,7 @@ public class Shooter extends Subsystem {
         return pidfController.targetReached();
     }
 
-    public double computeDistance() {
+    public double getOdometryDistance() {
         Pose currentPose = Robot.follower.getPose();
         Pose targetObeliskPose =
                 Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
@@ -103,35 +127,72 @@ public class Shooter extends Subsystem {
         return currentPose.distanceFrom(targetObeliskPose);
     }
 
+    public double getDistance() {
+        if (trackingMethod == TrackingMethod.LIMELIGHT) {
+            return llDistance;
+        }
+
+        return getOdometryDistance();
+    }
+
     private double computeLob() {
-        // TODO: implement this
+        double d = getDistance();
 
-        double dist = computeDistance();
-        if (dist > 100) {
-            return 1;
+        if ((trackingMethod == TrackingMethod.LIMELIGHT && d >= uV.llDistanceFar) || (trackingMethod == TrackingMethod.ODOMETRY && d >= uV.odometruDistanceFar)) {
+            return uV.angleFar;
         }
-        if (dist < 65) {
-            return 0;
+        double m = (uV.angleTwo - uV.angleOne);
+        double b = uV.angleOne;
+
+        if (trackingMethod == TrackingMethod.LIMELIGHT) {
+            m /= (uV.llDistanceTwo - uV.llDistanceOne);
+            b -= (m * uV.llDistanceOne);
+        } else {
+            m /= (uV.odometruDistanceTwo - uV.odometruDistanceOne);
+            b -= (m * uV.odometruDistanceOne);
         }
 
-        return 0;
 
-        // should output a servo value (0 -> 1)
-        // modify with telemetry for best results and change formula
-//        return dist * Math.pow(1, -100);
+        double lob = d * m + b;
+
+        FtcDashboard.getInstance().getTelemetry().addData("uncapped lob", lob);
+
+        if (lob <= uV.lobMin) {
+            return uV.lobMin;
+        } else if (lob >= uV.lobMax) {
+            return uV.lobMax;
+        }
+
+        return lob;
     }
 
     private double computeVelocity() {
-//        double dist = computeDistance();
-//        if (dist > 100) {
-//            return 1400;
-//        }
-//        if (dist < 65) {
-//            return 1100;
-//        }
-//        return dist * 1.42 + 1060;
+        double d = getDistance();
 
-        return 2700;
+        if ((trackingMethod == TrackingMethod.LIMELIGHT && d >= uV.llDistanceFar) || (trackingMethod == TrackingMethod.ODOMETRY && d >= uV.odometruDistanceFar)) {
+            return uV.velocityFar;
+        }
+
+        double m = (uV.velocityTwo - uV.velocityOne);
+        double b = uV.velocityOne;
+
+        if (trackingMethod == TrackingMethod.LIMELIGHT) {
+            m /= (uV.llDistanceTwo - uV.llDistanceOne);
+            b -= (m * uV.llDistanceOne);
+        } else {
+            m /= (uV.odometruDistanceTwo - uV.odometruDistanceOne);
+            b -= (m * uV.odometruDistanceOne);
+        }
+
+        double velocity = d * m + b;
+
+        if (velocity <= 0) {
+            return 0;
+        } else if (velocity >= 2300) {
+            return 2300;
+        }
+
+        return velocity;
     }
 
     public double getAngle(double x, double y) {
@@ -155,20 +216,23 @@ public class Shooter extends Subsystem {
     public void track() {
         LLResult result = ll.getLatestResult();
 
-        boolean found = false;
         double output = 0;
+
+        trackingMethod = TrackingMethod.ODOMETRY;
 
         if (result.isValid()) {
             for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
                 if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
                     output = limelightTrackingController.updatePID(result.getTx());
 
-                    found = true;
+                    llDistance = - fiducial.getRobotPoseTargetSpace().getPosition().z;
+
+                    trackingMethod = TrackingMethod.LIMELIGHT;
                 }
             }
         }
 
-        if (!found) {
+        if (trackingMethod == TrackingMethod.ODOMETRY){
             double delta = getAngle() - Robot.follower.getHeading();
 
             double deltaTicks = delta * 2048 / Math.PI;
@@ -189,24 +253,27 @@ public class Shooter extends Subsystem {
         pidfController.kD = shootKd;
         pidfController.kF = shootKf;
 
-        targetVelocity = computeVelocity();
-        pidfController.setSetpoint(targetVelocity);
+        track();
 
         if (shooting) {
-            double pidOutput = pidfController.updatePID(turretMotorLeft.getVelocity());
+            targetVelocity = computeVelocity();
+            pidfController.setSetpoint(targetVelocity);
+
+            lobServo.setPosition(computeLob());
+
+            double pidOutput = pidfController.updatePID(-turretMotorLeft.getVelocity());
 
             FtcDashboard.getInstance().getTelemetry().addData("pid vel", pidOutput);
+            FtcDashboard.getInstance().getTelemetry().addData("target vel", targetVelocity);
+            FtcDashboard.getInstance().getTelemetry().addData("lob", computeLob());
+
             turretMotorRight.setPower(pidOutput / 2);
             turretMotorLeft.setPower(pidOutput / 2);
 
-            lobServo.setPosition(computeLob());
         } else {
-            turretMotorRight.setPower(0);
-            turretMotorLeft.setPower(0);
+//            turretMotorRight.setPower(0.4);
+//            turretMotorLeft.setPower(0.4);
         }
-
-        if (isTracking) {
-            track();
-        }
+        
     }
 }

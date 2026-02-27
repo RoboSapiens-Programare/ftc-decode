@@ -13,7 +13,6 @@ public class Intake extends Subsystem {
     private final DcMotorEx rollerTwo;
     private final Servo pivotLeft;
     private final Servo pivotRight;
-    private final Servo gate;
 
     public Intake(HardwareMap hwMap) {
 
@@ -27,23 +26,14 @@ public class Intake extends Subsystem {
         rollerTwo.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pivotLeft = hwMap.get(Servo.class, "intakePivotLeft");
-        pivotLeft.setDirection(Servo.Direction.REVERSE);
 
         pivotRight = hwMap.get(Servo.class, "intakePivotRight");
+        pivotRight.setDirection(Servo.Direction.REVERSE);
 
-        gate = hwMap.get(Servo.class, "gate");
     }
 
     @Override
     public void update() {}
-
-    public void openGate() {
-        gate.setPosition(uV.gateOpen);
-    }
-
-    public void closeGate() {
-        gate.setPosition(uV.gateClosed);
-    }
 
     public void shoot() {
         rollerOne.setPower(uV.rollerOneP);
@@ -71,12 +61,12 @@ public class Intake extends Subsystem {
     }
 
     public void intakeDown() {
-        pivotLeft.setPosition(uV.intakeDownLeft);
-        pivotRight.setPosition(uV.intakeDownRight);
+        pivotLeft.setPosition(uV.intakeDown);
+        pivotRight.setPosition(uV.intakeDown);
     }
 
     public void intakeMid() {
-        pivotLeft.setPosition(uV.intakeLeftMid);
-        pivotRight.setPosition(uV.intakeRightMid);
+        pivotLeft.setPosition(uV.intakeMid);
+        pivotRight.setPosition(uV.intakeMid);
     }
 }

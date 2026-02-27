@@ -137,7 +137,7 @@ public class TeleOpClaude extends OpMode {
 
         // Siguranță mecanică
         robot.intake.intakeMid();
-        robot.intake.closeGate();
+//        robot.intake.closeGate();
 
         telemetry.addLine("=== TeleOp Final 25-26 ONLINE ===");
         telemetry.addData("⚠ inShootingZone", "SIMULAT — conectați Marrow FTC!");
@@ -183,7 +183,7 @@ public class TeleOpClaude extends OpMode {
             // -----------------------------------------------------------------
             case SEARCH_AND_DESTROY:
                 robot.intake.pullBalls();
-                robot.intake.closeGate();
+//                robot.intake.closeGate();
                 robot.shooter.shooting   = false;
                 robot.shooter.isTracking = false;
                 robot.shooter.update(currentVoltage); // Oprește flywheel
@@ -201,7 +201,7 @@ public class TeleOpClaude extends OpMode {
             // -----------------------------------------------------------------
             case TRANSIT:
                 robot.intake.rest();
-                robot.intake.closeGate();
+//                robot.intake.closeGate();
 
                 // PRE-SPOOL: Pornim flywheel-ul în tranzit dacă suntem aproape de zonă.
                 // Aceasta reduce timpul de așteptare la ENGAGING (mai rapid la tragere).
@@ -226,7 +226,7 @@ public class TeleOpClaude extends OpMode {
             // ENGAGING: Lock-on complet + spool shooter + așteptăm comanda
             // -----------------------------------------------------------------
             case ENGAGING:
-                robot.intake.closeGate();
+//                robot.intake.closeGate();
 
                 // Shooter: PIDF activ cu voltage comp + Limelight/SOTM tracking
                 robot.shooter.shooting   = true;
@@ -258,14 +258,14 @@ public class TeleOpClaude extends OpMode {
 
                 // FAILSAFE #1: Trigger eliberat sau ieșit din zonă → abort imediat
                 if (gamepad1.left_trigger <= 0.05 || !inShootingZone) {
-                    robot.intake.closeGate();
+//                    robot.intake.closeGate();
                     changeState(State.TRANSIT);
                     break;
                 }
 
                 // FAILSAFE #2: Timeout global (baterie moartă sau blocaj mecanic)
                 if (stateTimer.milliseconds() > FIRE_TIMEOUT_MS) {
-                    robot.intake.closeGate();
+//                    robot.intake.closeGate();
                     changeState(State.SEARCH_AND_DESTROY);
                     break;
                 }
@@ -289,7 +289,7 @@ public class TeleOpClaude extends OpMode {
                         // La 11V: recuperare după foc ~120ms (voltage comp ajută, dar nu elimină)
                         // Cu timer fix de 100ms: la 11V trageam înainte de recuperare completă.
                         // Cu velocity-gate: tragem EXACT când flywheel-ul E gata → precizie maximă.
-                        robot.intake.closeGate();
+//                        robot.intake.closeGate();
 
                         if (robot.shooter.isShootReady()) {
                             fireState = FireState.GATE_OPEN;
@@ -300,11 +300,11 @@ public class TeleOpClaude extends OpMode {
                     case GATE_OPEN:
                         // Gate DESCHIS: bila avansează spre flywheel
                         // Rămânem deschiși exact GATE_OPEN_MS ms (suficient pentru o bilă)
-                        robot.intake.openGate();
+//                        robot.intake.openGate();
 
                         if (gateTimer.milliseconds() >= GATE_OPEN_MS) {
                             ballsFired++;
-                            robot.intake.closeGate();
+//                            robot.intake.closeGate();
 
                             if (ballsFired >= MAX_BALLS) {
                                 // Toate 3 bile trase → terminat
@@ -318,7 +318,7 @@ public class TeleOpClaude extends OpMode {
 
                     case DONE:
                         // Ciclu complet — gate se asigură că e închis, înapoi la colectare
-                        robot.intake.closeGate();
+//                        robot.intake.closeGate();
                         changeState(State.SEARCH_AND_DESTROY);
                         break;
                 }

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.uV;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp(name = "TeleOp")
@@ -36,14 +37,17 @@ public class TeleOpul extends OpMode {
             robot.intake.intakeDown();
         }
 
-        robot.shooter.shooting = newState == State.OUTTAKE;
+        if (newState == State.OUTTAKE) {
+            robot.shooter.openGate();
+            robot.shooter.shooting = true;
+        } else {
+            robot.shooter.closeGate();
+            robot.shooter.shooting = false;
+        }
+
     }
 
     private void handleIntake() {
-//        robot.shooter.shooting = false;
-
-        robot.intake.closeGate();
-
         if (gamepad1.right_trigger > 0.1 && !(gamepad1.left_trigger > 0.1)) {
             robot.intake.pullBalls();
         } else if (gamepad1.left_trigger > 0.1 && !(gamepad1.right_trigger > 0.1)) {
@@ -58,22 +62,10 @@ public class TeleOpul extends OpMode {
     }
 
     private void handleOuttake() {
-//        robot.shooter.shooting = true;
-
-        robot.intake.openGate();
-
-//        robot.shooter.track();
-
-//        if (robot.shooter.velocityReached()
-//                && robot.shooter.isShootReady()
-//                && gamepad1.right_trigger > 0.1) {
-//            robot.intake.shoot();
-//        }
+        robot.intake.intakeDown();
 
         if (gamepad1.right_trigger > 0.1) {
             robot.intake.shoot();
-        } else {
-            robot.intake.rest();
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
@@ -93,7 +85,7 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.startTeleOpDrive(true);
 
-        Robot.follower.setStartingPose(new Pose(0, 0));
+        Robot.follower.setStartingPose(Robot.transitionPose);
 
         robot.intake.intakeMid();
     }
@@ -113,6 +105,10 @@ public class TeleOpul extends OpMode {
         telemetry.addData("encoder 1", robot.shooter.turretMotorRight.getCurrentPosition());
         telemetry.addData("encoder 2", robot.shooter.turretMotorLeft.getVelocity());
 
+        dashboardTelemetry.addData("State", state);
+
+        dashboardTelemetry.update();
+
         Robot.follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
@@ -121,5 +117,6 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.update();
         robot.shooter.update();
+
     }
 }

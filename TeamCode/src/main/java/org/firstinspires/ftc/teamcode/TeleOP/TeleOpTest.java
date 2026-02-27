@@ -73,7 +73,7 @@ public class TeleOpTest extends OpMode {
 
         // Siguranță mecanică
         robot.intake.intakeMid();
-        robot.intake.closeGate();
+//        robot.intake.closeGate();
 
         telemetry.addLine("Sistem World Class Online (PedroPathing 2.0.6).");
         telemetry.update();
@@ -115,7 +115,7 @@ public class TeleOpTest extends OpMode {
 
             case SEARCH_AND_DESTROY:
                 robot.intake.pullBalls();
-                robot.intake.closeGate();
+//                robot.intake.closeGate();
 
                 // Oprim shooter-ul complet pentru salvarea bateriei
                 robot.shooter.turretMotorLeft.setPower(0);
@@ -131,7 +131,7 @@ public class TeleOpTest extends OpMode {
 
             case TRANSIT:
                 robot.intake.rest();
-                robot.intake.closeGate();
+//                robot.intake.closeGate();
                 robot.shooter.turretMotorLeft.setPower(0);
                 robot.shooter.turretMotorRight.setPower(0);
                 turret.trackToAngleRad(0);
@@ -181,25 +181,25 @@ public class TeleOpTest extends OpMode {
                 if (timeInState < 50) {
                     robot.shooter.turretMotorLeft.setPower(maxPower);
                     robot.shooter.turretMotorRight.setPower(maxPower);
-                    robot.intake.openGate(); // Scapă Bila 1
+//                    robot.intake.openGate(); // Scapă Bila 1
                 } else if (timeInState < 150) {
-                    robot.intake.closeGate(); // Retract
+//                    robot.intake.closeGate(); // Retract
                     robot.shooter.turretMotorLeft.setPower(maxPower);
                     robot.shooter.turretMotorRight.setPower(maxPower);
                 } else if (timeInState < 200) {
-                    robot.intake.openGate(); // Scapă Bila 2
+//                    robot.intake.openGate(); // Scapă Bila 2
                     robot.shooter.turretMotorLeft.setPower(maxPower);
                     robot.shooter.turretMotorRight.setPower(maxPower);
                 } else if (timeInState < 300) {
-                    robot.intake.closeGate(); // Retract
+//                    robot.intake.closeGate(); // Retract
                     robot.shooter.turretMotorLeft.setPower(maxPower);
                     robot.shooter.turretMotorRight.setPower(maxPower);
                 } else if (timeInState < 350) {
-                    robot.intake.openGate(); // Scapă Bila 3
+//                    robot.intake.openGate(); // Scapă Bila 3
                     robot.shooter.turretMotorLeft.setPower(maxPower);
                     robot.shooter.turretMotorRight.setPower(maxPower);
                 } else if (timeInState < 450) {
-                    robot.intake.closeGate(); // Finalizare
+//                    robot.intake.closeGate(); // Finalizare
                 } else {
                     changeState(State.SEARCH_AND_DESTROY); // Ciclul se reia automat
                 }
