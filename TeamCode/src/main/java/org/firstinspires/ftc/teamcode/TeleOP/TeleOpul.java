@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -31,12 +32,6 @@ public class TeleOpul extends OpMode {
         state = newState;
         stateTimer.reset();
 
-        if (newState == State.INTAKE) {
-            robot.intake.intakeMid();
-        } else {
-            robot.intake.intakeDown();
-        }
-
         if (newState == State.OUTTAKE) {
             robot.shooter.openGate();
             robot.shooter.shooting = true;
@@ -48,6 +43,7 @@ public class TeleOpul extends OpMode {
     }
 
     private void handleIntake() {
+
         if (gamepad1.right_trigger > 0.1 && !(gamepad1.left_trigger > 0.1)) {
             robot.intake.pullBalls();
         } else if (gamepad1.left_trigger > 0.1 && !(gamepad1.right_trigger > 0.1)) {
@@ -56,13 +52,13 @@ public class TeleOpul extends OpMode {
             robot.intake.rest();
         }
 
+
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             changeState(State.OUTTAKE);
         }
     }
 
     private void handleOuttake() {
-        robot.intake.intakeDown();
 
         if (gamepad1.right_trigger > 0.1) {
             robot.intake.shoot();
@@ -87,7 +83,19 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.setStartingPose(Robot.transitionPose);
 
-        robot.intake.intakeMid();
+    }
+    
+    @Override
+    public void init_loop()
+    {
+        if (gamepad1.share)
+        {
+            gamepad1.setLedColor(0,0,255, 1000);
+            Robot.alliance = Robot.Alliance.BLUE;
+        } else if (gamepad1.options) {
+            gamepad1.setLedColor(255,0,0,1000);
+            Robot.alliance = Robot.Alliance.RED;
+        }
     }
 
     @Override
@@ -104,6 +112,10 @@ public class TeleOpul extends OpMode {
 
         telemetry.addData("encoder 1", robot.shooter.turretMotorRight.getCurrentPosition());
         telemetry.addData("encoder 2", robot.shooter.turretMotorLeft.getVelocity());
+        telemetry.addData("distance intake", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
+        telemetry.addData("distance outtake", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
+        telemetry.addData("distance mid", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
+
 
         dashboardTelemetry.addData("State", state);
 
@@ -117,6 +129,8 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.update();
         robot.shooter.update();
+
+        robot.intake.updateHeadlight();
 
     }
 }

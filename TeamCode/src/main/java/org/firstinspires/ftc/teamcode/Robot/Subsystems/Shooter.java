@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
@@ -23,7 +25,7 @@ public class Shooter extends Subsystem {
     public final DcMotorEx turretMotorRight;
 
     public final Servo lobServo;
-    private final CRServo turretPivot;
+    public final CRServo turretPivot;
 
     private final Limelight3A ll;
 
@@ -48,7 +50,7 @@ public class Shooter extends Subsystem {
 
     public boolean shooting = false;
 
-    private final Servo gate;
+    public final Servo gate;
 
     enum TrackingMethod {
         ODOMETRY,
@@ -243,6 +245,8 @@ public class Shooter extends Subsystem {
         }
 
         turretPivot.setPower(output);
+
+        telemetry.addData("ll tx", ll.getLatestResult());
 
     }
 

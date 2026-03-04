@@ -136,7 +136,7 @@ public class TeleOpClaude extends OpMode {
         Robot.follower.setStartingPose(new Pose(0, 0, 0)); // TODO: Transfer pose din Auto
 
         // Siguranță mecanică
-        robot.intake.intakeMid();
+//        robot.intake.intakeMid();
 //        robot.intake.closeGate();
 
         telemetry.addLine("=== TeleOp Final 25-26 ONLINE ===");
