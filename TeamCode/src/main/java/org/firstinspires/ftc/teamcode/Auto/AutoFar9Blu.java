@@ -10,20 +10,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.Utils.ColorEnum;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Autonomous(name = "Auto Far 9 blue", group = "0. Auto")
 public class AutoFar9Blu extends OpMode {
 
-    private AprilTagProcessor aprilTag;
-    private VisionPortal visionPortal;
 
     private int pathState; // Current autonomous path state (state machine)
     private ElapsedTime pathTimer; // Timer for path state machine
@@ -43,23 +34,9 @@ public class AutoFar9Blu extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap);
 
-        aprilTag = new AprilTagProcessor.Builder().build();
-
-        // Adjust Image Decimation to trade-off detection-range for detection-rate.
-        aprilTag.setDecimation(2);
-
-        visionPortal =
-                new VisionPortal.Builder()
-                        .setCamera(hardwareMap.get(WebcamName.class, "limelight"))
-                        .addProcessor(aprilTag)
-                        .build();
-
-        visionPortal.resumeStreaming();
-        FtcDashboard.getInstance().startCameraStream(visionPortal, 30);
-
         Robot.alliance = Robot.Alliance.BLUE;
 
-        Robot.follower.setStartingPose(new Pose(63, 9, Math.toRadians(90)));
+        Robot.follower.setStartingPose(new Pose(56, 8, Math.toRadians(90)));
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -73,10 +50,6 @@ public class AutoFar9Blu extends OpMode {
         dashboardTelemetry.update();
     }
 
-    @Override
-    public void start() {
-        visionPortal.stopStreaming();
-    }
 
     @Override
     public void loop() {
@@ -115,7 +88,7 @@ public class AutoFar9Blu extends OpMode {
                             new BezierCurve(
                                     new Pose(56.503, 8.336),
                                     new Pose(64.448, 39.776),
-                                    new Pose(21.594, 35.664)
+                                    new Pose(26.797, 35.664)
                             )
                     )
                     .setTangentHeadingInterpolation()
@@ -124,7 +97,7 @@ public class AutoFar9Blu extends OpMode {
             shoot1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(21.594, 35.664),
+                                    new Pose(26.797, 35.664),
                                     new Pose(60.287, 12.965)
                             )
                     )
@@ -136,7 +109,7 @@ public class AutoFar9Blu extends OpMode {
                             new BezierCurve(
                                     new Pose(60.287, 12.965),
                                     new Pose(67.717, 62.573),
-                                    new Pose(22.140, 59.762)
+                                    new Pose(26.503, 59.930)
                             )
                     )
                     .setTangentHeadingInterpolation()
@@ -145,7 +118,7 @@ public class AutoFar9Blu extends OpMode {
             shoot2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(22.140, 59.762),
+                                    new Pose(26.503, 59.930),
                                     new Pose(60.497, 12.608)
                             )
                     )
@@ -157,7 +130,7 @@ public class AutoFar9Blu extends OpMode {
                             new BezierCurve(
                                     new Pose(60.497, 12.608),
                                     new Pose(78.829, 91.077),
-                                    new Pose(21.776, 83.993)
+                                    new Pose(31.678, 84.161)
                             )
                     )
                     .setTangentHeadingInterpolation()
@@ -166,7 +139,7 @@ public class AutoFar9Blu extends OpMode {
             shoot3 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(21.776, 83.993),
+                                    new Pose(31.678, 84.161),
                                     new Pose(49.196, 90.448)
                             )
                     )
