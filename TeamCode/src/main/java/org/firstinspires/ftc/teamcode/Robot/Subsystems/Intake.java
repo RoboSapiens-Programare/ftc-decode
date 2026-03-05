@@ -61,6 +61,10 @@ public class Intake extends Subsystem {
         rollerTwo.setPower(uV.rollerTwoP);
     }
 
+    public boolean isEmpty()
+    {
+        return sensorMid.getDistance(DistanceUnit.CM)>8 && sensorIntake.getDistance(DistanceUnit.CM)>8 && sensorOuttake.getDistance(DistanceUnit.CM)>8;
+    }
 
     public void pullBalls() {
         if (sensorOuttake.getDistance(DistanceUnit.CM) < 8)
