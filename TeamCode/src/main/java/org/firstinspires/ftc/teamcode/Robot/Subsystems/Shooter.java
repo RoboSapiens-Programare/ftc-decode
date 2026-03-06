@@ -27,7 +27,7 @@ public class Shooter extends Subsystem {
     public final Servo lobServo;
     public final CRServo turretPivot;
 
-    private Limelight3A ll;
+    public Limelight3A ll;
 
     // PID values for shooter
 
@@ -35,6 +35,8 @@ public class Shooter extends Subsystem {
     public static double shootKi = 0.00002;
     public static double shootKd = 0.0000001;
     public static double shootKf = 0.013;
+
+    public double turretErrorRad = 0.0;
 
     private final PIDFController pidfController =
             new PIDFController(shootKp, shootKi, shootKd, shootKf);
@@ -57,7 +59,7 @@ public class Shooter extends Subsystem {
         LIMELIGHT
     };
 
-    private TrackingMethod trackingMethod = TrackingMethod.ODOMETRY;
+    private TrackingMethod trackingMethod = TrackingMethod.LIMELIGHT;
     double llDistance = 0;
 
 
@@ -78,9 +80,10 @@ public class Shooter extends Subsystem {
         pidfController.minOut = -2;
 
         ll = hwMap.get(Limelight3A.class, "limelight");
-        ll.pipelineSwitch(0);
+        ll.pipelineSwitch(2);
         limelightTrackingController.setSetpoint(0);
         limelightTrackingController.setTolerance(1);
+
 
         ll.start();
 
@@ -215,42 +218,51 @@ public class Shooter extends Subsystem {
         return getAngle(currentPose.getX(), currentPose.getY());
     }
 
-    public void track() {
-        final LLResult result = ll.getLatestResult();
-//        telemetry.addData("result",  ll.getLatestResult().getTx());
+    public double track() {
+        LLResult result = ll.getLatestResult();
+        double output = 0.0;
 
-        double output = 0;
+        // Telemetrie de bază pentru conexiune
+        FtcDashboard.getInstance().getTelemetry().addData("LL-Conn", result != null ? "Connected" : "DISCONNECTED");
 
-//        trackingMethod = TrackingMethod.ODOMETRY;
+        if (result != null && result.isValid()) {
+            int targetId = (Robot.alliance == Robot.Alliance.RED) ? 24 : 20;
 
-//        if (result.isValid()) {
-//            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-//                if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
-//
-//
-//                    output = limelightTrackingController.updatePID(result.getTx());
-//
-//                    llDistance = - fiducial.getRobotPoseTargetSpace().getPosition().z;
-//
-//                    trackingMethod = TrackingMethod.LIMELIGHT;
-//                }
-//            }
-//        }
+            // Listăm TOATE ID-urile pe care le vede camera acum
+            StringBuilder seenIds = new StringBuilder();
+            for (LLResultTypes.FiducialResult fid : result.getFiducialResults()) {
+                seenIds.append(fid.getFiducialId()).append(" ");
+            }
+            FtcDashboard.getInstance().getTelemetry().addData("LL-Visible-IDs", seenIds.toString());
 
-//        if (trackingMethod == TrackingMethod.ODOMETRY){
-//            double delta = getAngle() - Robot.follower.getHeading();
-//
-//            double deltaTicks = delta * 2048 / Math.PI;
-//
-//            odometryTrackingController.setSetpoint(deltaTicks);
-//
-//            output = odometryTrackingController.updatePID(turretMotorRight.getCurrentPosition());
-//        }
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                if (fiducial.getFiducialId() == targetId) {
+                    double tx = fiducial.getTargetXDegrees();
 
-        //stay still
+                    // Forțăm setarea constantelor înainte de calcul
+                    limelightTrackingController.kP = uV.limelightKp;
+                    limelightTrackingController.kF = uV.limelightKf;
 
-        turretPivot.setPower(output);
+                    output = limelightTrackingController.updatePID(tx);
+                    turretPivot.setPower(output);
+                    llDistance = fiducial.getCameraPoseTargetSpace().getPosition().z;
+                    FtcDashboard.getInstance().getTelemetry().addData("LL-Status", "LOCKED");
+                    FtcDashboard.getInstance().getTelemetry().addData("LimeLightDistance", llDistance);
+                    FtcDashboard.getInstance().getTelemetry().addData("LL-TX", tx);
+                    break;
+                } else {
+                    FtcDashboard.getInstance().getTelemetry().addData("LL-Status", "Wrong ID");
+                }
+            }
+        } else {
+            FtcDashboard.getInstance().getTelemetry().addData("LL-Status", "No Target/Invalid");
+            turretPivot.setPower(0);
+        }
 
+        // Trimitem datele la Dashboard
+        FtcDashboard.getInstance().getTelemetry().update();
+
+        return output;
     }
 
     @Override
@@ -259,7 +271,7 @@ public class Shooter extends Subsystem {
         pidfController.kI = shootKi;
         pidfController.kD = shootKd;
         pidfController.kF = shootKf;
-
+        llDistance =
         track();
 
         if (shooting) {
@@ -273,6 +285,7 @@ public class Shooter extends Subsystem {
             FtcDashboard.getInstance().getTelemetry().addData("pid vel", pidOutput);
             FtcDashboard.getInstance().getTelemetry().addData("target vel", targetVelocity);
             FtcDashboard.getInstance().getTelemetry().addData("lob", computeLob());
+            FtcDashboard.getInstance().getTelemetry().update();
 
             turretMotorRight.setPower(pidOutput / 2);
             turretMotorLeft.setPower(pidOutput / 2);

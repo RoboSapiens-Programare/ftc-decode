@@ -35,7 +35,7 @@ public class TeleOpul extends OpMode {
     }
 
     private void handleIntake() {
-//        robot.shooter.shooting = false;
+        robot.shooter.shooting = false;
 
         robot.shooter.closeGate();
 
@@ -53,7 +53,7 @@ public class TeleOpul extends OpMode {
     }
 
     private void handleOuttake() {
-//        robot.shooter.shooting = true;
+        robot.shooter.shooting = true;
 
         robot.shooter.openGate();
 
@@ -131,5 +131,10 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.update();
         robot.shooter.update();
+        telemetry.addData("turret pivot power", robot.shooter.turretPivot.getPower());
+        telemetry.addData("result", robot.shooter.ll.getLatestResult());
+
+        telemetry.update();
+
     }
 }
