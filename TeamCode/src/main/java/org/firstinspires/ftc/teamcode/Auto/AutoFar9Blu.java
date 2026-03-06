@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @Autonomous(name = "Auto Far 9 blue", group = "0. Auto")
 public class AutoFar9Blu extends OpMode {
@@ -23,7 +24,7 @@ public class AutoFar9Blu extends OpMode {
 
     private static Robot robot;
 
-    private boolean pathingOnly=true;
+    private boolean pathingOnly=false;
 
     private final ElapsedTime timer = new ElapsedTime();
     private final ElapsedTime autoTimer = new ElapsedTime();
@@ -56,7 +57,7 @@ public class AutoFar9Blu extends OpMode {
 
         Robot.follower.update(); // Update Pedro Pathing
         robot.intake.update();
-        robot.shooter.update();
+//        robot.shooter.update();
         pathState = autonomousPathUpdate(); // Update autonomous state machine
 
 
@@ -65,6 +66,15 @@ public class AutoFar9Blu extends OpMode {
         dashboardTelemetry.addData("X", Robot.follower.getPose().getX());
         dashboardTelemetry.addData("Y", Robot.follower.getPose().getY());
         dashboardTelemetry.addData("Heading", Robot.follower.getPose().getHeading());
+
+        telemetry.addData("velo", robot.shooter.turretMotorRight.getVelocity());
+
+        telemetry.addData("empty", robot.intake.isEmpty());
+
+        robot.shooter.turretMotorLeft.setPower(0.8);
+        robot.shooter.turretMotorRight.setPower(0.8);
+
+        robot.shooter.lobServo.setPosition(uV.angleFar);
 
         dashboardTelemetry.update();
     }
@@ -155,16 +165,24 @@ public class AutoFar9Blu extends OpMode {
                 if (!pathingOnly)
                 {
                     robot.shooter.openGate();
-                    robot.shooter.update();
-                    robot.shooter.track();
+//                    robot.shooter.update();
+//                    robot.shooter.track();
                 }
-                if (!Robot.follower.isBusy() && robot.shooter.isShootReady() && !pathingOnly)
+                if (!Robot.follower.isBusy() /* && robot.shooter.isShootReady() */ && !pathingOnly)
                 {
-                    robot.intake.shoot();
+                    if (robot.shooter.turretMotorRight.getVelocity() > 1400)
+                    {
+                        robot.intake.shoot();
+                    }
                     if (robot.intake.isEmpty())
                     {
-                        Robot.follower.followPath(paths.grab1);
-                        setPathState(1);
+                        if (timer.seconds()>1)
+                        {
+                            Robot.follower.followPath(paths.grab1);
+                            setPathState(1);
+                        }
+                    } else {
+                        timer.reset();
                     }
                 } else if (pathingOnly && !Robot.follower.isBusy()) {
                     Robot.follower.followPath(paths.grab1);
@@ -194,16 +212,24 @@ public class AutoFar9Blu extends OpMode {
                 if (!pathingOnly)
                 {
                     robot.shooter.openGate();
-                    robot.shooter.update();
-                    robot.shooter.track();
+//                    robot.shooter.update();
+//                    robot.shooter.track();
                 }
-                if (!Robot.follower.isBusy() && robot.shooter.isShootReady() && !pathingOnly)
+                if (!Robot.follower.isBusy() /*&& robot.shooter.isShootReady()*/ && !pathingOnly)
                 {
-                    robot.intake.shoot();
+                    if (robot.shooter.turretMotorRight.getVelocity()>1400)
+                    {
+                        robot.intake.shoot();
+                    }
                     if (robot.intake.isEmpty())
                     {
-                        Robot.follower.followPath(paths.grab2);
-                        setPathState(3);
+                        if (timer.seconds()>1)
+                        {
+                            Robot.follower.followPath(paths.grab2);
+                            setPathState(3);
+                        }
+                    } else {
+                        timer.reset();
                     }
                 } else if (pathingOnly && !Robot.follower.isBusy()) {
                     Robot.follower.followPath(paths.grab2);
@@ -232,16 +258,24 @@ public class AutoFar9Blu extends OpMode {
                 if (!pathingOnly)
                 {
                     robot.shooter.openGate();
-                    robot.shooter.update();
-                    robot.shooter.track();
+//                    robot.shooter.update();
+//                    robot.shooter.track();
                 }
-                if (!Robot.follower.isBusy() && robot.shooter.isShootReady() && !pathingOnly)
+                if (!Robot.follower.isBusy() /*&& robot.shooter.isShootReady()*/ && !pathingOnly)
                 {
-                    robot.intake.shoot();
+                    if (robot.shooter.turretMotorRight.getVelocity()>1400)
+                    {
+                        robot.intake.shoot();
+                    }
                     if (robot.intake.isEmpty())
                     {
-                        Robot.follower.followPath(paths.grab3);
-                        setPathState(5);
+                        if (timer.seconds()>1)
+                        {
+                            Robot.follower.followPath(paths.grab3);
+                            setPathState(5);
+                        }
+                    } else {
+                        timer.reset();
                     }
                 } else if (pathingOnly && !Robot.follower.isBusy()) {
                     Robot.follower.followPath(paths.grab3);
@@ -270,12 +304,15 @@ public class AutoFar9Blu extends OpMode {
                 if (!pathingOnly)
                 {
                     robot.shooter.openGate();
-                    robot.shooter.update();
-                    robot.shooter.track();
+//                    robot.shooter.update();
+//                    robot.shooter.track();
                 }
-                if (!Robot.follower.isBusy() && robot.shooter.isShootReady() && !pathingOnly)
+                if (!Robot.follower.isBusy() /* && robot.shooter.isShootReady() */ && !pathingOnly)
                 {
-                    robot.intake.shoot();
+                    if (robot.shooter.turretMotorRight.getVelocity()>1400)
+                    {
+                        robot.intake.shoot();
+                    }
                     if (robot.intake.isEmpty())
                     {
                         setPathState(-1);

@@ -9,8 +9,8 @@ public class uV {
     public static double intakeDown = 0.44;
 
     // Gate positions
-    public static double gateOpen = 0.9;
-    public static double gateClosed = 0.8;
+    public static double gateOpen = 0.8;
+    public static double gateClosed = 0.7;
 
     // Transfer
     public static double rollerOneP = 1;

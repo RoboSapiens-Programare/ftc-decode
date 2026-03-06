@@ -21,7 +21,7 @@ public class Constants {
                     .mass(15)
                     .forwardZeroPowerAcceleration(-43.5)
                     .lateralZeroPowerAcceleration(-65.3)
-                    .headingPIDFCoefficients(new PIDFCoefficients(4.5, 6, 0, 0));
+                    .headingPIDFCoefficients(new PIDFCoefficients(1.5, 0, 0, 0));
 
     //                    .useSecondaryTranslationalPIDF(true)
     //                    .useSecondaryHeadingPIDF(true)
@@ -54,13 +54,13 @@ public class Constants {
 
     public static PinpointConstants localizerConstants =
             new PinpointConstants()
-                    .forwardPodY(12.4)
-                    .strafePodX(4)
+                    .forwardPodY(4)
+                    .strafePodX(-12.4)
                     .distanceUnit(DistanceUnit.CM)
                     .hardwareMapName("pinpoint")
                     .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
                     .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
-                    .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+                    .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
     public static DriveEncoderConstants driveEncoderLocalizerConstants =
             new DriveEncoderConstants()

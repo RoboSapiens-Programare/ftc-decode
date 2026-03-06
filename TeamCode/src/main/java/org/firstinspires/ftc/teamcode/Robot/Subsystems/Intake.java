@@ -51,7 +51,7 @@ public class Intake extends Subsystem {
             if (sensorOuttake.getDistance(DistanceUnit.CM) < 8 && sensorMid.getDistance(DistanceUnit.CM) < 8 && sensorIntake.getDistance(DistanceUnit.CM) < 8) {
                 headlight.setPosition(1);
             } else {
-                headlight.setPosition(0.1);
+                headlight.setPosition(0.277);
             }
         }
     }

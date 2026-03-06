@@ -32,7 +32,7 @@ public class VelocityTuner extends OpMode {
     @Override
     public void loop() {
         dashboardTelemetry.addData("current velocity", robot.shooter.turretMotorLeft.getVelocity());
-        dashboardTelemetry.addData("odom distance", robot.shooter.getOdometryDistance());
+//        dashboardTelemetry.addData("odom distance", robot.shooter.getOdometryDistance());
 
         dashboardTelemetry.update();
 

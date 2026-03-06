@@ -27,7 +27,7 @@ public class Shooter extends Subsystem {
     public final Servo lobServo;
     public final CRServo turretPivot;
 
-    private final Limelight3A ll;
+    private Limelight3A ll;
 
     // PID values for shooter
 
@@ -50,7 +50,7 @@ public class Shooter extends Subsystem {
 
     public boolean shooting = false;
 
-    public final Servo gate;
+    private final Servo gate;
 
     enum TrackingMethod {
         ODOMETRY,
@@ -78,7 +78,7 @@ public class Shooter extends Subsystem {
         pidfController.minOut = -2;
 
         ll = hwMap.get(Limelight3A.class, "limelight");
-        ll.pipelineSwitch(2);
+        ll.pipelineSwitch(0);
         limelightTrackingController.setSetpoint(0);
         limelightTrackingController.setTolerance(1);
 
@@ -90,7 +90,7 @@ public class Shooter extends Subsystem {
 
         turretPivot = hwMap.get(CRServo.class, "turretPivot");
 
-        gate = hwMap.get(Servo.class, "gate");
+        gate = hwMap.get(Servo.class, "gateServo");
 
     }
 
@@ -216,37 +216,40 @@ public class Shooter extends Subsystem {
     }
 
     public void track() {
-        LLResult result = ll.getLatestResult();
+        final LLResult result = ll.getLatestResult();
+//        telemetry.addData("result",  ll.getLatestResult().getTx());
 
         double output = 0;
 
-        trackingMethod = TrackingMethod.ODOMETRY;
+//        trackingMethod = TrackingMethod.ODOMETRY;
 
-        if (result.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-                if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
-                    output = limelightTrackingController.updatePID(result.getTx());
+//        if (result.isValid()) {
+//            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+//                if (fiducial.getFiducialId() == (Robot.alliance == Robot.Alliance.RED ? 24 : 20)) {
+//
+//
+//                    output = limelightTrackingController.updatePID(result.getTx());
+//
+//                    llDistance = - fiducial.getRobotPoseTargetSpace().getPosition().z;
+//
+//                    trackingMethod = TrackingMethod.LIMELIGHT;
+//                }
+//            }
+//        }
 
-                    llDistance = - fiducial.getRobotPoseTargetSpace().getPosition().z;
+//        if (trackingMethod == TrackingMethod.ODOMETRY){
+//            double delta = getAngle() - Robot.follower.getHeading();
+//
+//            double deltaTicks = delta * 2048 / Math.PI;
+//
+//            odometryTrackingController.setSetpoint(deltaTicks);
+//
+//            output = odometryTrackingController.updatePID(turretMotorRight.getCurrentPosition());
+//        }
 
-                    trackingMethod = TrackingMethod.LIMELIGHT;
-                }
-            }
-        }
-
-        if (trackingMethod == TrackingMethod.ODOMETRY){
-            double delta = getAngle() - Robot.follower.getHeading();
-
-            double deltaTicks = delta * 2048 / Math.PI;
-
-            odometryTrackingController.setSetpoint(deltaTicks);
-
-            output = odometryTrackingController.updatePID(turretMotorRight.getCurrentPosition());
-        }
+        //stay still
 
         turretPivot.setPower(output);
-
-        telemetry.addData("ll tx", ll.getLatestResult());
 
     }
 
@@ -274,10 +277,11 @@ public class Shooter extends Subsystem {
             turretMotorRight.setPower(pidOutput / 2);
             turretMotorLeft.setPower(pidOutput / 2);
 
+
         } else {
-//            turretMotorRight.setPower(0.4);
-//            turretMotorLeft.setPower(0.4);
+            turretMotorRight.setPower(0.2);
+            turretMotorLeft.setPower(0.2);
         }
-        
+
     }
 }
