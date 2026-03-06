@@ -19,20 +19,23 @@ public class uV {
     // Outtake
 
     // PIDF values for odometry tracking
-    public static double odometryKp = 0.00023;
+    public static double odometryKp = 0.006;
     public static double odometryKi = 0.000321;
-    public static double odometryKd = 0.000027;
-    public static double odometryKf = 0.06;
+    public static double odometryKd = 0.0005;
+    public static double odometryKf = 0.07;
 
     // PIDF values for limelight tracking
-    public static double limelightKp = 0.0023;
-    public static double limelightKi = 0;
-    public static double limelightKd = 0.002;
-    public static double limelightKf = 0.07;
+    public static double limelightKp = 0.0053;
+    public static double limelightKi = 0.00321;
+    public static double limelightKd = 0.0019;
+    public static double limelightKf = 0.006;
 
     // lob positions
     public static double lobMax = 1;
     public static double lobMin = 0.25;
+
+    public static double tuningVel = 1400;
+    public static double tuningLob = 1;
 
 
     // SHOOT ASSIST

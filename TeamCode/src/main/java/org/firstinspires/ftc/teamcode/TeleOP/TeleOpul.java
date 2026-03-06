@@ -80,6 +80,7 @@ public class TeleOpul extends OpMode {
     @Override
     public void init() {
 
+
         robot = new Robot(hardwareMap);
 
         state = State.INTAKE;
@@ -88,7 +89,8 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.startTeleOpDrive(true);
 
-        Robot.follower.setStartingPose(new Pose(0, 0));
+        Pose startPoseBlue = new Pose(56, 8, Math.toRadians(90));
+        Robot.follower.setPose(startPoseBlue);
 
 
         robot.shooter.openGate();
@@ -134,6 +136,10 @@ public class TeleOpul extends OpMode {
         telemetry.addData("turret pivot power", robot.shooter.turretPivot.getPower());
         telemetry.addData("result", robot.shooter.ll.getLatestResult());
 
+        telemetry.addData("DISTANTA", robot.shooter.llDistance);
+        dashboardTelemetry.addData("DISTANTA", robot.shooter.llDistance);
+
+        dashboardTelemetry.update();
         telemetry.update();
 
     }
