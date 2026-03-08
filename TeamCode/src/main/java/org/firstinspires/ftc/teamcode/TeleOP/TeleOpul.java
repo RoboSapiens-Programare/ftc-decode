@@ -18,6 +18,8 @@ public class TeleOpul extends OpMode {
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
     private final ElapsedTime stateTimer = new ElapsedTime();
+    private int loopCount = 0;
+
 
     enum State {
         INTAKE,
@@ -32,6 +34,13 @@ public class TeleOpul extends OpMode {
 
 
         robot.shooter.shooting = newState == State.OUTTAKE;
+        if (newState == State.OUTTAKE) {
+            // Reseteaza PID flywheel si ramp — previne integral windup
+            robot.shooter.resetShooterPID();
+        } else {
+            // Inchide gate la intrarea in INTAKE
+            robot.shooter.closeGate();
+        }
     }
 
     private void handleIntake() {
@@ -65,11 +74,16 @@ public class TeleOpul extends OpMode {
 //            robot.intake.shoot();
 //        }
 
-        if (gamepad1.right_trigger > 0.1) {
+        // În handleOuttake() — TeleOp
+        if (gamepad1.right_trigger > 0.1
+                && robot.shooter.velocityReached())
+//                && robot.shooter.isAimed())
+                {
             robot.intake.shoot();
         } else {
             robot.intake.rest();
         }
+
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             changeState(State.INTAKE);
@@ -122,8 +136,6 @@ public class TeleOpul extends OpMode {
 
         robot.intake.updateHeadlight();
 
-        telemetry.addData("encoder 1", robot.shooter.turretMotorRight.getCurrentPosition());
-        telemetry.addData("encoder 2", robot.shooter.turretMotorLeft.getVelocity());
 
         Robot.follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
@@ -133,14 +145,22 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.update();
         robot.shooter.update();
-        telemetry.addData("turret pivot power", robot.shooter.turretPivot.getPower());
-        telemetry.addData("result", robot.shooter.ll.getLatestResult());
-
-        telemetry.addData("DISTANTA", robot.shooter.llDistance);
-        dashboardTelemetry.addData("DISTANTA", robot.shooter.llDistance);
-
-        dashboardTelemetry.update();
-        telemetry.update();
+        loopCount++;
+        if (loopCount % 5 == 0) {
+            dashboardTelemetry.addData("State", state);
+            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+            dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
+            dashboardTelemetry.update();
+            dashboardTelemetry.addData("Track State", robot.shooter.trackState);
+            dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
+            dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
+            dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
+            dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
+            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+            dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
+            dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
+            dashboardTelemetry.update();
+        }
 
     }
 }

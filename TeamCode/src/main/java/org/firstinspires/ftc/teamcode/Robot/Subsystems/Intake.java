@@ -82,6 +82,22 @@ public class Intake extends Subsystem {
         }
     }
 
+    public void pullBallsHard() {
+        if (sensorOuttake.getDistance(DistanceUnit.CM) < 8)
+        {
+            rollerTwo.setPower(0);
+        } else {
+            rollerTwo.setPower(uV.rollerTwoP);
+        }
+
+        if (sensorMid.getDistance(DistanceUnit.CM) < 8 && sensorIntake.getDistance(DistanceUnit.CM) < 8)
+        {
+            rollerOne.setPower(0.8);
+        } else {
+            rollerOne.setPower(uV.rollerOneP);
+        }
+    }
+
     public void spitBalls() {
         rollerOne.setPower(-uV.rollerOneP);
         rollerTwo.setPower(-uV.rollerTwoP);
