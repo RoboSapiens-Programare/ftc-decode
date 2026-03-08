@@ -123,6 +123,7 @@ public class Shooter extends Subsystem {
         turretMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         turretEncoder = hwMap.get(DcMotorEx.class, "rollerOne");
+        turretEncoder.setDirection(DcMotorSimple.Direction.REVERSE);
         turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -142,6 +143,8 @@ public class Shooter extends Subsystem {
         odometryTrackingController.setTolerance(14);
 
         turretPivot = hwMap.get(CRServo.class, "turretPivot");
+
+        turretPivot.setDirection(DcMotorSimple.Direction.REVERSE);
         gate        = hwMap.get(Servo.class, "gateServo");
     }
 
@@ -158,18 +161,33 @@ public class Shooter extends Subsystem {
         double actual = -turretMotorLeft.getVelocity();
         if(llDistance < 80)
         {
-            return Math.abs(actual - targetVelocity) < 150;
+            if (actual - targetVelocity > -80 && actual - targetVelocity < 0)
+            {
+                return true;
+            }
+            if (actual - targetVelocity < 120)
+            {
+                return true;
+            }
+            // actual e mai mare -> actual-target negativ
         } else {
-            return Math.abs(actual - targetVelocity) < 40;
+            return Math.abs(actual - targetVelocity) < 41;
         }
+        return false;
     }
 
     // =========================================================
     // IS AIMED
     // =========================================================
     public boolean isAimed() {
-//        return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
-        return true;
+        if (llDistance<60)
+        {
+            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG+2.5;
+        }
+        else {
+            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG+2;
+        }
+//        return true;
     }
 
     // =========================================================
@@ -280,10 +298,18 @@ public class Shooter extends Subsystem {
                     if (llStaleCount < LL_STALE_THRESHOLD && Math.abs(tx) < LL_THRESHOLD_DEG) {
                         useLimelight = true;
 
-                        limelightTrackingController.kP = uV.limelightKp;
-                        limelightTrackingController.kI = uV.limelightKi;
-                        limelightTrackingController.kD = uV.limelightKd;
-                        limelightTrackingController.kF = uV.limelightKf;
+                        if (llDistance>80)
+                        {
+                            limelightTrackingController.kP = uV.limelightKpF;
+                            limelightTrackingController.kI = uV.limelightKiF;
+                            limelightTrackingController.kD = uV.limelightKdF;
+                            limelightTrackingController.kF = uV.limelightKfF;
+                        } else {
+                            limelightTrackingController.kP = uV.limelightKp;
+                            limelightTrackingController.kI = uV.limelightKi;
+                            limelightTrackingController.kD = uV.limelightKd;
+                            limelightTrackingController.kF = uV.limelightKf;
+                        }
 
                         double txCorrected = tx + LL_TURRET_OFFSET_DEG;
                         output         = limelightTrackingController.updatePID(txCorrected);
@@ -324,10 +350,20 @@ public class Shooter extends Subsystem {
 
             turretErrorRad = errorRad;
 
-            odometryTrackingController.kP = uV.odometryKp;
-            odometryTrackingController.kI = uV.odometryKi;
-            odometryTrackingController.kD = uV.odometryKd;
-            odometryTrackingController.kF = uV.odometryKf;
+            if (llDistance>80)
+            {
+                odometryTrackingController.kP = uV.odometryKpF;
+                odometryTrackingController.kI = uV.odometryKiF;
+                odometryTrackingController.kD = uV.odometryKdF;
+                odometryTrackingController.kF = uV.odometryKfF;
+            } else {
+                odometryTrackingController.kP = uV.odometryKp;
+                odometryTrackingController.kI = uV.odometryKi;
+                odometryTrackingController.kD = uV.odometryKd;
+                odometryTrackingController.kF = uV.odometryKf;
+            }
+
+
 
             // Semn pastrat exact ca in versiunea originala
             output       = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));

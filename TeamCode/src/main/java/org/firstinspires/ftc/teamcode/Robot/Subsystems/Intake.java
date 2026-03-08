@@ -92,7 +92,7 @@ public class Intake extends Subsystem {
 
         if (sensorMid.getDistance(DistanceUnit.CM) < 8 && sensorIntake.getDistance(DistanceUnit.CM) < 8)
         {
-            rollerOne.setPower(0.8);
+            rollerOne.setPower(0.55);
         } else {
             rollerOne.setPower(uV.rollerOneP);
         }

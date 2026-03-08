@@ -157,6 +157,8 @@ public class TeleOpul extends OpMode {
             dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
             dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
             dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
+            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
+            dashboardTelemetry.addData("heading", robot.follower.getHeading());
             dashboardTelemetry.update();
         }
 

@@ -20,6 +20,7 @@ public class AutoFar9Blu extends OpMode {
 
 
     private int pathState; // Current autonomous path state (state machine)
+    int loopCount=0;
     private ElapsedTime pathTimer; // Timer for path state machine
     private boolean singleton;
     private Paths paths; // Paths defined in the Paths class
@@ -46,7 +47,7 @@ public class AutoFar9Blu extends OpMode {
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
-        Robot.follower.setMaxPower(0.8);
+        Robot.follower.setMaxPower(0.75);
     }
 
     @Override
@@ -67,20 +68,25 @@ public class AutoFar9Blu extends OpMode {
         pathState = autonomousPathUpdate(); // Update autonomous state machine
 
 
-        // Log values to Panels and Driver Station
-        dashboardTelemetry.addData("Path State", pathState);
-        dashboardTelemetry.addData("X", Robot.follower.getPose().getX());
-        dashboardTelemetry.addData("Y", Robot.follower.getPose().getY());
-        dashboardTelemetry.addData("Heading", Robot.follower.getPose().getHeading());
 
-        telemetry.addData("velo", robot.shooter.turretMotorRight.getVelocity());
-
-        telemetry.addData("empty", robot.intake.isEmpty());
-
-//        robot.shooter.turretMotorLeft.setPower(0.8);
-//        robot.shooter.turretMotorRight.setPower(0.8);
-
-//        robot.shooter.lobServo.setPosition(uV.angleFar);
+        loopCount++;
+        if (loopCount % 5 == 0) {
+            dashboardTelemetry.addData("Path State", pathState);
+            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+            dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
+            dashboardTelemetry.update();
+            dashboardTelemetry.addData("Track State", robot.shooter.trackState);
+            dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
+            dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
+            dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
+            dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
+            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+            dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
+            dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
+            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
+            dashboardTelemetry.addData("heading", robot.follower.getHeading());
+            dashboardTelemetry.update();
+        }
 
 
 
@@ -106,7 +112,7 @@ public class AutoFar9Blu extends OpMode {
                             new BezierCurve(
                                     new Pose(56.503, 8.336),
                                     new Pose(64.448, 39.776),
-                                    new Pose(26.797, 35.664)
+                                    new Pose(20.797, 35.664)
                             )
                     )
                     .setTangentHeadingInterpolation()
@@ -115,11 +121,11 @@ public class AutoFar9Blu extends OpMode {
             shoot1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(26.797, 35.664),
+                                    new Pose(22.797, 35.664),
                                     new Pose(60.287, 12.965)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(115))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(140))
                     .build();
 
             grab2 = follower.pathBuilder()
@@ -141,21 +147,19 @@ public class AutoFar9Blu extends OpMode {
                                     new Pose(60.287, 12.965)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(115))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(140))
                     .build();
-            follower.setMaxPower(0.6);
             grab3 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
                                     new Pose(60.287, 12.965),
                                     new Pose(65.126, 91.832),
                                     new Pose(52.273, 83.990),
-                                    new Pose(24.002, 83.990)
+                                    new Pose(26.002, 83.990)
                             )
                     )
                     .setTangentHeadingInterpolation()
                     .build();
-            follower.setMaxPower(0.8);
             shoot3 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
@@ -171,6 +175,9 @@ public class AutoFar9Blu extends OpMode {
     public int autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+
+                Robot.follower.followPath(paths.grab1);
+                setPathState(1);
                 // shoot preload
                 if (!pathingOnly)
                 {
@@ -187,7 +194,7 @@ public class AutoFar9Blu extends OpMode {
                     else robot.intake.rest();
                     if (robot.intake.isEmpty())
                     {
-                        if (timer.seconds()>1)
+                        if (timer.seconds()>2)
                         {
                             Robot.follower.followPath(paths.grab1);
                             setPathState(1);
@@ -222,27 +229,31 @@ public class AutoFar9Blu extends OpMode {
                 // shoot 1
                 if (!pathingOnly)
                 {
-                    robot.shooter.openGate();
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
+                    robot.shooter.openGate();
                     if (singleton)
                     {
                         robot.intake.rest();
+                        timer.reset();
                         singleton = false;
                     }
-                    if (timer.seconds()>1 && robot.shooter.velocityReached())
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() && robot.shooter.isAimed())
                     {
-                        robot.intake.shoot();
+                        if (robot.shooter.velocityReached())
+                        {
+                            robot.intake.shoot();
+                        }
                     }
                     else {
                         robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>4)
+                        if (timer2.seconds()>2)
                         {
                             Robot.follower.followPath(paths.grab2);
                             robot.shooter.shooting = false;
@@ -279,27 +290,32 @@ public class AutoFar9Blu extends OpMode {
                 // shoot 2
                 if (!pathingOnly)
                 {
-                    robot.shooter.openGate();
+
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
+                    robot.shooter.openGate();
                     if (singleton)
                     {
                         robot.intake.rest();
+                        timer.reset();
                         singleton = false;
                     }
-                    if (timer.seconds()>1 && robot.shooter.velocityReached())
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() && robot.shooter.isAimed())
                     {
-                        robot.intake.shoot();
+                        if (robot.shooter.velocityReached())
+                        {
+                            robot.intake.shoot();
+                        }
                     }
                     else {
                         robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>4)
+                        if (timer2.seconds()>2)
                         {
                             Robot.follower.followPath(paths.grab3);
                             robot.shooter.shooting = false;
@@ -335,21 +351,19 @@ public class AutoFar9Blu extends OpMode {
             case 6:
                 if (!pathingOnly)
                 {
-                    robot.shooter.openGate();
+
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
-                    dashboardTelemetry.addData("ready to shoot nigga", "ok");
-                    dashboardTelemetry.addData("velocity current", -robot.shooter.turretMotorLeft.getVelocity());
-                    dashboardTelemetry.addData("target vel", robot.shooter.targetVelocity);
                     if (singleton)
                     {
                         robot.intake.rest();
+                        robot.shooter.openGate();
                         singleton = false;
                     }
-                    if (timer.seconds()>1 && robot.shooter.velocityReached())
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
                     {
                         robot.intake.shoot();
                     }
@@ -358,7 +372,7 @@ public class AutoFar9Blu extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>4)
+                        if (timer2.seconds()>0.4)
                         {
 //                            Robot.follower.followPath(paths.grab2);
                             robot.shooter.shooting = false;
