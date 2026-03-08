@@ -75,10 +75,8 @@ public class TeleOpul extends OpMode {
 //        }
 
         // În handleOuttake() — TeleOp
-        if (gamepad1.right_trigger > 0.1
-                && robot.shooter.velocityReached())
-//                && robot.shooter.isAimed())
-                {
+        if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
+        {
             robot.intake.shoot();
         } else {
             robot.intake.rest();

@@ -9,7 +9,7 @@ public class uV {
     public static double intakeDown = 0.44;
 
     // Gate positions
-    public static double gateOpen = 0.8;
+    public static double gateOpen = 1;
     public static double gateClosed = 0.7;
 
     // Transfer
@@ -19,14 +19,14 @@ public class uV {
     // Outtake
 
     // PIDF values for odometry tracking
-    public static double odometryKp = 0.005;
-    public static double odometryKi = 0.000321;
+    public static double odometryKp = 0.0025;
+    public static double odometryKi = 0.0002;
     public static double odometryKd = 0.0000002;
     public static double odometryKf = 0.05;
 
     // PIDF values for limelight tracking
     public static double limelightKp = 0.003;
-    public static double limelightKi = 0.0002;
+    public static double limelightKi = 0.0003;
     public static double limelightKd = 0.00000002;
     public static double limelightKf = 0.05;
 

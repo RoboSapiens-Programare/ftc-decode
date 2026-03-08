@@ -55,14 +55,12 @@ public class Shooter extends Subsystem {
     // =========================================================
     // POLINOAME PENTRU RPM SI LOB (Grad 2: A*x^2 + B*x + C)
     // =========================================================
-    public static double velA = -0.01905;
-    public static double velB =  10.762;
-    public static double velC =  822.86;
-
-    public static double lobA =  0.000370;
-    public static double lobB = -0.09624;
-    public static double lobC =  5.253;
-
+    public static double velA =  0.0;
+    public static double velB =  4.444;
+    public static double velC =  1140.2;
+    public static double lobA =  0.0;
+    public static double lobB = -0.01364;
+    public static double lobC =  1.0682;
     // =========================================================
     // TRACKING & SOTM CONFIG
     // =========================================================
@@ -158,14 +156,20 @@ public class Shooter extends Subsystem {
     // =========================================================
     public boolean velocityReached() {
         double actual = -turretMotorLeft.getVelocity();
-        return Math.abs(actual - targetVelocity) < 40;
+        if(llDistance < 80)
+        {
+            return Math.abs(actual - targetVelocity) < 150;
+        } else {
+            return Math.abs(actual - targetVelocity) < 40;
+        }
     }
 
     // =========================================================
     // IS AIMED
     // =========================================================
     public boolean isAimed() {
-        return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
+//        return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
+        return true;
     }
 
     // =========================================================
@@ -187,6 +191,10 @@ public class Shooter extends Subsystem {
 
     private double computeVelocity(double distance) {
         double velocity = (velA * distance * distance) + (velB * distance) + velC;
+        if (distance>80)
+        {
+            return 1880;
+        }
         if (velocity <= 0)    return 0;
         if (velocity >= 2300) return 2300;
         return velocity;
@@ -328,7 +336,7 @@ public class Shooter extends Subsystem {
         }
 
         output = Math.max(-1.0, Math.min(1.0, output));
-//        turretPivot.setPower(output);
+        turretPivot.setPower(output);
 
         return output;
     }
@@ -348,7 +356,9 @@ public class Shooter extends Subsystem {
         if (shooting) {
             track();
 
+
             targetVelocity = computeVelocity(llDistance);
+//            targetVelocity = 0;
             pidfController.setSetpoint(targetVelocity);
             lobServo.setPosition(computeLob(llDistance));
 
