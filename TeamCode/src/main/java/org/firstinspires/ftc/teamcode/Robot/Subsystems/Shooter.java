@@ -65,9 +65,9 @@ public class Shooter extends Subsystem {
     // TRACKING & SOTM CONFIG
     // =========================================================
     public static double LL_THRESHOLD_DEG     = 20.0;
-    public static double LL_TURRET_OFFSET_DEG =  0.0;
+    public double LL_TURRET_OFFSET_DEG =  0.0;
     public static double BALL_SPEED_INCHES    = 250.0;
-    public static double TURRET_AIM_THRESHOLD_DEG = 3.0;
+    public static double TURRET_AIM_THRESHOLD_DEG = 3;
 
     // =========================================================
     // HYSTERESIS LIMELIGHT
@@ -182,7 +182,7 @@ public class Shooter extends Subsystem {
     public boolean isAimed() {
         if (llDistance<60)
         {
-            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG+2.5;
+            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
         }
         else {
             return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG+2;

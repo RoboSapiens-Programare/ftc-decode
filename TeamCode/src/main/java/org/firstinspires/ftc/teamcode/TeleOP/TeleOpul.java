@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -90,6 +91,12 @@ public class TeleOpul extends OpMode {
     }
 
     @Override
+    public void stop()
+    {
+        Robot.transitionPose = Robot.follower.getPose();
+    }
+
+    @Override
     public void init() {
 
 
@@ -101,22 +108,30 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.startTeleOpDrive(true);
 
-        Pose startPoseBlue = new Pose(56, 8, Math.toRadians(90));
-        Robot.follower.setPose(startPoseBlue);
-
+        gamepad1.setLedColor(0, 255, 0, 10);
 
         robot.shooter.openGate();
     }
 
+    @Override
+    public void start()
+    {
+        Robot.follower.setPose(Robot.transitionPose);
+    }
+
     public void init_loop()
     {
+        Pose startPoseBlue = new Pose(56, 8, Math.toRadians(90));
+        Pose startPoseRed = new Pose(88, 8, Math.toRadians(90));
         if (gamepad1.options)
         {
             Robot.alliance = Robot.Alliance.RED;
-            gamepad1.setLedColor(255, 0,0,1000);
+            Robot.follower.setPose(startPoseRed);
+            gamepad1.setLedColor(255, 0,0,10000);
         } else if (gamepad1.share) {
             Robot.alliance = Robot.Alliance.BLUE;
-            gamepad1.setLedColor(0, 0,255,1000);
+            Robot.follower.setPose(startPoseBlue);
+            gamepad1.setLedColor(0, 0,255,10000);
         }
     }
 
@@ -145,10 +160,12 @@ public class TeleOpul extends OpMode {
         robot.shooter.update();
         loopCount++;
         if (loopCount % 5 == 0) {
+            dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
+            dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
+            dashboardTelemetry.addData("Sensor3", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
             dashboardTelemetry.addData("State", state);
             dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
             dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
-            dashboardTelemetry.update();
             dashboardTelemetry.addData("Track State", robot.shooter.trackState);
             dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
             dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
