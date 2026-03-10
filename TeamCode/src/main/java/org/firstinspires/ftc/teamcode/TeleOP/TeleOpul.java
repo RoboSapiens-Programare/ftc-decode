@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -20,6 +22,7 @@ public class TeleOpul extends OpMode {
 
     private final ElapsedTime stateTimer = new ElapsedTime();
     private int loopCount = 0;
+    private boolean isAimingChassis = false;
 
 
     enum State {
@@ -28,6 +31,15 @@ public class TeleOpul extends OpMode {
     }
 
     private State state = State.INTAKE;
+
+    private void aimChassis(Pose target) {
+        Pose current = Robot.follower.getPose();
+        PathChain path = Robot.follower.pathBuilder()
+                .addPath(new BezierLine(current, target))
+                .setLinearHeadingInterpolation(current.getHeading(), target.getHeading())
+                .build();
+        Robot.follower.followPath(path, true);
+    }
 
     private void changeState(State newState) {
         state = newState;
@@ -58,6 +70,7 @@ public class TeleOpul extends OpMode {
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
+            isAimingChassis = true;
             changeState(State.OUTTAKE);
         }
     }
@@ -67,15 +80,7 @@ public class TeleOpul extends OpMode {
 
         robot.shooter.openGate();
 
-//        robot.shooter.track();
 
-//        if (robot.shooter.velocityReached()
-//                && robot.shooter.isShootReady()
-//                && gamepad1.right_trigger > 0.1) {
-//            robot.intake.shoot();
-//        }
-
-        // În handleOuttake() — TeleOp
         if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
         {
             robot.intake.shoot();
@@ -150,6 +155,16 @@ public class TeleOpul extends OpMode {
 
         robot.intake.updateHeadlight();
 
+        if (isAimingChassis && !((Math.abs(gamepad1.left_stick_x)>0.1)||(Math.abs(gamepad1.left_stick_y)>0.1)||(Math.abs(gamepad1.right_stick_x)>0.1)))
+        {
+            aimChassis(new Pose(Robot.follower.getPose().getX(), Robot.follower.getPose().getY(), robot.shooter.getTargetFieldAngleRad()));
+        }
+
+        Robot.follower.update();
+
+        robot.shooter.turretLocked = Robot.follower.isBusy();
+
+        robot.shooter.update();
 
         Robot.follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
@@ -157,8 +172,6 @@ public class TeleOpul extends OpMode {
                 -gamepad1.right_stick_x - 0.1 * gamepad2.right_stick_x,
                 true);
 
-        Robot.follower.update();
-        robot.shooter.update();
         loopCount++;
         if (loopCount % 5 == 0) {
             dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
@@ -176,7 +189,7 @@ public class TeleOpul extends OpMode {
             dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
             dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
             dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
-            dashboardTelemetry.addData("heading", robot.follower.getHeading());
+            dashboardTelemetry.addData("Pose", robot.follower.getPose());
             dashboardTelemetry.update();
         }
 

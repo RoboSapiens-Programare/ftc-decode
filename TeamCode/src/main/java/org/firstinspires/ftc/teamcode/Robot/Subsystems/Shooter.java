@@ -91,6 +91,10 @@ public class Shooter extends Subsystem {
     public double  turretOutput   = 0.0;
     public static double targetVelocity = 1300;
 
+    // hazu meu gen
+    public boolean turretLocked = false;
+    private double lockedTurretAngleRad = 0.0;
+
     // =========================================================
     // CONTROLLERE PID
     // =========================================================
@@ -172,6 +176,15 @@ public class Shooter extends Subsystem {
             return Math.abs(actual - targetVelocity) < 41;
         }
     }
+    public void lockTurret() {
+        lockedTurretAngleRad = (turretEncoder.getCurrentPosition()
+                / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+        turretLocked = true;
+    }
+
+    public void unlockTurret() {
+        turretLocked = false;
+    }
 
     // =========================================================
     // IS AIMED
@@ -242,10 +255,34 @@ public class Shooter extends Subsystem {
         return new double[]{targetAngleRad, rawDist};
     }
 
+    public double getTargetFieldAngleRad() {
+        Pose pose = Robot.follower.getPose();
+        double vx = Robot.follower.getVelocity().getXComponent();
+        double vy = Robot.follower.getVelocity().getYComponent();
+        double heading = pose.getHeading();
+        double vxField = vx * Math.cos(heading) - vy * Math.sin(heading);
+        double vyField = vx * Math.sin(heading) + vy * Math.cos(heading);
+        double[] sotm = computeVirtualGoal(pose.getX(), pose.getY(), vxField, vyField);
+        return sotm[0]; // unghiul in field frame spre virtual goal
+    }
+
     // =========================================================
     // TRACK — turret tracking principal
     // =========================================================
     public double track() {
+
+        if (turretLocked) {
+            double currentAngleRad = (turretEncoder.getCurrentPosition()
+                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+            double errorRad = lockedTurretAngleRad - currentAngleRad;
+            while (errorRad >  Math.PI) errorRad -= 2.0 * Math.PI;
+            while (errorRad < -Math.PI) errorRad += 2.0 * Math.PI;
+            turretErrorRad = errorRad;
+            double output = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
+            output = Math.max(-1.0, Math.min(1.0, output));
+            turretPivot.setPower(output);
+            return output;
+        }
 
         PIDFController odometryTrackingController =
                 new PIDFController(uV.odometryKp, uV.odometryKi, uV.odometryKd, uV.odometryKf);
