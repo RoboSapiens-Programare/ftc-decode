@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto informatie 1", group = "0. Auto")
+@Autonomous(name = "Auto C 'Artemis'", group = "0. Auto")
 public class AutoInfo1 extends OpMode {
 
 

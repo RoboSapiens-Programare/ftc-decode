@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto F 9 blue", group = "0. Auto")
+@Autonomous(name = "Auto F 'Chronos'", group = "0. Auto")
 public class AutoFar9Blu extends OpMode {
 
 
