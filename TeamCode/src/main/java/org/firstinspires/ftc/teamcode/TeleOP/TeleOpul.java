@@ -83,7 +83,6 @@ public class TeleOpul extends OpMode {
             robot.intake.rest();
         }
 
-
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             changeState(State.INTAKE);
 
@@ -126,10 +125,12 @@ public class TeleOpul extends OpMode {
         if (gamepad1.options)
         {
             Robot.alliance = Robot.Alliance.RED;
+            Robot.transitionPose =startPoseRed;
             Robot.follower.setPose(startPoseRed);
             gamepad1.setLedColor(255, 0,0,10000);
         } else if (gamepad1.share) {
             Robot.alliance = Robot.Alliance.BLUE;
+            Robot.transitionPose =startPoseBlue;
             Robot.follower.setPose(startPoseBlue);
             gamepad1.setLedColor(0, 0,255,10000);
         }

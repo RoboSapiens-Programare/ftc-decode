@@ -85,6 +85,7 @@ public class Shooter extends Subsystem {
     // =========================================================
     public double  turretErrorRad = 0.0;
     public boolean shooting       = false;
+    public boolean trackCurrent = false;
     public double  llDistance     = 0;
     public String  trackState     = "IDLE";
     public double  turretOutput   = 0.0;
@@ -161,19 +162,15 @@ public class Shooter extends Subsystem {
         double actual = -turretMotorLeft.getVelocity();
         if(llDistance < 80)
         {
-            if (actual - targetVelocity > -80 && actual - targetVelocity < 0)
-            {
-                return true;
-            }
-            if (actual - targetVelocity < 120)
-            {
-                return true;
-            }
+//            if (actual - targetVelocity > -80 && actual - targetVelocity < 0)
+//            {
+//                return true;
+//            }
+                return (Math.abs(actual - targetVelocity ))<120;
             // actual e mai mare -> actual-target negativ
         } else {
             return Math.abs(actual - targetVelocity) < 41;
         }
-        return false;
     }
 
     // =========================================================
@@ -312,7 +309,9 @@ public class Shooter extends Subsystem {
                         }
 
                         double txCorrected = tx + LL_TURRET_OFFSET_DEG;
-                        output         = limelightTrackingController.updatePID(txCorrected);
+
+                            output = limelightTrackingController.updatePID(txCorrected);
+
                         turretErrorRad = Math.toRadians(txCorrected);
                         turretOutput   = output;
                         trackState     = "LIMELIGHT tx=" + tx;
@@ -321,6 +320,8 @@ public class Shooter extends Subsystem {
                 }
             }
         }
+
+
 
         // -------------------------------------------------------
         // 3. ODOMETRIE — fallback cand LL nu vede sau e stale
@@ -366,12 +367,15 @@ public class Shooter extends Subsystem {
 
 
             // Semn pastrat exact ca in versiunea originala
-            output       = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
+                output       = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
+
             turretOutput = output; // actualizat DUPA calculul output
             trackState   = "ODOMETRY";
         }
 
+
         output = Math.max(-1.0, Math.min(1.0, output));
+
         turretPivot.setPower(output);
 
         return output;

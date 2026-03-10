@@ -34,7 +34,7 @@ public class AutoInfo1 extends OpMode {
     private final ElapsedTime autoTimer = new ElapsedTime();
 
     private byte gateLoops = 0;
-    private final byte targetGateLoops = 3;
+    private final byte targetGateLoops = 1;
 
     private boolean singletonRest = true;
 
@@ -75,7 +75,7 @@ public class AutoInfo1 extends OpMode {
 
         Robot.follower.update(); // Update Pedro Pathing
         robot.intake.update();
-//        robot.shooter.update();
+        robot.shooter.update();
         pathState = autonomousPathUpdate(); // Update autonomous state machine
 
 
@@ -113,16 +113,20 @@ public class AutoInfo1 extends OpMode {
     public static class Paths {
         public PathChain shootPreload;
         public PathChain grab2;
+        public PathChain openGate2;
         public PathChain shoot2;
         public PathChain gate1;
+        public PathChain gate1p;
         public PathChain shoot3;
+        public PathChain grab3;
+        public PathChain shoot4;
 
         public Paths(Follower follower) {
             shootPreload = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
                                     new Pose(20.923, 123.133),
-                                    new Pose(61.189, 88.168)
+                                    new Pose(56.490, 93.538)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(144))
@@ -131,11 +135,20 @@ public class AutoInfo1 extends OpMode {
             grab2 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(61.189, 88.168),
-                                    new Pose(58.070, 56.699),
-                                    new Pose(12.350, 62.038),
-                                    new Pose(21.552, 53.073),
-                                    new Pose(16.545, 69.280)
+                                    new Pose(56.490, 93.538),
+                                    new Pose(77.371, 54.378),
+                                    new Pose(21.245, 57.699)
+                            )
+                    )
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .build();
+
+            openGate2 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    new Pose(21.245, 57.699),
+                                    new Pose(47.173, 62.168),
+                                    new Pose(18.752, 73.028)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -143,9 +156,10 @@ public class AutoInfo1 extends OpMode {
 
             shoot2 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(16.545, 69.280),
-                                    new Pose(55.531, 89.867)
+                            new BezierCurve(
+                                    new Pose(18.752, 73.028),
+                                    new Pose(54.673, 57.524),
+                                    new Pose(55.364, 94.902)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
@@ -154,22 +168,55 @@ public class AutoInfo1 extends OpMode {
             gate1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(55.531, 89.867),
-                                    new Pose(37.161, 63.811),
-                                    new Pose(11.028, 59.378)
+                                    new Pose(55.364, 94.902),
+                                    new Pose(47.734, 62.636),
+                                    new Pose(18.580, 66.594)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(140))
+                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(160))
+                    .build();
+
+            gate1p = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    new Pose(18.580, 66.594),
+                                    new Pose(14.722, 60.617),
+                                    new Pose(11.521, 58.668)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(160), Math.toRadians(110))
                     .build();
 
             shoot3 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(11.028, 59.378),
-                                    new Pose(55.650, 89.678)
+                            new BezierCurve(
+                                    new Pose(11.521, 58.668),
+                                    new Pose(48.192, 62.346),
+                                    new Pose(55.483, 94.545)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(144))
+                    .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(144))
+                    .build();
+
+            grab3 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    new Pose(55.483, 94.545),
+                                    new Pose(67.185, 82.510),
+                                    new Pose(26.552, 84.084)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                    .build();
+
+            shoot4 = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(26.552, 84.084),
+                                    new Pose(47.517, 102.175)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
                     .build();
         }
     }
@@ -187,10 +234,10 @@ public class AutoInfo1 extends OpMode {
                         singleton = false;
                     }
                 }
+                robot.shooter.update();
+                robot.shooter.shooting = true;
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
-                    robot.shooter.update();
-                    robot.shooter.shooting = true;
                     if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
                     {
                         robot.intake.shoot();
@@ -204,7 +251,7 @@ public class AutoInfo1 extends OpMode {
                         {
                             Robot.follower.followPath(paths.grab2);
                             robot.shooter.shooting = false;
-                            setPathState(1);
+                            setPathState(101);
                         }
                     } else {
                         timer2.reset();
@@ -213,8 +260,7 @@ public class AutoInfo1 extends OpMode {
                     timer.reset();
                 }
                 break;
-            case 1:
-                // go to grab 1
+            case 101:
                 if (!pathingOnly)
                 {
                     robot.shooter.shooting = false;
@@ -223,21 +269,35 @@ public class AutoInfo1 extends OpMode {
                 }
                 if (!Robot.follower.isBusy())
                 {
+                    Robot.follower.followPath(paths.openGate2);
+                    Robot.follower.setMaxPower(0.8);
+                    setPathState(1);
+                }
+                break;
+            case 1:
+                // go to grab 1
+                if (!pathingOnly)
+                {
+                    robot.intake.rest();
+                }
+                if (!Robot.follower.isBusy())
+                {
                     Robot.follower.followPath(paths.shoot2);
+                    Robot.follower.setMaxPower(0.9);
                     setPathState(2);
                 }
                 break;
             case 2:
+                if (singleton)
+                {
+                    robot.intake.rest();
+                    robot.shooter.openGate();
+                    singleton = false;
+                }
+                robot.shooter.update();
+                robot.shooter.shooting = true;
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
-                    robot.shooter.update();
-                    robot.shooter.shooting = true;
-                    if (singleton)
-                    {
-                        robot.intake.rest();
-                        robot.shooter.openGate();
-                        singleton = false;
-                    }
                     if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
                     {
                         robot.intake.shoot();
@@ -250,14 +310,30 @@ public class AutoInfo1 extends OpMode {
                         if (timer2.seconds()>0.4)
                         {
                             Robot.follower.followPath(paths.gate1);
+                            Robot.follower.setMaxPower(1);
                             robot.shooter.shooting = false;
-                            setPathState(3);
+                            setPathState(301);
                         }
                     } else {
                         timer2.reset();
                     }
-                } else {
+                }
+                else {
                     timer.reset();
+                }
+                break;
+            case 301:
+                if (!pathingOnly)
+                {
+                    robot.intake.pullBallsHard();
+                    robot.shooter.shooting = false;
+                    robot.shooter.closeGate();
+                }
+                if (!Robot.follower.isBusy())
+                {
+                    Robot.follower.followPath(paths.gate1p);
+                    Robot.follower.setMaxPower(1);
+                        setPathState(3);
                 }
                 break;
             case 3:
@@ -268,17 +344,99 @@ public class AutoInfo1 extends OpMode {
                     robot.shooter.shooting = false;
                     robot.shooter.closeGate();
                 }
-                if (!Robot.follower.isBusy())
+                if (!Robot.follower.isBusy() && autoTimer.seconds() > 2)
                 {
                     Robot.follower.followPath(paths.shoot3);
+                    Robot.follower.setMaxPower(0.9);
                     if (gateLoops<targetGateLoops)
                     {
                         gateLoops++;
                         setPathState(2);
                     } else {
-                        setPathState(-1);
+                        setPathState(4);
                     }
 
+                }
+                break;
+            case 4:
+                if (singleton)
+                {
+                    robot.intake.rest();
+                    robot.shooter.openGate();
+                    singleton = false;
+                }
+                robot.shooter.update();
+                robot.shooter.shooting = true;
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
+                {
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
+                    {
+                        robot.intake.shoot();
+                    }
+                    else {
+                        robot.intake.rest();
+                    }
+                    if (robot.intake.isEmpty())
+                    {
+                        if (timer2.seconds()>0.4)
+                        {
+                            Robot.follower.followPath(paths.grab3);
+//                            robot.shooter.shooting = false;
+                            setPathState(5);
+                        }
+                    } else {
+                        timer2.reset();
+                    }
+                }
+                else {
+                    timer.reset();
+                }
+                break;
+            case 5:
+                // get spike 3
+                if (!pathingOnly)
+                {
+                    robot.intake.pullBallsHard();
+                    robot.shooter.shooting = false;
+                    robot.shooter.closeGate();
+                }
+                if (!Robot.follower.isBusy())
+                {
+                    Robot.follower.followPath(paths.shoot4);
+                        setPathState(6);
+                }
+                break;
+            case 6:
+                if (singleton)
+                {
+                    robot.intake.rest();
+                    robot.shooter.openGate();
+                    singleton = false;
+                }
+                robot.shooter.update();
+                robot.shooter.shooting = true;
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
+                {
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
+                    {
+                        robot.intake.shoot();
+                    }
+                    else {
+                        robot.intake.rest();
+                    }
+                    if (robot.intake.isEmpty())
+                    {
+                        if (timer2.seconds()>0.4)
+                        {
+                            robot.shooter.shooting = false;
+                            setPathState(-1);
+                        }
+                    } else {
+                        timer2.reset();
+                    }
+                }
+                else {
+                    timer.reset();
                 }
                 break;
         }
@@ -288,6 +446,7 @@ public class AutoInfo1 extends OpMode {
     public void setPathState(int pState) {
         timer.reset();
         timer2.reset();
+        autoTimer.reset();
         singletonRest = true;
         singleton = true;
         pathState = pState;
