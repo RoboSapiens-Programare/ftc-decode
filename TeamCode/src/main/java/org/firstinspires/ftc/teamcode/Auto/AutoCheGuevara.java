@@ -15,9 +15,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto F 'Hades' S", group = "0. Auto")
-public class AutoFarHumanSpike1 extends OpMode {
-
+@Autonomous(name = "Auto F 'Athena' S", group = "0. Auto")
+public class AutoCheGuevara extends OpMode {
 
     private int pathState; // Current autonomous path state (state machine)
     int loopCount=0;
@@ -46,9 +45,9 @@ public class AutoFarHumanSpike1 extends OpMode {
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
-        Robot.follower.setStartingPose(new Pose(56, 8, Math.toRadians(90)));
-        Robot.transitionPose = new Pose(56, 8, Math.toRadians(90));
-        Robot.follower.setMaxPower(1);
+        Robot.follower.setStartingPose(new Pose(56, 8, Math.toRadians(180)));
+        Robot.transitionPose = new Pose(56, 8, Math.toRadians(180));
+        Robot.follower.setMaxPower(0.9);
     }
 
     @Override
@@ -100,7 +99,6 @@ public class AutoFarHumanSpike1 extends OpMode {
     }
 
     public static class Paths {
-        public PathChain shootPreload;
         public PathChain grabHuman;
         public PathChain shootHuman;
         public PathChain grab1;
@@ -111,98 +109,85 @@ public class AutoFarHumanSpike1 extends OpMode {
         public PathChain shootHuman3;
 
         public Paths(Follower follower) {
-            shootPreload = follower.pathBuilder()
+            grabHuman = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
                                     new Pose(56.000, 8.000),
-                                    new Pose(55.881, 13.804)
+                                    new Pose(13.370, 8.476)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(111))
-                    .build();
-
-            grabHuman = follower.pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(55.881, 13.804),
-                                    new Pose(52.364, 16.783),
-                                    new Pose(13.706, 6.797)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(111), Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             shootHuman = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13.706, 6.797),
-                                    new Pose(60.503, 17.308)
+                                    new Pose(13.370, 8.476),
+                                    new Pose(55.804, 8.077)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(111.5))
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             grab1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(60.503, 17.308),
-                                    new Pose(69.716, 38.189),
-                                    new Pose(11.993, 35.868)
+                                    new Pose(55.804, 8.077),
+                                    new Pose(72.234, 43.056),
+                                    new Pose(11.993, 39.224)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(111.5), Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             shoot1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(11.993, 35.868),
-                                    new Pose(57.168, 15.833)
+                                    new Pose(11.993, 39.224),
+                                    new Pose(56.496, 8.112)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(111.5))
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             grabHuman2 = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(57.168, 15.833),
-                                    new Pose(57.629, 4.269),
-                                    new Pose(13.741, 6.762)
+                            new BezierLine(
+                                    new Pose(56.496, 8.112),
+                                    new Pose(13.406, 8.608)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(111.5), Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             shootHuman2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13.741, 6.762),
-                                    new Pose(57.413, 15.846)
+                                    new Pose(13.406, 8.608),
+                                    new Pose(56.238, 8.126)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(111.5))
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             grabHuman3 = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(57.413, 15.846),
-                                    new Pose(57.846, 4.056),
-                                    new Pose(13.650, 6.741)
+                            new BezierLine(
+                                    new Pose(56.238, 8.126),
+                                    new Pose(13.315, 8.755)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(111.5), Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             shootHuman3 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13.650, 6.741),
-                                    new Pose(57.014, 15.580)
+                                    new Pose(13.315, 8.755),
+                                    new Pose(55.839, 8.028)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(111.5))
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
         }
     }
@@ -212,34 +197,35 @@ public class AutoFarHumanSpike1 extends OpMode {
             case 0:
                 if (singleton)
                 {
-                    Robot.follower.followPath(paths.shootPreload);
                     robot.shooter.openGate();
                     robot.shooter.shooting = true;
                     robot.shooter.turretLocked = true;
                     singleton = false;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.isAimed()*/ /*&& robot.shooter.velocityReached() */ && !pathingOnly && timer2.seconds()>1)
-                {
-                    if (pathTimer.seconds()>0.6)
+                    if (singletonRest && robot.shooter.velocityReached())
+                    {   pathTimer.reset();
+                        singletonRest = false;
+                    }
+                    if (pathTimer.seconds()>0.3 && !singletonRest)
                     {
                         robot.intake.shoot();
-                        if (pathTimer.seconds()>0.72)
+                        if (pathTimer.seconds()>0.45 && !singletonRest)
                         {
                             robot.intake.rest();
                             pathTimer.reset();
                         }
                     }
-                    if (robot.intake.isEmpty())
+                if (robot.intake.isEmpty())
+                {
+                    if (timer.seconds()>1)
                     {
-                        if (timer.seconds()>1)
-                        {
-                            Robot.follower.followPath(paths.grabHuman);
-                            setPathState(1);
-                        }
-                    } else {
-                        timer.reset();
+                        Robot.follower.followPath(paths.grabHuman);
+                        setPathState(1);
                     }
+                } else {
+                    timer.reset();
                 }
+
                 if (Robot.follower.isBusy())
                 {
                     timer2.reset();
@@ -286,10 +272,10 @@ public class AutoFarHumanSpike1 extends OpMode {
                     }
                     if (!Robot.follower.isBusy() && timer.seconds()>1  /*&& robot.shooter.velocityReached()*/)
                     {
-                        if (pathTimer.seconds()>0.6)
+                        if (pathTimer.seconds()>0.3)
                         {
                             robot.intake.shoot();
-                            if (pathTimer.seconds()>0.72)
+                            if (pathTimer.seconds()>0.45)
                             {
                                 robot.intake.rest();
                                 pathTimer.reset();
@@ -353,10 +339,10 @@ public class AutoFarHumanSpike1 extends OpMode {
                     }
                     if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
                     {
-                        if (pathTimer.seconds()>0.6)
+                        if (pathTimer.seconds()>0.3)
                         {
                             robot.intake.shoot();
-                            if (pathTimer.seconds()>0.72)
+                            if (pathTimer.seconds()>0.45)
                             {
                                 robot.intake.rest();
                                 pathTimer.reset();
@@ -423,10 +409,10 @@ public class AutoFarHumanSpike1 extends OpMode {
                     }
                     if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
                     {
-                        if (pathTimer.seconds()>0.6)
+                        if (pathTimer.seconds()>0.3)
                         {
                             robot.intake.shoot();
-                            if (pathTimer.seconds()>0.72)
+                            if (pathTimer.seconds()>0.45)
                             {
                                 robot.intake.rest();
                                 pathTimer.reset();
@@ -437,7 +423,77 @@ public class AutoFarHumanSpike1 extends OpMode {
                     {
                         if (timer2.seconds()>1)
                         {
-//                            Robot.follower.followPath(paths.grabHuman2);
+                            Robot.follower.followPath(paths.grabHuman2);
+                            robot.shooter.shooting = false;
+                            setPathState(7);
+                        }
+                    } else {
+                        timer2.reset();
+                    }
+                } else {
+                    timer.reset();
+                }
+                break;
+            case 7:
+                // go to grab 2
+                if (!pathingOnly)
+                {
+                    robot.intake.pullBallsHard();
+                    robot.shooter.closeGate();
+                    robot.shooter.shooting=false;
+                }
+
+                if (!Robot.follower.isBusy())
+                {
+                    if (singleton)
+                    {
+                        autoTimer.reset();
+                        singleton = false;
+                    }
+                    if (autoTimer.seconds() > 1.5)
+                    {
+                        Robot.follower.followPath(paths.shootHuman2);
+                        setPathState(8);
+                    }
+                }
+                break;
+            case 8:
+                // shoot 2
+                if (!pathingOnly)
+                {
+                    robot.shooter.update();
+                    robot.shooter.shooting = true;
+                }
+                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                {
+                    robot.shooter.openGate();
+                    if (singleton)
+                    {
+                        robot.intake.rest();
+                        timer.reset();
+                        singleton = false;
+                    }
+                    if (Robot.follower.isBusy())
+                    {
+                        timer.reset();
+                    }
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
+                    {
+                        if (pathTimer.seconds()>0.3)
+                        {
+                            robot.intake.shoot();
+                            if (pathTimer.seconds()>0.45)
+                            {
+                                robot.intake.rest();
+                                pathTimer.reset();
+                            }
+                        }
+                    }
+                    if (robot.intake.isEmpty())
+                    {
+                        if (timer2.seconds()>1)
+                        {
+                            Robot.follower.followPath(paths.grabHuman3);
                             robot.shooter.shooting = false;
                             setPathState(-1);
                         }

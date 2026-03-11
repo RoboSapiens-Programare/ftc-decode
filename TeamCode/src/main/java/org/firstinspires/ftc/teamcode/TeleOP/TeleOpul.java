@@ -22,6 +22,10 @@ public class TeleOpul extends OpMode {
 
     private final ElapsedTime stateTimer = new ElapsedTime();
     private int loopCount = 0;
+    private boolean singleton = true;
+    private final ElapsedTime followerIdleTimer = new ElapsedTime();
+    private boolean wasFollowerBusy = false;
+    private boolean singleton2 = true;
     private boolean isAimingChassis = false;
 
 
@@ -32,11 +36,25 @@ public class TeleOpul extends OpMode {
 
     private State state = State.INTAKE;
 
-    private void aimChassis(Pose target) {
+    private void aimChassis(double targetHeadingRad) {
         Pose current = Robot.follower.getPose();
+
+        // atan2 returns [-π, π], PedroPathing heading is [0, 2π] — must match
+        while (targetHeadingRad < 0)            targetHeadingRad += 2.0 * Math.PI;
+        while (targetHeadingRad >= 2.0 * Math.PI) targetHeadingRad -= 2.0 * Math.PI;
+
+        double currentHeading = current.getHeading(); // already [0, 2π]
+
+        // 1-inch offset so BezierLine is non-degenerate
+        Pose target = new Pose(
+                current.getX() + Math.cos(targetHeadingRad),
+                current.getY() + Math.sin(targetHeadingRad),
+                targetHeadingRad
+        );
+
         PathChain path = Robot.follower.pathBuilder()
                 .addPath(new BezierLine(current, target))
-                .setLinearHeadingInterpolation(current.getHeading(), target.getHeading())
+                .setLinearHeadingInterpolation(currentHeading, targetHeadingRad)
                 .build();
         Robot.follower.followPath(path, true);
     }
@@ -44,7 +62,8 @@ public class TeleOpul extends OpMode {
     private void changeState(State newState) {
         state = newState;
         stateTimer.reset();
-
+        singleton = false;
+        singleton2 = false;
 
         robot.shooter.shooting = newState == State.OUTTAKE;
         if (newState == State.OUTTAKE) {
@@ -81,14 +100,28 @@ public class TeleOpul extends OpMode {
         robot.shooter.openGate();
 
 
-        if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
+        if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance<40)
         {
             robot.intake.shoot();
-        } else {
+            robot.shooter.shootingLobComp = true;
+            robot.shooter.lobServo.setPosition(robot.shooter.lobServo.getPosition()+0.02);
+        } else if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance>40 && robot.shooter.llDistance<80)
+        {
+            robot.intake.shoot();
+            robot.shooter.shootingLobComp = true;
+            robot.shooter.lobServo.setPosition(robot.shooter.lobServo.getPosition()+0.01);
+        }else if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance>80)
+        {
+            robot.intake.shoot();
+        }else {
+            robot.shooter.shootingLobComp = false;
             robot.intake.rest();
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
+            isAimingChassis = false;
+            Robot.follower.breakFollowing();
+            Robot.follower.startTeleOpDrive(true);
             changeState(State.INTAKE);
 
         }
@@ -155,43 +188,69 @@ public class TeleOpul extends OpMode {
 
         robot.intake.updateHeadlight();
 
-        if (isAimingChassis && !((Math.abs(gamepad1.left_stick_x)>0.1)||(Math.abs(gamepad1.left_stick_y)>0.1)||(Math.abs(gamepad1.right_stick_x)>0.1)))
-        {
-            aimChassis(new Pose(Robot.follower.getPose().getX(), Robot.follower.getPose().getY(), robot.shooter.getTargetFieldAngleRad()));
+        if (isAimingChassis && !singleton) {
+            Robot.follower.breakFollowing();
+            aimChassis(robot.shooter.getTargetFieldAngleRadStatic());
+            singleton = true;
+        }
+
+        boolean driverMovingSticks = Math.abs(gamepad1.left_stick_x) > 0.1
+                || Math.abs(gamepad1.left_stick_y) > 0.1
+                || Math.abs(gamepad1.right_stick_x) > 0.1;
+
+        boolean followerBusy = Robot.follower.isBusy();
+        if (followerBusy) {
+            followerIdleTimer.reset();
+        }
+        boolean followerSettled = !followerBusy && followerIdleTimer.milliseconds() > 300;
+
+        if (isAimingChassis && singleton && !singleton2 && driverMovingSticks) {
+            Robot.follower.breakFollowing();
+            Robot.follower.startTeleOpDrive(true);
+            singleton2 = true;
+        }
+
+        robot.shooter.turretLocked = !followerSettled;
+
+        robot.shooter.update();
+
+        boolean allowDrive = !isAimingChassis
+                || singleton2
+                || followerSettled;
+
+        if (allowDrive) {
+            Robot.follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    -gamepad1.right_stick_x - 0.1 * gamepad2.right_stick_x,
+                    true);
         }
 
         Robot.follower.update();
 
-        robot.shooter.turretLocked = Robot.follower.isBusy();
-
-        robot.shooter.update();
-
-        Robot.follower.setTeleOpDrive(
-                -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x,
-                -gamepad1.right_stick_x - 0.1 * gamepad2.right_stick_x,
-                true);
-
         loopCount++;
         if (loopCount % 5 == 0) {
-            dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
-            dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
-            dashboardTelemetry.addData("Sensor3", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
-            dashboardTelemetry.addData("State", state);
+            dashboardTelemetry.addData("desired angle", robot.shooter.getTargetFieldAngleRadStatic());
+//            dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
+//            dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
+//            dashboardTelemetry.addData("Sensor3", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
+//            dashboardTelemetry.addData("State", state);dashboardTelemetry.addData("State", state);
+            dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
             dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
-            dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
-            dashboardTelemetry.addData("Track State", robot.shooter.trackState);
-            dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
-            dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
-            dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
-            dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
-            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
-            dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
-            dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
-            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
-            dashboardTelemetry.addData("Pose", robot.follower.getPose());
+//            dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
+//            dashboardTelemetry.addData("Track State", robot.shooter.trackState);
+//            dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
+//            dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
+//            dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
+//            dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
+//            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+//            dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
+//            dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
+//            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
+            dashboardTelemetry.addData("Angle pose", robot.follower.getPose().getHeading());
             dashboardTelemetry.update();
         }
+
 
     }
 }

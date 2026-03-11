@@ -15,8 +15,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto F 'Hades' S", group = "0. Auto")
-public class AutoFarHumanSpike1 extends OpMode {
+@Autonomous(name = "Auto F 'Hades' XL", group = "0. Auto")
+public class AutoFarCeausescu extends OpMode {
 
 
     private int pathState; // Current autonomous path state (state machine)
@@ -220,15 +220,9 @@ public class AutoFarHumanSpike1 extends OpMode {
                 }
                 if (!Robot.follower.isBusy() /*&& robot.shooter.isAimed()*/ /*&& robot.shooter.velocityReached() */ && !pathingOnly && timer2.seconds()>1)
                 {
-                    if (pathTimer.seconds()>0.6)
-                    {
+
                         robot.intake.shoot();
-                        if (pathTimer.seconds()>0.72)
-                        {
-                            robot.intake.rest();
-                            pathTimer.reset();
-                        }
-                    }
+
                     if (robot.intake.isEmpty())
                     {
                         if (timer.seconds()>1)
@@ -286,15 +280,7 @@ public class AutoFarHumanSpike1 extends OpMode {
                     }
                     if (!Robot.follower.isBusy() && timer.seconds()>1  /*&& robot.shooter.velocityReached()*/)
                     {
-                        if (pathTimer.seconds()>0.6)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.72)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
                     }
                     if (robot.intake.isEmpty())
                     {
@@ -353,15 +339,7 @@ public class AutoFarHumanSpike1 extends OpMode {
                     }
                     if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
                     {
-                        if (pathTimer.seconds()>0.6)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.72)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
                     }
                     if (robot.intake.isEmpty())
                     {
@@ -423,15 +401,7 @@ public class AutoFarHumanSpike1 extends OpMode {
                     }
                     if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
                     {
-                        if (pathTimer.seconds()>0.6)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.72)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
                     }
                     if (robot.intake.isEmpty())
                     {

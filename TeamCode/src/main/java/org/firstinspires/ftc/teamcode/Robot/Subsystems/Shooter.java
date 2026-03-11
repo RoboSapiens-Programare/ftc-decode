@@ -87,6 +87,7 @@ public class Shooter extends Subsystem {
     public boolean shooting       = false;
     public boolean trackCurrent = false;
     public double  llDistance     = 0;
+    public boolean shootingLobComp = false;
     public String  trackState     = "IDLE";
     public double  turretOutput   = 0.0;
     public static double targetVelocity = 1300;
@@ -170,7 +171,7 @@ public class Shooter extends Subsystem {
 //            {
 //                return true;
 //            }
-                return (Math.abs(actual - targetVelocity ))<120;
+                return (Math.abs(actual - targetVelocity ))<160;
             // actual e mai mare -> actual-target negativ
         } else {
             return Math.abs(actual - targetVelocity) < 41;
@@ -255,15 +256,12 @@ public class Shooter extends Subsystem {
         return new double[]{targetAngleRad, rawDist};
     }
 
-    public double getTargetFieldAngleRad() {
+    public double getTargetFieldAngleRadStatic() {
         Pose pose = Robot.follower.getPose();
-        double vx = Robot.follower.getVelocity().getXComponent();
-        double vy = Robot.follower.getVelocity().getYComponent();
-        double heading = pose.getHeading();
-        double vxField = vx * Math.cos(heading) - vy * Math.sin(heading);
-        double vyField = vx * Math.sin(heading) + vy * Math.cos(heading);
-        double[] sotm = computeVirtualGoal(pose.getX(), pose.getY(), vxField, vyField);
-        return sotm[0]; // unghiul in field frame spre virtual goal
+        Pose target = (Robot.alliance == Robot.Alliance.RED) ? redObeliskPose : blueObeliskPose;
+        double dx = target.getX() - pose.getX();
+        double dy = target.getY() - pose.getY();
+        return Math.atan2(dy, dx); // [-π, π], normalized below in aimChassis
     }
 
     // =========================================================
@@ -281,7 +279,7 @@ public class Shooter extends Subsystem {
             double output = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
             output = Math.max(-1.0, Math.min(1.0, output));
             turretPivot.setPower(output);
-            return output;
+//            return output;
         }
 
         PIDFController odometryTrackingController =
@@ -413,7 +411,10 @@ public class Shooter extends Subsystem {
 
         output = Math.max(-1.0, Math.min(1.0, output));
 
-        turretPivot.setPower(output);
+        if (!turretLocked)
+        {
+            turretPivot.setPower(output);
+        }
 
         return output;
     }
@@ -437,8 +438,10 @@ public class Shooter extends Subsystem {
             targetVelocity = computeVelocity(llDistance);
 //            targetVelocity = 0;
             pidfController.setSetpoint(targetVelocity);
-            lobServo.setPosition(computeLob(llDistance));
-
+            if (!shootingLobComp)
+            {
+                lobServo.setPosition(computeLob(llDistance));
+            }
             double pidOutput = pidfController.updatePID(-turretMotorLeft.getVelocity());
 
             turretMotorRight.setPower(pidOutput);
