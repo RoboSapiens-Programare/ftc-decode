@@ -200,15 +200,15 @@ public class TeleOpul extends OpMode {
 
         robot.intake.updateHeadlight();
 
-        Pose homingPoseBlue = new Pose(55+56, 51-8, Math.toRadians(180));
-        Pose homingPoseRed = new Pose(88, 8, Math.toRadians(90));
-        if (gamepad1.square)
+        Pose homingPoseBlue = new Pose(20.9, 123.1, Math.toRadians(144));
+        Pose homingPoseRed = new Pose(123.077, 123.133, Math.toRadians(36));
+        if (gamepad1.circle)
         {
             Robot.alliance = Robot.Alliance.RED;
             Robot.transitionPose =homingPoseRed;
             Robot.follower.setPose(homingPoseRed);
             gamepad1.setLedColor(255, 0,0,10000);
-        } else if (gamepad1.triangle) {
+        } else if (gamepad1.square) {
             Robot.alliance = Robot.Alliance.BLUE;
             Robot.transitionPose =homingPoseBlue;
             Robot.follower.setPose(homingPoseBlue);

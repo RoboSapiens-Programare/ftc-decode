@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.Robot.uV;
 @Autonomous(name = "Auto F 'Hades' R", group = "0. Auto")
 public class AutoLhospital extends OpMode {
 
+
     private int pathState; // Current autonomous path state (state machine)
     int loopCount=0;
     private ElapsedTime pathTimer; // Timer for path state machine
@@ -32,6 +33,9 @@ public class AutoLhospital extends OpMode {
     private final ElapsedTime timer2 = new ElapsedTime();
     private final ElapsedTime autoTimer = new ElapsedTime();
 
+    int gateLoops=0;
+    int desiredGateLoops = 2;
+
     private boolean singletonRest = true;
 
     Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
@@ -45,9 +49,9 @@ public class AutoLhospital extends OpMode {
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
-        Robot.follower.setStartingPose(new Pose(88, 8, Math.toRadians(0)));
-        Robot.transitionPose = new Pose(88, 8, Math.toRadians(0));
-        Robot.follower.setMaxPower(0.9);
+        Robot.follower.setStartingPose(new Pose(88, 6, Math.toRadians(0)));
+        Robot.transitionPose = new Pose(88, 6, Math.toRadians(0));
+        Robot.follower.setMaxPower(1);
     }
 
     @Override
@@ -96,6 +100,7 @@ public class AutoLhospital extends OpMode {
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
+        Robot.alliance = Robot.Alliance.RED;
     }
 
     public static class Paths {
@@ -111,9 +116,10 @@ public class AutoLhospital extends OpMode {
         public Paths(Follower follower) {
             grabHuman = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(88.000, 8.000),
-                                    new Pose(130.630, 8.476)
+                            new BezierCurve(
+                                    new Pose(88.000, 6.000),
+                                    new Pose(108.986, 17.944),
+                                    new Pose(132.476, 10.657)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -121,9 +127,10 @@ public class AutoLhospital extends OpMode {
 
             shootHuman = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(130.630, 8.476),
-                                    new Pose(88.196, 8.077)
+                            new BezierCurve(
+                                    new Pose(132.476, 10.657),
+                                    new Pose(109.301, 17.843),
+                                    new Pose(88.000, 6.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -132,9 +139,9 @@ public class AutoLhospital extends OpMode {
             grab1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(88.196, 8.077),
-                                    new Pose(71.766, 43.056),
-                                    new Pose(132.007, 39.224)
+                                    new Pose(88.000, 6.000),
+                                    new Pose(71.766, 47.587),
+                                    new Pose(132.510, 42.749)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -143,8 +150,8 @@ public class AutoLhospital extends OpMode {
             shoot1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(132.007, 39.224),
-                                    new Pose(87.504, 8.112)
+                                    new Pose(132.510, 42.749),
+                                    new Pose(88.000, 6.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -152,9 +159,10 @@ public class AutoLhospital extends OpMode {
 
             grabHuman2 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(87.504, 8.112),
-                                    new Pose(130.594, 8.608)
+                            new BezierCurve(
+                                    new Pose(88.000, 6.000),
+                                    new Pose(108.909, 17.745),
+                                    new Pose(132.776, 10.622)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -162,9 +170,10 @@ public class AutoLhospital extends OpMode {
 
             shootHuman2 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(130.594, 8.608),
-                                    new Pose(87.762, 8.126)
+                            new BezierCurve(
+                                    new Pose(132.776, 10.622),
+                                    new Pose(109.080, 18.087),
+                                    new Pose(88.000, 6.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -172,9 +181,10 @@ public class AutoLhospital extends OpMode {
 
             grabHuman3 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(87.762, 8.126),
-                                    new Pose(130.685, 8.755)
+                            new BezierCurve(
+                                    new Pose(88.000, 6.000),
+                                    new Pose(109.035, 18.161),
+                                    new Pose(132.867, 10.601)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -182,9 +192,10 @@ public class AutoLhospital extends OpMode {
 
             shootHuman3 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(130.685, 8.755),
-                                    new Pose(88.161, 8.028)
+                            new BezierCurve(
+                                    new Pose(132.867, 10.601),
+                                    new Pose(109.066, 18.455),
+                                    new Pose(88.000, 6.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -202,18 +213,12 @@ public class AutoLhospital extends OpMode {
                     robot.shooter.turretLocked = true;
                     singleton = false;
                 }
-                if (singletonRest && robot.shooter.velocityReached())
-                {   pathTimer.reset();
-                    singletonRest = false;
-                }
-                if (pathTimer.seconds()>0.3 && !singletonRest)
+                if (timer2.seconds()>1 && robot.shooter.velocityReached())
                 {
                     robot.intake.shoot();
-                    if (pathTimer.seconds()>0.45 && !singletonRest)
-                    {
-                        robot.intake.rest();
-                        pathTimer.reset();
-                    }
+                }
+                else {
+                    robot.intake.rest();
                 }
                 if (robot.intake.isEmpty())
                 {
@@ -257,7 +262,7 @@ public class AutoLhospital extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -270,17 +275,11 @@ public class AutoLhospital extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1  /*&& robot.shooter.velocityReached()*/)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1  && robot.shooter.velocityReached())
                     {
-                        if (pathTimer.seconds()>0.3)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.45)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
+                    } else {
+                        robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
@@ -324,7 +323,7 @@ public class AutoLhospital extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -337,17 +336,11 @@ public class AutoLhospital extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
                     {
-                        if (pathTimer.seconds()>0.3)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.45)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
+                    } else {
+                        robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
@@ -394,7 +387,7 @@ public class AutoLhospital extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -407,25 +400,28 @@ public class AutoLhospital extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
                     {
-                        if (pathTimer.seconds()>0.3)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.45)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
+                    } else {
+                        robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
                         if (timer2.seconds()>1)
                         {
-                            Robot.follower.followPath(paths.grabHuman2);
-                            robot.shooter.shooting = false;
-                            setPathState(7);
+                            if(gateLoops<desiredGateLoops)
+                            {
+                                Robot.follower.followPath(paths.grabHuman2);
+                                robot.shooter.shooting = false;
+                                setPathState(5);
+                                gateLoops++;
+                            } else {
+                                Robot.follower.followPath(paths.grabHuman2);
+                                robot.shooter.shooting = false;
+                                setPathState(-1);
+                            }
+
                         }
                     } else {
                         timer2.reset();
@@ -464,7 +460,7 @@ public class AutoLhospital extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -477,17 +473,11 @@ public class AutoLhospital extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
                     {
-                        if (pathTimer.seconds()>0.3)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.45)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
+                    } else {
+                        robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {

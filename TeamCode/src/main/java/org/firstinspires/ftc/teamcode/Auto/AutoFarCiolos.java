@@ -49,8 +49,8 @@ public class AutoFarCiolos extends OpMode {
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
-        Robot.follower.setStartingPose(new Pose(56, 8, Math.toRadians(180)));
-        Robot.transitionPose = new Pose(56, 8, Math.toRadians(180));
+        Robot.follower.setStartingPose(new Pose(56, 6, Math.toRadians(180)));
+        Robot.transitionPose = new Pose(56, 6, Math.toRadians(180));
         Robot.follower.setMaxPower(1);
     }
 
@@ -100,6 +100,7 @@ public class AutoFarCiolos extends OpMode {
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
+        Robot.alliance = Robot.Alliance.BLUE;
     }
 
     public static class Paths {
@@ -116,9 +117,9 @@ public class AutoFarCiolos extends OpMode {
             grabHuman = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(56.000, 8.000),
-                                    new Pose(35.517, 15.594),
-                                    new Pose(11.692, 8.644)
+                                    new Pose(56.000, 6.000),
+                                    new Pose(35.014, 17.944),
+                                    new Pose(11.524, 10.657)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -127,9 +128,9 @@ public class AutoFarCiolos extends OpMode {
             shootHuman = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(11.692, 8.644),
-                                    new Pose(34.195, 15.158),
-                                    new Pose(55.804, 8.077)
+                                    new Pose(11.524, 10.657),
+                                    new Pose(34.699, 17.843),
+                                    new Pose(56.000, 6.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -138,7 +139,7 @@ public class AutoFarCiolos extends OpMode {
             grab1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(55.804, 8.077),
+                                    new Pose(56.000, 6.000),
                                     new Pose(72.234, 47.587),
                                     new Pose(11.490, 42.749)
                             )
@@ -150,7 +151,7 @@ public class AutoFarCiolos extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(11.490, 42.749),
-                                    new Pose(56.496, 8.112)
+                                    new Pose(56.000, 6.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -159,9 +160,9 @@ public class AutoFarCiolos extends OpMode {
             grabHuman2 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(56.496, 8.112),
-                                    new Pose(35.259, 15.395),
-                                    new Pose(12.063, 8.608)
+                                    new Pose(56.000, 6.000),
+                                    new Pose(35.091, 17.745),
+                                    new Pose(11.224, 10.622)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -170,9 +171,9 @@ public class AutoFarCiolos extends OpMode {
             shootHuman2 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(12.063, 8.608),
-                                    new Pose(34.752, 15.906),
-                                    new Pose(56.238, 8.126)
+                                    new Pose(11.224, 10.622),
+                                    new Pose(34.920, 18.087),
+                                    new Pose(56.000, 6.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -181,9 +182,9 @@ public class AutoFarCiolos extends OpMode {
             grabHuman3 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(56.238, 8.126),
-                                    new Pose(35.804, 15.643),
-                                    new Pose(11.636, 8.587)
+                                    new Pose(56.000, 6.000),
+                                    new Pose(34.965, 18.161),
+                                    new Pose(11.133, 10.601)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -192,9 +193,9 @@ public class AutoFarCiolos extends OpMode {
             shootHuman3 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(11.636, 8.587),
-                                    new Pose(34.934, 15.937),
-                                    new Pose(55.839, 8.028)
+                                    new Pose(11.133, 10.601),
+                                    new Pose(34.934, 18.455),
+                                    new Pose(56.000, 6.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))

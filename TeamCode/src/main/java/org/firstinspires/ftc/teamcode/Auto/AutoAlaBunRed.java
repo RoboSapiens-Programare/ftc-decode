@@ -108,6 +108,7 @@ public class AutoAlaBunRed extends OpMode {
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
+        Robot.alliance = Robot.Alliance.RED;
         robot.shooter.LL_TURRET_OFFSET_DEG = 0;
     }
 

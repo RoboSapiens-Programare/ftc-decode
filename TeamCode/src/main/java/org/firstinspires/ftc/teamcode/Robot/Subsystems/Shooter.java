@@ -450,8 +450,10 @@ public class Shooter extends Subsystem {
         } else {
             turretMotorRight.setPower(0.2);
             turretMotorLeft.setPower(0.2);
-
-            turretPivot.setPower(0);
+            if (!turretLocked)
+            {
+                turretPivot.setPower(0);
+            }
         }
     }
 }
