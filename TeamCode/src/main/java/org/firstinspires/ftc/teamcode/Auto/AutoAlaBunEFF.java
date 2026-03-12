@@ -5,7 +5,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -13,8 +12,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
-@Autonomous(name = "Auto C 'Artemis' B", group = "0. Auto")
-public class AutoAlaBun extends OpMode {
+@Autonomous(name = "Auto C 'Tyche' EFF", group = "0. Auto")
+public class AutoAlaBunEFF extends OpMode {
 
 
     private int pathState; // Current autonomous path state (state machine)
@@ -32,7 +31,7 @@ public class AutoAlaBun extends OpMode {
     private final ElapsedTime autoTimer = new ElapsedTime();
 
     private byte gateLoops = 0;
-    int targetGateLoops = 1;
+    int targetGateLoops = 2;
 
     private boolean singletonRest = true;
 
@@ -55,7 +54,7 @@ public class AutoAlaBun extends OpMode {
     public void init_loop() {
 
         robot.intake.update();
-//        robot.shooter.update();
+        robot.shooter.update();
 
         autoTimer.reset();
 
@@ -147,7 +146,7 @@ public class AutoAlaBun extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(54.895, 60.262),
-                                    new Pose(12.685, 59.881)
+                                    new Pose(27.958, 59.881)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -156,9 +155,9 @@ public class AutoAlaBun extends OpMode {
             grab2GATE = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(12.685, 59.881),
-                                    new Pose(30.656, 55.189),
-                                    new Pose(18.752, 66.231)
+                                    new Pose(27.958, 59.881),
+                                    new Pose(23.942, 71.972),
+                                    new Pose(22.276, 70.427)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -167,7 +166,7 @@ public class AutoAlaBun extends OpMode {
             shoot2 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(18.752, 66.231),
+                                    new Pose(22.276, 70.427),
                                     new Pose(52.364, 61.594),
                                     new Pose(55.000, 95.000)
                             )
@@ -239,7 +238,7 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -248,7 +247,7 @@ public class AutoAlaBun extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>1)
+                        if (timer2.seconds()>0.4)
                         {
                             Robot.follower.followPath(paths.grab2MID);
                             robot.shooter.shooting = false;
@@ -315,7 +314,7 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -324,7 +323,7 @@ public class AutoAlaBun extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>0.5)
+                        if (timer2.seconds()>0.4)
                         {
                             Robot.follower.followPath(paths.gate1);
                             Robot.follower.setMaxPower(0.72);
@@ -354,6 +353,11 @@ public class AutoAlaBun extends OpMode {
                 }
                 break;
             case 3:
+//                if (pathTimer.seconds()>1.5) {
+//                    Robot.follower.setMaxPower(0.72);
+//                } else {
+//                    Robot.follower.setMaxPower(1);
+//                }
                 // go to grab 2
                 if (!pathingOnly)
                 {
@@ -383,7 +387,7 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -443,7 +447,7 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -452,18 +456,10 @@ public class AutoAlaBun extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>0.4)
+                        if (timer2.seconds()>1)
                         {
                             robot.shooter.shooting = false;
-                            if (timer.seconds()<2)
-                            {Robot.follower.followPath(paths.gate1);}
-                            else
-                            {Robot.follower.setMaxPower(0);
-                                Robot.transitionPose=Robot.follower.getPose();}
-
-
-
-
+                            setPathState(-1);
                         }
                     } else {
                         timer2.reset();

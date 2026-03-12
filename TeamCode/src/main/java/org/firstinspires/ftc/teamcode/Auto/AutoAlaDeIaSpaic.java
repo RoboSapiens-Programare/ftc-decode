@@ -5,7 +5,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -13,9 +12,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
-@Autonomous(name = "Auto C 'Artemis' B", group = "0. Auto")
-public class AutoAlaBun extends OpMode {
-
+@Autonomous(name = "Auto C 'Heracles'", group = "0. Auto")
+public class AutoAlaDeIaSpaic extends OpMode {
 
     private int pathState; // Current autonomous path state (state machine)
     int loopCount=0;
@@ -31,7 +29,7 @@ public class AutoAlaBun extends OpMode {
     private final ElapsedTime timer2 = new ElapsedTime();
     private final ElapsedTime autoTimer = new ElapsedTime();
 
-    private byte gateLoops = 0;
+    int gateLoops = 0;
     int targetGateLoops = 1;
 
     private boolean singletonRest = true;
@@ -117,10 +115,13 @@ public class AutoAlaBun extends OpMode {
         public PathChain grab2;
         public PathChain grab2GATE;
         public PathChain shoot2;
-        public PathChain gate1;
-        public PathChain shoot3;
         public PathChain grab3;
         public PathChain shoot4;
+        public PathChain gate1;
+        public PathChain shoot3;
+        public PathChain grab1MID;
+        public PathChain grab1;
+        public PathChain shoot1;
 
         public Paths(Follower follower) {
             shootPreload = follower.pathBuilder()
@@ -147,7 +148,7 @@ public class AutoAlaBun extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(54.895, 60.262),
-                                    new Pose(12.685, 59.881)
+                                    new Pose(16.378, 60.049)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -156,7 +157,7 @@ public class AutoAlaBun extends OpMode {
             grab2GATE = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(12.685, 59.881),
+                                    new Pose(16.378, 60.049),
                                     new Pose(30.656, 55.189),
                                     new Pose(18.752, 66.231)
                             )
@@ -168,33 +169,11 @@ public class AutoAlaBun extends OpMode {
                     .addPath(
                             new BezierCurve(
                                     new Pose(18.752, 66.231),
-                                    new Pose(52.364, 61.594),
+                                    new Pose(45.147, 68.476),
                                     new Pose(55.000, 95.000)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
-                    .build();
-
-            gate1 = follower.pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(55.000, 95.000),
-                                    new Pose(37.161, 63.811),
-                                    new Pose(9.853, 59.545)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(155))
-                    .build();
-
-            shoot3 = follower.pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(9.853, 59.545),
-                                    new Pose(39.297, 65.871),
-                                    new Pose(55.000, 95.000)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(144))
                     .build();
 
             grab3 = follower.pathBuilder()
@@ -217,8 +196,61 @@ public class AutoAlaBun extends OpMode {
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
                     .build();
+
+            gate1 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    new Pose(47.517, 102.175),
+                                    new Pose(44.042, 71.028),
+                                    new Pose(9.853, 59.545)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(155))
+                    .build();
+
+            shoot3 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    new Pose(9.853, 59.545),
+                                    new Pose(45.003, 69.059),
+                                    new Pose(55.000, 95.000)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(144))
+                    .build();
+
+            grab1MID = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(55.000, 95.000),
+                                    new Pose(54.804, 36.517)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                    .build();
+
+            grab1 = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(54.804, 36.517),
+                                    new Pose(17.119, 36.252)
+                            )
+                    )
+                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .build();
+
+            shoot1 = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(17.119, 36.252),
+                                    new Pose(54.224, 94.559)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+                    .build();
         }
     }
+
     public int autonomousPathUpdate() {
         switch (pathState) {
             case 0:
@@ -239,7 +271,7 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -248,7 +280,7 @@ public class AutoAlaBun extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>1)
+                        if (timer2.seconds()>0.4)
                         {
                             Robot.follower.followPath(paths.grab2MID);
                             robot.shooter.shooting = false;
@@ -299,75 +331,7 @@ public class AutoAlaBun extends OpMode {
                 {
                     Robot.follower.followPath(paths.shoot2);
                     Robot.follower.setMaxPower(1);
-                    setPathState(2);
-                }
-                break;
-            case 2:
-                if (singleton)
-                {
-                    robot.intake.rest();
-                    robot.shooter.openGate();
-                    singleton = false;
-                }
-                robot.shooter.update();
-                robot.shooter.shooting = true;
-//                robot.shooter.turretLocked=true;
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
-                {
-//                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
-                    {
-                        robot.intake.shoot();
-                    }
-                    else {
-                        robot.intake.rest();
-                    }
-                    if (robot.intake.isEmpty())
-                    {
-                        if (timer2.seconds()>0.5)
-                        {
-                            Robot.follower.followPath(paths.gate1);
-                            Robot.follower.setMaxPower(0.72);
-                            robot.shooter.shooting = false;
-                            setPathState(3);
-                        }
-                    } else {
-                        timer2.reset();
-                    }
-                }
-                else {
-                    timer.reset();
-                }
-                break;
-            case 301:
-                if (!pathingOnly)
-                {
-                    robot.intake.pullBallsHard();
-                    robot.shooter.shooting = false;
-                    robot.shooter.closeGate();
-                }
-                if (!Robot.follower.isBusy())
-                {
-//                    Robot.follower.followPath(paths.gate1p);
-                    Robot.follower.setMaxPower(1);
-                    setPathState(3);
-                }
-                break;
-            case 3:
-                // go to grab 2
-                if (!pathingOnly)
-                {
-                    robot.intake.pullBallsHard();
-                    robot.shooter.shooting = false;
-                    robot.shooter.closeGate();
-                }
-                if (!Robot.follower.isBusy() && autoTimer.seconds() > 4)
-                {
-                    Robot.follower.followPath(paths.shoot3);
-                    Robot.follower.setMaxPower(1);
-
                     setPathState(4);
-
                 }
                 break;
             case 4:
@@ -383,7 +347,7 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -396,16 +360,8 @@ public class AutoAlaBun extends OpMode {
                         {
 
 //                            robot.shooter.shooting = false;
-                            if (gateLoops<targetGateLoops)
-                            {
-                                setPathState(3);
-                                Robot.follower.followPath(paths.gate1);
-                                Robot.follower.setMaxPower(0.72);
-                                gateLoops++;
-                            } else {
-                                setPathState(5);
-                                Robot.follower.followPath(paths.grab3);
-                            }
+                            setPathState(5);
+                            Robot.follower.followPath(paths.grab3);
 
                         }
                     } else {
@@ -443,7 +399,137 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    {
+                        robot.intake.shoot();
+                    }
+                    else {
+                        robot.intake.rest();
+                    }
+                    if (robot.intake.isEmpty())
+                    {
+                        if (timer2.seconds()>1)
+                        {
+                            robot.shooter.shooting = false;
+                            Robot.follower.followPath(paths.gate1);
+                            Robot.follower.setMaxPower(0.72);
+                            setPathState(3);
+                        }
+                    } else {
+                        timer2.reset();
+                    }
+                }
+                else {
+                    timer.reset();
+                }
+                break;
+            case 3:
+//                if (pathTimer.seconds()>1.5) {
+//                    Robot.follower.setMaxPower(0.72);
+//                } else {
+//                    Robot.follower.setMaxPower(1);
+//                }
+                // go to grab 2
+                if (!pathingOnly)
+                {
+                    robot.intake.pullBallsHard();
+                    robot.shooter.shooting = false;
+                    robot.shooter.closeGate();
+                }
+                if (!Robot.follower.isBusy() && autoTimer.seconds() > 4)
+                {
+                        Robot.follower.followPath(paths.shoot3);
+                        setPathState(601);
+                        Robot.follower.setMaxPower(1);
+                }
+                break;
+            case 601:
+                if (singleton)
+                {
+                    robot.intake.rest();
+                    robot.shooter.openGate();
+                    singleton = false;
+                }
+                robot.shooter.update();
+                robot.shooter.shooting = true;
+//                robot.shooter.turretLocked=true;
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
+                {
+//                    robot.shooter.turretLocked=false;
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    {
+                        robot.intake.shoot();
+                    }
+                    else {
+                        robot.intake.rest();
+                    }
+                    if (robot.intake.isEmpty())
+                    {
+                        if (timer2.seconds()>1)
+                        {
+                            robot.shooter.shooting = false;
+                            if (gateLoops<targetGateLoops)
+                            {
+                                Robot.follower.followPath(paths.gate1);
+                                Robot.follower.setMaxPower(0.72);
+                                gateLoops++;
+                                setPathState(3);
+                            } else {
+                                Robot.follower.followPath(paths.grab1);
+                                setPathState(7);
+                            }
+
+                        }
+                    } else {
+                        timer2.reset();
+                    }
+                }
+                else {
+                    timer.reset();
+                }
+                break;
+            case 7:
+                // go to grab 1
+                if (!pathingOnly)
+                {
+                    robot.intake.pullBallsHard();
+                    robot.shooter.closeGate();
+                }
+                if (!Robot.follower.isBusy())
+                {
+                    Robot.follower.followPath(paths.grab1);
+                    Robot.follower.setMaxPower(1);
+                    setPathState(701);
+                }
+                break;
+            case 701:
+                // go to grab 1
+                if (!pathingOnly)
+                {
+                    robot.intake.rest();
+                    robot.shooter.openGate();
+                }
+                if (!Robot.follower.isBusy())
+                {
+                    Robot.follower.followPath(paths.shoot1);
+                    Robot.follower.setMaxPower(1);
+                    setPathState(8);
+                }
+                break;
+            case 8:
+                if (singleton)
+                {
+                    robot.intake.rest();
+                    robot.shooter.openGate();
+                    singleton = false;
+                }
+                robot.shooter.update();
+                robot.shooter.shooting = true;
+//                robot.shooter.turretLocked=true;
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
+                {
+//                    robot.shooter.turretLocked=false;
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -454,15 +540,10 @@ public class AutoAlaBun extends OpMode {
                     {
                         if (timer2.seconds()>0.4)
                         {
-                            robot.shooter.shooting = false;
-                            if (timer.seconds()<2)
-                            {Robot.follower.followPath(paths.gate1);}
-                            else
-                            {Robot.follower.setMaxPower(0);
-                                Robot.transitionPose=Robot.follower.getPose();}
 
-
-
+//                            robot.shooter.shooting = false;
+                            setPathState(-1);
+//                            Robot.follower.followPath(paths.grab1);
 
                         }
                     } else {
