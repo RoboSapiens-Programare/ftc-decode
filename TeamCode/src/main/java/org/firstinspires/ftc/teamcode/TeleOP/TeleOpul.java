@@ -100,23 +100,32 @@ public class TeleOpul extends OpMode {
         robot.shooter.openGate();
 
 
-        if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance<40)
-        {
-            robot.intake.shoot();
-            robot.shooter.shootingLobComp = true;
-            robot.shooter.lobServo.setPosition(robot.shooter.lobServo.getPosition()+0.02);
-        } else if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance>40 && robot.shooter.llDistance<80)
-        {
-            robot.intake.shoot();
-            robot.shooter.shootingLobComp = true;
-            robot.shooter.lobServo.setPosition(robot.shooter.lobServo.getPosition()+0.01);
-        }else if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance>80)
+        if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed())
         {
             robot.intake.shoot();
         }else {
-            robot.shooter.shootingLobComp = false;
+//            robot.shooter.shootingLobComp = false;
             robot.intake.rest();
         }
+
+
+//        if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance<40)
+//        {
+//            robot.intake.shoot();
+//            robot.shooter.shootingLobComp = true;
+//            robot.shooter.lobServo.setPosition(robot.shooter.lobServo.getPosition()+0.02);
+//        } else if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance>40 && robot.shooter.llDistance<80)
+//        {
+//            robot.intake.shoot();
+//            robot.shooter.shootingLobComp = true;
+//            robot.shooter.lobServo.setPosition(robot.shooter.lobServo.getPosition()+0.01);
+//        }else if (gamepad1.right_trigger > 0.1 && robot.shooter.velocityReached() && robot.shooter.isAimed() && robot.shooter.llDistance>80)
+//        {
+//            robot.intake.shoot();
+//        }else {
+//            robot.shooter.shootingLobComp = false;
+//            robot.intake.rest();
+//        }
 
         if (gamepad1.cross && stateTimer.milliseconds() > 400) {
             isAimingChassis = false;
@@ -141,9 +150,9 @@ public class TeleOpul extends OpMode {
 
         state = State.INTAKE;
 
-        Robot.follower = Constants.createFollower(hardwareMap);
+//        Robot.follower = Constants.createFollower(hardwareMap);
 
-        Robot.follower.startTeleOpDrive(true);
+
 
         gamepad1.setLedColor(0, 255, 0, 10);
 
@@ -154,6 +163,7 @@ public class TeleOpul extends OpMode {
     public void start()
     {
         Robot.follower.setPose(Robot.transitionPose);
+        Robot.follower.startTeleOpDrive(true);
     }
 
     public void init_loop()
@@ -171,6 +181,8 @@ public class TeleOpul extends OpMode {
             Robot.transitionPose =startPoseBlue;
             Robot.follower.setPose(startPoseBlue);
             gamepad1.setLedColor(0, 0,255,10000);
+        } else {
+            Robot.follower.setPose(Robot.transitionPose);
         }
     }
 
@@ -187,6 +199,21 @@ public class TeleOpul extends OpMode {
         }
 
         robot.intake.updateHeadlight();
+
+        Pose homingPoseBlue = new Pose(55+56, 51-8, Math.toRadians(180));
+        Pose homingPoseRed = new Pose(88, 8, Math.toRadians(90));
+        if (gamepad1.square)
+        {
+            Robot.alliance = Robot.Alliance.RED;
+            Robot.transitionPose =homingPoseRed;
+            Robot.follower.setPose(homingPoseRed);
+            gamepad1.setLedColor(255, 0,0,10000);
+        } else if (gamepad1.triangle) {
+            Robot.alliance = Robot.Alliance.BLUE;
+            Robot.transitionPose =homingPoseBlue;
+            Robot.follower.setPose(homingPoseBlue);
+            gamepad1.setLedColor(0, 0,255,10000);
+        }
 
         if (isAimingChassis && !singleton) {
             Robot.follower.breakFollowing();

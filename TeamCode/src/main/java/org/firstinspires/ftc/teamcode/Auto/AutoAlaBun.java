@@ -239,7 +239,7 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -248,7 +248,7 @@ public class AutoAlaBun extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>1)
+                        if (timer2.seconds()>0.5)
                         {
                             Robot.follower.followPath(paths.grab2MID);
                             robot.shooter.shooting = false;

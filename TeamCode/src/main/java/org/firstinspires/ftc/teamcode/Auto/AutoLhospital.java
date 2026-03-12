@@ -15,9 +15,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto F 'Hades' B", group = "0. Auto")
-public class AutoFarCiolos extends OpMode {
-
+@Autonomous(name = "Auto F 'Hades' R", group = "0. Auto")
+public class AutoLhospital extends OpMode {
 
     private int pathState; // Current autonomous path state (state machine)
     int loopCount=0;
@@ -33,9 +32,6 @@ public class AutoFarCiolos extends OpMode {
     private final ElapsedTime timer2 = new ElapsedTime();
     private final ElapsedTime autoTimer = new ElapsedTime();
 
-    int gateLoops=0;
-    int desiredGateLoops = 2;
-
     private boolean singletonRest = true;
 
     Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
@@ -49,9 +45,9 @@ public class AutoFarCiolos extends OpMode {
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
-        Robot.follower.setStartingPose(new Pose(56, 8, Math.toRadians(180)));
-        Robot.transitionPose = new Pose(56, 8, Math.toRadians(180));
-        Robot.follower.setMaxPower(1);
+        Robot.follower.setStartingPose(new Pose(88, 8, Math.toRadians(0)));
+        Robot.transitionPose = new Pose(88, 8, Math.toRadians(0));
+        Robot.follower.setMaxPower(0.9);
     }
 
     @Override
@@ -115,89 +111,83 @@ public class AutoFarCiolos extends OpMode {
         public Paths(Follower follower) {
             grabHuman = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(56.000, 8.000),
-                                    new Pose(35.517, 15.594),
-                                    new Pose(11.692, 8.644)
+                            new BezierLine(
+                                    new Pose(88.000, 8.000),
+                                    new Pose(130.630, 8.476)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shootHuman = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(11.692, 8.644),
-                                    new Pose(34.195, 15.158),
-                                    new Pose(55.804, 8.077)
+                            new BezierLine(
+                                    new Pose(130.630, 8.476),
+                                    new Pose(88.196, 8.077)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             grab1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(55.804, 8.077),
-                                    new Pose(72.234, 47.587),
-                                    new Pose(11.490, 42.749)
+                                    new Pose(88.196, 8.077),
+                                    new Pose(71.766, 43.056),
+                                    new Pose(132.007, 39.224)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shoot1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(11.490, 42.749),
-                                    new Pose(56.496, 8.112)
+                                    new Pose(132.007, 39.224),
+                                    new Pose(87.504, 8.112)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             grabHuman2 = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(56.496, 8.112),
-                                    new Pose(35.259, 15.395),
-                                    new Pose(12.063, 8.608)
+                            new BezierLine(
+                                    new Pose(87.504, 8.112),
+                                    new Pose(130.594, 8.608)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shootHuman2 = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(12.063, 8.608),
-                                    new Pose(34.752, 15.906),
-                                    new Pose(56.238, 8.126)
+                            new BezierLine(
+                                    new Pose(130.594, 8.608),
+                                    new Pose(87.762, 8.126)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             grabHuman3 = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(56.238, 8.126),
-                                    new Pose(35.804, 15.643),
-                                    new Pose(11.636, 8.587)
+                            new BezierLine(
+                                    new Pose(87.762, 8.126),
+                                    new Pose(130.685, 8.755)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shootHuman3 = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(11.636, 8.587),
-                                    new Pose(34.934, 15.937),
-                                    new Pose(55.839, 8.028)
+                            new BezierLine(
+                                    new Pose(130.685, 8.755),
+                                    new Pose(88.161, 8.028)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
         }
     }
@@ -212,23 +202,29 @@ public class AutoFarCiolos extends OpMode {
                     robot.shooter.turretLocked = true;
                     singleton = false;
                 }
-                if (timer2.seconds()>1 && robot.shooter.velocityReached())
+                if (singletonRest && robot.shooter.velocityReached())
+                {   pathTimer.reset();
+                    singletonRest = false;
+                }
+                if (pathTimer.seconds()>0.3 && !singletonRest)
                 {
                     robot.intake.shoot();
-                }
-                else {
-                    robot.intake.rest();
-                }
-                    if (robot.intake.isEmpty())
+                    if (pathTimer.seconds()>0.45 && !singletonRest)
                     {
-                        if (timer.seconds()>1)
-                        {
-                            Robot.follower.followPath(paths.grabHuman);
-                            setPathState(1);
-                        }
-                    } else {
-                        timer.reset();
+                        robot.intake.rest();
+                        pathTimer.reset();
                     }
+                }
+                if (robot.intake.isEmpty())
+                {
+                    if (timer.seconds()>1)
+                    {
+                        Robot.follower.followPath(paths.grabHuman);
+                        setPathState(1);
+                    }
+                } else {
+                    timer.reset();
+                }
 
                 if (Robot.follower.isBusy())
                 {
@@ -261,7 +257,7 @@ public class AutoFarCiolos extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
+                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -274,11 +270,17 @@ public class AutoFarCiolos extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1  && robot.shooter.velocityReached())
+                    if (!Robot.follower.isBusy() && timer.seconds()>1  /*&& robot.shooter.velocityReached()*/)
                     {
-                        robot.intake.shoot();
-                    } else {
-                        robot.intake.rest();
+                        if (pathTimer.seconds()>0.3)
+                        {
+                            robot.intake.shoot();
+                            if (pathTimer.seconds()>0.45)
+                            {
+                                robot.intake.rest();
+                                pathTimer.reset();
+                            }
+                        }
                     }
                     if (robot.intake.isEmpty())
                     {
@@ -322,7 +324,7 @@ public class AutoFarCiolos extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
+                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -335,11 +337,17 @@ public class AutoFarCiolos extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
                     {
-                        robot.intake.shoot();
-                    } else {
-                        robot.intake.rest();
+                        if (pathTimer.seconds()>0.3)
+                        {
+                            robot.intake.shoot();
+                            if (pathTimer.seconds()>0.45)
+                            {
+                                robot.intake.rest();
+                                pathTimer.reset();
+                            }
+                        }
                     }
                     if (robot.intake.isEmpty())
                     {
@@ -386,7 +394,7 @@ public class AutoFarCiolos extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
+                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -399,28 +407,25 @@ public class AutoFarCiolos extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
                     {
-                        robot.intake.shoot();
-                    } else {
-                        robot.intake.rest();
+                        if (pathTimer.seconds()>0.3)
+                        {
+                            robot.intake.shoot();
+                            if (pathTimer.seconds()>0.45)
+                            {
+                                robot.intake.rest();
+                                pathTimer.reset();
+                            }
+                        }
                     }
                     if (robot.intake.isEmpty())
                     {
                         if (timer2.seconds()>1)
                         {
-                            if(gateLoops<desiredGateLoops)
-                            {
-                                Robot.follower.followPath(paths.grabHuman2);
-                                robot.shooter.shooting = false;
-                                setPathState(5);
-                                gateLoops++;
-                            } else {
-                                Robot.follower.followPath(paths.grabHuman2);
-                                robot.shooter.shooting = false;
-                                setPathState(-1);
-                            }
-
+                            Robot.follower.followPath(paths.grabHuman2);
+                            robot.shooter.shooting = false;
+                            setPathState(7);
                         }
                     } else {
                         timer2.reset();
@@ -459,7 +464,7 @@ public class AutoFarCiolos extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
+                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -472,11 +477,17 @@ public class AutoFarCiolos extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
                     {
-                        robot.intake.shoot();
-                    } else {
-                        robot.intake.rest();
+                        if (pathTimer.seconds()>0.3)
+                        {
+                            robot.intake.shoot();
+                            if (pathTimer.seconds()>0.45)
+                            {
+                                robot.intake.rest();
+                                pathTimer.reset();
+                            }
+                        }
                     }
                     if (robot.intake.isEmpty())
                     {

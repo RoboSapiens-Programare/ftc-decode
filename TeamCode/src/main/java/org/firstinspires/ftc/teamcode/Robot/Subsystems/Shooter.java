@@ -220,7 +220,7 @@ public class Shooter extends Subsystem {
 
     private double computeVelocity(double distance) {
         double velocity = (velA * distance * distance) + (velB * distance) + velC;
-        if (distance>80)
+        if (distance>120)
         {
             return 1880;
         }
@@ -330,7 +330,7 @@ public class Shooter extends Subsystem {
                     if (llStaleCount < LL_STALE_THRESHOLD && Math.abs(tx) < LL_THRESHOLD_DEG) {
                         useLimelight = true;
 
-                        if (llDistance>80)
+                        if (llDistance>120)
                         {
                             limelightTrackingController.kP = uV.limelightKpF;
                             limelightTrackingController.kI = uV.limelightKiF;
@@ -386,7 +386,7 @@ public class Shooter extends Subsystem {
 
             turretErrorRad = errorRad;
 
-            if (llDistance>80)
+            if (llDistance>120)
             {
                 odometryTrackingController.kP = uV.odometryKpF;
                 odometryTrackingController.kI = uV.odometryKiF;
@@ -450,6 +450,7 @@ public class Shooter extends Subsystem {
         } else {
             turretMotorRight.setPower(0.2);
             turretMotorLeft.setPower(0.2);
+
             turretPivot.setPower(0);
         }
     }

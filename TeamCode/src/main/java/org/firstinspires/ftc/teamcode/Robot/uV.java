@@ -29,10 +29,10 @@ public class uV {
     public static double odometryKfF = 0.01;
 
     // PIDF values for limelight tracking
-    public static double limelightKp = 0.005;
+    public static double limelightKp = 0.001;
     public static double limelightKi = 0.0003;
     public static double limelightKd = 0.00000002;
-    public static double limelightKf = 0.04;
+    public static double limelightKf = 0.03;
     public static double limelightKpF = 0.0035;
     public static double limelightKiF = 0.0003;
     public static double limelightKdF = 0.00000002;
