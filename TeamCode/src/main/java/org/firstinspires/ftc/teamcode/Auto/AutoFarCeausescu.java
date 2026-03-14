@@ -215,7 +215,7 @@ public class AutoFarCeausescu extends OpMode {
                     Robot.follower.followPath(paths.shootPreload);
                     robot.shooter.openGate();
                     robot.shooter.shooting = true;
-                    robot.shooter.turretLocked = true;
+//                    robot.shooter.turretLocked = true;
                     singleton = false;
                 }
                 if (!Robot.follower.isBusy() /*&& robot.shooter.isAimed()*/ /*&& robot.shooter.velocityReached() */ && !pathingOnly && timer2.seconds()>1)

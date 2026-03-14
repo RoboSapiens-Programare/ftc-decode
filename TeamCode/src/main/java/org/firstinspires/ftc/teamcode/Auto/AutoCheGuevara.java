@@ -199,7 +199,7 @@ public class AutoCheGuevara extends OpMode {
                 {
                     robot.shooter.openGate();
                     robot.shooter.shooting = true;
-                    robot.shooter.turretLocked = true;
+//                    robot.shooter.turretLocked = true;
                     singleton = false;
                 }
                     if (singletonRest && robot.shooter.velocityReached())

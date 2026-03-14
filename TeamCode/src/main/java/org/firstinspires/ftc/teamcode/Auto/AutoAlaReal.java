@@ -226,7 +226,7 @@ public class AutoAlaReal extends OpMode {
                 {
                     if (singleton)
                     {
-                        robot.shooter.turretLocked = true;
+//                        robot.shooter.turretLocked = true;
                         robot.intake.rest();
                         robot.shooter.openGate();
                         singleton = false;

@@ -49,17 +49,20 @@ public class AutoAlaBunRed extends OpMode {
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
         Robot.follower.setMaxPower(0.9);
+
+        robot.shooter.lock();
     }
 
     @Override
     public void init_loop() {
 
         robot.intake.update();
-//        robot.shooter.update();
+        robot.shooter.update();
 
         autoTimer.reset();
 
         dashboardTelemetry.update();
+        robot.shooter.update();
     }
 
     @Override
@@ -110,6 +113,8 @@ public class AutoAlaBunRed extends OpMode {
         Robot.transitionPose = Robot.follower.getPose();
         Robot.alliance = Robot.Alliance.RED;
         robot.shooter.LL_TURRET_OFFSET_DEG = 0;
+
+        robot.shooter.stopOverride();
     }
 
     public static class Paths {
@@ -229,7 +234,7 @@ public class AutoAlaBunRed extends OpMode {
                 {
                     if (singleton)
                     {
-                        robot.shooter.turretLocked = true;
+//                        robot.shooter.turretLocked = true;
                         robot.intake.rest();
                         robot.shooter.openGate();
                         singleton = false;

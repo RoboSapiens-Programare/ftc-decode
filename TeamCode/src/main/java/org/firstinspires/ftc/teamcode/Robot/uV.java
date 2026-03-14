@@ -23,6 +23,7 @@ public class uV {
     public static double odometryKi = 0;
     public static double odometryKd = 0.000012;
     public static double odometryKf = 0.01;
+
     public static double odometryKpF = 0.01;
     public static double odometryKiF = 0;
     public static double odometryKdF = 0;
@@ -33,6 +34,7 @@ public class uV {
     public static double limelightKi = 0.0003;
     public static double limelightKd = 0.00000002;
     public static double limelightKf = 0.03;
+
     public static double limelightKpF = 0.0035;
     public static double limelightKiF = 0.0003;
     public static double limelightKdF = 0.00000002;

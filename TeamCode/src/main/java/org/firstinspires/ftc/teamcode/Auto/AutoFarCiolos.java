@@ -23,7 +23,7 @@ public class AutoFarCiolos extends OpMode {
     int loopCount=0;
     private ElapsedTime pathTimer; // Timer for path state machine
     private boolean singleton = true;
-    private Paths paths; // Paths defined in the Paths class
+    private Paths paths; // Paths defined in `the Paths class
 
     private static Robot robot;
 
@@ -52,6 +52,9 @@ public class AutoFarCiolos extends OpMode {
         Robot.follower.setStartingPose(new Pose(56, 6, Math.toRadians(180)));
         Robot.transitionPose = new Pose(56, 6, Math.toRadians(180));
         Robot.follower.setMaxPower(1);
+
+        // TODO: tune
+        robot.shooter.goToAngle(-Math.toRadians(95));
     }
 
     @Override
@@ -60,6 +63,7 @@ public class AutoFarCiolos extends OpMode {
         autoTimer.reset();
 
         dashboardTelemetry.update();
+        robot.shooter.update();
     }
 
 
@@ -89,6 +93,7 @@ public class AutoFarCiolos extends OpMode {
             dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
             dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
             dashboardTelemetry.addData("heading", robot.follower.getHeading());
+            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
             dashboardTelemetry.update();
         }
 
@@ -101,6 +106,9 @@ public class AutoFarCiolos extends OpMode {
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
         Robot.alliance = Robot.Alliance.BLUE;
+
+//        robot.shooter.goToAngle(0);
+        robot.shooter.stopOverride();
     }
 
     public static class Paths {
@@ -210,7 +218,7 @@ public class AutoFarCiolos extends OpMode {
                 {
                     robot.shooter.openGate();
                     robot.shooter.shooting = true;
-                    robot.shooter.turretLocked = true;
+//                    robot.shooter.turretLocked = true;
                     singleton = false;
                 }
                 if (timer2.seconds()>1 && robot.shooter.velocityReached())

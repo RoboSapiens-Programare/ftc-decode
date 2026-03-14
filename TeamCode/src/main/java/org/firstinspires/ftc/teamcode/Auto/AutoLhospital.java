@@ -52,10 +52,15 @@ public class AutoLhospital extends OpMode {
         Robot.follower.setStartingPose(new Pose(88, 6, Math.toRadians(0)));
         Robot.transitionPose = new Pose(88, 6, Math.toRadians(0));
         Robot.follower.setMaxPower(1);
+
+        // TODO: tune
+        robot.shooter.goToAngle(Math.toRadians(95));
     }
 
     @Override
     public void init_loop() {
+
+        robot.shooter.update();
 
         autoTimer.reset();
 
@@ -101,6 +106,8 @@ public class AutoLhospital extends OpMode {
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
         Robot.alliance = Robot.Alliance.RED;
+
+        robot.shooter.stopOverride();
     }
 
     public static class Paths {
@@ -210,7 +217,7 @@ public class AutoLhospital extends OpMode {
                 {
                     robot.shooter.openGate();
                     robot.shooter.shooting = true;
-                    robot.shooter.turretLocked = true;
+//                    robot.shooter.turretLocked = true;
                     singleton = false;
                 }
                 if (timer2.seconds()>1 && robot.shooter.velocityReached())

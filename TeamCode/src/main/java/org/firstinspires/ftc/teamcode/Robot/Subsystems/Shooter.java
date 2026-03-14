@@ -93,7 +93,7 @@ public class Shooter extends Subsystem {
     public static double targetVelocity = 1300;
 
     // hazu meu gen
-    public boolean turretLocked = false;
+//    public boolean turretLocked = false;
     private double lockedTurretAngleRad = 0.0;
 
     // =========================================================
@@ -111,6 +111,13 @@ public class Shooter extends Subsystem {
 
     private final Pose blueObeliskPose = new Pose(12, 134);
     private final Pose redObeliskPose  = new Pose(133, 134);
+
+
+    // =========================================================
+    //
+    // =========================================================
+    private boolean override = false;
+    private double overrideAngle = 0;
 
     // =========================================================
     // CONSTRUCTOR
@@ -146,7 +153,7 @@ public class Shooter extends Subsystem {
         FtcDashboard.getInstance().startCameraStream(ll, 30);
 
         odometryTrackingController.setSetpoint(0);
-        odometryTrackingController.setTolerance(14);
+        odometryTrackingController.setTolerance(0);
 
         turretPivot = hwMap.get(CRServo.class, "turretPivot");
 
@@ -177,15 +184,15 @@ public class Shooter extends Subsystem {
             return Math.abs(actual - targetVelocity) < 41;
         }
     }
-    public void lockTurret() {
-        lockedTurretAngleRad = (turretEncoder.getCurrentPosition()
-                / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
-        turretLocked = true;
-    }
-
-    public void unlockTurret() {
-        turretLocked = false;
-    }
+//    public void lockTurret() {
+//        lockedTurretAngleRad = (turretEncoder.getCurrentPosition()
+//                / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+//        turretLocked = true;
+//    }
+//
+//    public void unlockTurret() {
+//        turretLocked = false;
+//    }
 
     // =========================================================
     // IS AIMED
@@ -269,24 +276,24 @@ public class Shooter extends Subsystem {
     // =========================================================
     public double track() {
 
-        if (turretLocked) {
-            double currentAngleRad = (turretEncoder.getCurrentPosition()
-                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
-            double errorRad = lockedTurretAngleRad - currentAngleRad;
-            while (errorRad >  Math.PI) errorRad -= 2.0 * Math.PI;
-            while (errorRad < -Math.PI) errorRad += 2.0 * Math.PI;
-            turretErrorRad = errorRad;
-            double output = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
-            output = Math.max(-1.0, Math.min(1.0, output));
-            turretPivot.setPower(output);
-//            return output;
-        }
+//        if (turretLocked) {
+//            double currentAngleRad = (turretEncoder.getCurrentPosition()
+//                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+//            double errorRad = lockedTurretAngleRad - currentAngleRad;
+//            while (errorRad >  Math.PI) errorRad -= 2.0 * Math.PI;
+//            while (errorRad < -Math.PI) errorRad += 2.0 * Math.PI;
+//            turretErrorRad = errorRad;
+//            double output = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
+//            output = Math.max(-1.0, Math.min(1.0, output));
+//            turretPivot.setPower(output);
+////            return output;
+//        }
 
-        PIDFController odometryTrackingController =
-                new PIDFController(uV.odometryKp, uV.odometryKi, uV.odometryKd, uV.odometryKf);
-
-        PIDFController limelightTrackingController =
-                new PIDFController(uV.limelightKp, uV.limelightKi, uV.limelightKd, uV.limelightKf);
+//        PIDFController odometryTrackingController =
+//                new PIDFController(uV.odometryKp, uV.odometryKi, uV.odometryKd, uV.odometryKf);
+//
+//        PIDFController limelightTrackingController =
+//                new PIDFController(uV.limelightKp, uV.limelightKi, uV.limelightKd, uV.limelightKf);
         // -------------------------------------------------------
         // 1. POZITIE & VITEZA — rotire in field frame
         // -------------------------------------------------------
@@ -314,6 +321,8 @@ public class Shooter extends Subsystem {
             int targetId = (Robot.alliance == Robot.Alliance.RED) ? 24 : 20;
 
             for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+//                FtcDashboard.getInstance().getTelemetry().addData("found tag with id", fiducial.getFiducialId());
+//                FtcDashboard.getInstance().getTelemetry().addData("searching for ", targetId);
                 if (fiducial.getFiducialId() == targetId) {
                     double tx = fiducial.getTargetXDegrees();
 
@@ -327,10 +336,12 @@ public class Shooter extends Subsystem {
                     }
 
                     // LL activ daca frame recent SI tinta in frame
+//                    FtcDashboard.getInstance().getTelemetry().addData("ll stale count", llStaleCount);
+//                    FtcDashboard.getInstance().getTelemetry().addData("tx", tx);
                     if (llStaleCount < LL_STALE_THRESHOLD && Math.abs(tx) < LL_THRESHOLD_DEG) {
                         useLimelight = true;
 
-                        if (llDistance>120)
+                        if (llDistance>180)
                         {
                             limelightTrackingController.kP = uV.limelightKpF;
                             limelightTrackingController.kI = uV.limelightKiF;
@@ -345,7 +356,7 @@ public class Shooter extends Subsystem {
 
                         double txCorrected = tx + LL_TURRET_OFFSET_DEG;
 
-                            output = limelightTrackingController.updatePID(txCorrected);
+                        output = limelightTrackingController.updatePID(txCorrected);
 
                         turretErrorRad = Math.toRadians(txCorrected);
                         turretOutput   = output;
@@ -372,7 +383,7 @@ public class Shooter extends Subsystem {
             while (desiredTurretAngleRad >  Math.PI) desiredTurretAngleRad -= 2.0 * Math.PI;
             while (desiredTurretAngleRad < -Math.PI) desiredTurretAngleRad += 2.0 * Math.PI;
 
-            double limitRad = Math.toRadians(80.0);
+            double limitRad = Math.toRadians(180.0);
             if (desiredTurretAngleRad > limitRad) {
                 desiredTurretAngleRad = limitRad;
             } else if (desiredTurretAngleRad < -limitRad) {
@@ -406,17 +417,56 @@ public class Shooter extends Subsystem {
 
             turretOutput = output; // actualizat DUPA calculul output
             trackState   = "ODOMETRY";
+
         }
+
+//        FtcDashboard.getInstance().getTelemetry().addData("use ll", useLimelight);
 
 
         output = Math.max(-1.0, Math.min(1.0, output));
-
-        if (!turretLocked)
-        {
+        if (!override) {
             turretPivot.setPower(output);
         }
 
         return output;
+    }
+
+    @Override
+    public void reset() {
+        turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    // =========================================================
+    // override
+    // =========================================================
+    public void goToAngle(double rad) {
+        override = true;
+
+        double limitRad = Math.toRadians(1000.0);
+        if (rad > limitRad) {
+            rad = limitRad;
+        } else if (rad < -limitRad) {
+            rad = -limitRad;
+        }
+
+        overrideAngle = rad;
+    }
+
+    public void stopOverride() {
+        override = false;
+    }
+
+    public void incremental(double rad) {
+        if (!override) {
+            overrideAngle = (turretEncoder.getCurrentPosition()
+                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+        }
+        goToAngle(rad + overrideAngle);
+    }
+
+    public void lock() {
+        goToAngle(overrideAngle);
     }
 
     // =========================================================
@@ -431,6 +481,29 @@ public class Shooter extends Subsystem {
         pidfController.kD = shootKd;
         pidfController.kF = shootKf;
 
+        if (override) {
+            odometryTrackingController.kP = 0.02;
+            odometryTrackingController.kI = 0;
+            odometryTrackingController.kD = 0.000018;
+            odometryTrackingController.kF = 0.02;
+
+            double currentTurretAngleRad = (turretEncoder.getCurrentPosition()
+                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+
+            double errorRad = overrideAngle - currentTurretAngleRad;
+
+            while (errorRad >  Math.PI) errorRad -= 2.0 * Math.PI;
+            while (errorRad < -Math.PI) errorRad += 2.0 * Math.PI;
+
+//            FtcDashboard.getInstance().getTelemetry().addData("err", errorRad);
+//            FtcDashboard.getInstance().getTelemetry().addData("ovr", overrideAngle);
+//            FtcDashboard.getInstance().getTelemetry().addData("cur", currentTurretAngleRad);
+
+            double output = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
+
+            turretPivot.setPower(output);
+        }
+
         if (shooting) {
             track();
 
@@ -438,21 +511,19 @@ public class Shooter extends Subsystem {
             targetVelocity = computeVelocity(llDistance);
 //            targetVelocity = 0;
             pidfController.setSetpoint(targetVelocity);
-            if (!shootingLobComp)
-            {
+            if (!shootingLobComp) {
                 lobServo.setPosition(computeLob(llDistance));
             }
+
             double pidOutput = pidfController.updatePID(-turretMotorLeft.getVelocity());
 
             turretMotorRight.setPower(pidOutput);
             turretMotorLeft.setPower(pidOutput);
 
         } else {
-            turretMotorRight.setPower(0.2);
-            turretMotorLeft.setPower(0.2);
-            if (!turretLocked)
-            {
-                turretPivot.setPower(0);
+            if (!override) {
+                turretMotorRight.setPower(0.2);
+                turretMotorLeft.setPower(0.2);
             }
         }
     }

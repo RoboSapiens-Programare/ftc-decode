@@ -49,13 +49,16 @@ public class AutoAlaBun extends OpMode {
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
         Robot.follower.setMaxPower(0.9);
+
+        robot.shooter.lock();
+
     }
 
     @Override
     public void init_loop() {
 
         robot.intake.update();
-//        robot.shooter.update();
+        robot.shooter.update();
 
         autoTimer.reset();
 
@@ -97,6 +100,7 @@ public class AutoAlaBun extends OpMode {
             dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
             dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
             dashboardTelemetry.addData("heading", robot.follower.getHeading());
+            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
             dashboardTelemetry.update();
         }
 
@@ -110,6 +114,7 @@ public class AutoAlaBun extends OpMode {
         Robot.transitionPose = Robot.follower.getPose();
         Robot.alliance= Robot.Alliance.BLUE;
         robot.shooter.LL_TURRET_OFFSET_DEG = 0;
+        robot.shooter.stopOverride();
     }
 
     public static class Paths {
@@ -181,7 +186,7 @@ public class AutoAlaBun extends OpMode {
                             new BezierCurve(
                                     new Pose(55.000, 95.000),
                                     new Pose(37.161, 63.811),
-                                    new Pose(9.853, 59.545)
+                                    new Pose(7.353, 56.045)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(155))
@@ -190,7 +195,7 @@ public class AutoAlaBun extends OpMode {
             shoot3 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(9.853, 59.545),
+                                    new Pose(7.853, 58.545),
                                     new Pose(39.297, 65.871),
                                     new Pose(55.000, 95.000)
                             )
@@ -228,7 +233,7 @@ public class AutoAlaBun extends OpMode {
                 {
                     if (singleton)
                     {
-                        robot.shooter.turretLocked = true;
+//                        robot.shooter.turretLocked = true;
                         robot.intake.rest();
                         robot.shooter.openGate();
                         singleton = false;
