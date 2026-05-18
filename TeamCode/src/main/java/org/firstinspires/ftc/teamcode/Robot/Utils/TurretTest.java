@@ -75,7 +75,6 @@ public class TurretTest extends OpMode {
 //        robot.shooter.update();
 
         robot.shooter.lobServo.setPosition(1);
-        robot.shooter.turretPivot.setPower(1);
 
     }
 }

@@ -300,30 +300,30 @@ public class TeleOpul extends OpMode {
 
         Robot.follower.update();
 
-//        loopCount++;
-//        if (loopCount % 5 == 0) {
-//            dashboardTelemetry.addData("desired angle", robot.shooter.getTargetFieldAngleRadStatic());
-//            dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
-//            dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
-//            dashboardTelemetry.addData("Sensor3", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
-//            dashboardTelemetry.addData("State", state);dashboardTelemetry.addData("State", state);
-//            dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
-//            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
-//            dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
-//            dashboardTelemetry.addData("Track State", robot.shooter.trackState);
-//            dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
-//            dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
-//            dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
-//            dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
-//            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
-//            dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
-//            dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
-//            dashboardTelemetry.addData("Distance", robot.shooter.llDistance);
-//            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
-//            dashboardTelemetry.addData("Angle pose", robot.follower.getPose().getHeading());
-//            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
-//            dashboardTelemetry.update();
-//        }
+        loopCount++;
+        if (loopCount % 5 == 0) {
+            dashboardTelemetry.addData("desired angle", robot.shooter.getTargetFieldAngleRadStatic());
+            dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
+            dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
+            dashboardTelemetry.addData("Sensor3", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
+            dashboardTelemetry.addData("State", state);dashboardTelemetry.addData("State", state);
+            dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
+            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+            dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
+            dashboardTelemetry.addData("Track State", robot.shooter.trackState);
+            dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
+            dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
+            dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
+            dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
+            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+            dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
+            dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
+            dashboardTelemetry.addData("Distance", robot.shooter.llDistance);
+            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
+            dashboardTelemetry.addData("Angle pose", robot.follower.getPose().getHeading());
+            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
+            dashboardTelemetry.update();
+        }
 
 
     }
