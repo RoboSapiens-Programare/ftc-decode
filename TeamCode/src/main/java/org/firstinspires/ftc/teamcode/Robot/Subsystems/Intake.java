@@ -11,12 +11,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@SuppressWarnings("FieldCanBeLocal")
 public class Intake extends Subsystem {
+
+    // Hardware
     private final DcMotorEx rollerOne;
     private final DcMotorEx rollerTwo;
     public final Servo headlight;
-
     public final DistanceSensor sensorIntake;
     public final DistanceSensor sensorOuttake;
     public final DistanceSensor sensorMid;
@@ -24,7 +24,6 @@ public class Intake extends Subsystem {
     private final ElapsedTime ballTimer = new ElapsedTime();
 
     public Intake(HardwareMap hwMap) {
-
         rollerOne = hwMap.get(DcMotorEx.class, "rollerOne");
         rollerTwo = hwMap.get(DcMotorEx.class, "rollerTwo");
 
@@ -44,11 +43,11 @@ public class Intake extends Subsystem {
     @Override
     public void update() {}
 
-    public void updateHeadlight()
-    {
-        if (hlTimer.milliseconds()>100)
-        {
-            if (sensorOuttake.getDistance(DistanceUnit.CM) < 8 && sensorMid.getDistance(DistanceUnit.CM) < 8 && sensorIntake.getDistance(DistanceUnit.CM) < 8) {
+    public void updateHeadlight() {
+        if (hlTimer.milliseconds() > 100) {
+            if (sensorOuttake.getDistance(DistanceUnit.CM) < 8
+                    && sensorMid.getDistance(DistanceUnit.CM) < 8
+                    && sensorIntake.getDistance(DistanceUnit.CM) < 8) {
                 headlight.setPosition(1);
             } else {
                 headlight.setPosition(0.277);
@@ -56,26 +55,26 @@ public class Intake extends Subsystem {
         }
     }
 
+    // Rollers
     public void shoot() {
         rollerOne.setPower(uV.rollerOneP);
         rollerTwo.setPower(uV.rollerTwoP);
     }
 
-    public boolean isEmpty()
-    {
-        return sensorMid.getDistance(DistanceUnit.CM)>8 && sensorIntake.getDistance(DistanceUnit.CM)>8 && sensorOuttake.getDistance(DistanceUnit.CM)>8;
+    public boolean isEmpty() {
+        return sensorMid.getDistance(DistanceUnit.CM) > 8
+                && sensorIntake.getDistance(DistanceUnit.CM) > 8
+                && sensorOuttake.getDistance(DistanceUnit.CM) > 8;
     }
 
     public void pullBalls() {
-        if (sensorOuttake.getDistance(DistanceUnit.CM) < 8)
-        {
+        if (sensorOuttake.getDistance(DistanceUnit.CM) < 8) {
             rollerTwo.setPower(0);
         } else {
             rollerTwo.setPower(uV.rollerTwoP);
         }
 
-        if (sensorMid.getDistance(DistanceUnit.CM) < 8 && sensorIntake.getDistance(DistanceUnit.CM) < 8)
-        {
+        if (sensorMid.getDistance(DistanceUnit.CM) < 8 && sensorIntake.getDistance(DistanceUnit.CM) < 8) {
             rollerOne.setPower(0);
         } else {
             rollerOne.setPower(uV.rollerOneP);
@@ -83,15 +82,13 @@ public class Intake extends Subsystem {
     }
 
     public void pullBallsHard() {
-        if (sensorOuttake.getDistance(DistanceUnit.CM) < 8)
-        {
+        if (sensorOuttake.getDistance(DistanceUnit.CM) < 8) {
             rollerTwo.setPower(0);
         } else {
             rollerTwo.setPower(uV.rollerTwoP);
         }
 
-        if (sensorMid.getDistance(DistanceUnit.CM) < 8 && sensorIntake.getDistance(DistanceUnit.CM) < 8)
-        {
+        if (sensorMid.getDistance(DistanceUnit.CM) < 8 && sensorIntake.getDistance(DistanceUnit.CM) < 8) {
             rollerOne.setPower(0.55);
         } else {
             rollerOne.setPower(uV.rollerOneP);

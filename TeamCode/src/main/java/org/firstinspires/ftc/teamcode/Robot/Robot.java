@@ -21,7 +21,7 @@ public class Robot {
         BLUE
     };
 
-    public static Alliance alliance = Alliance.RED;
+    public static Alliance alliance = Alliance.BLUE;
     public static Pose transitionPose = new Pose(63, 9, Math.PI / 2);
 
     public Robot(HardwareMap hwMap) {

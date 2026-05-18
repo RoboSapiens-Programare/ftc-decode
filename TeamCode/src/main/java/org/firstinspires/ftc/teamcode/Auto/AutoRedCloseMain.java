@@ -5,7 +5,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -13,8 +12,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
-@Autonomous(name = "Auto C 'Artemis' B", group = "0. Auto")
-public class AutoAlaBun extends OpMode {
+@Autonomous(name = "Auto C 'Artemis' R", group = "0. Auto")
+public class AutoRedCloseMain extends OpMode {
 
 
     private int pathState; // Current autonomous path state (state machine)
@@ -44,14 +43,13 @@ public class AutoAlaBun extends OpMode {
 
         Robot.alliance = Robot.Alliance.BLUE;
 
-        Robot.follower.setStartingPose(new Pose(20.9, 123.1, Math.toRadians(144)));
+        Robot.follower.setStartingPose(new Pose(123.077, 123.133, Math.toRadians(36)));
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
         Robot.follower.setMaxPower(0.9);
 
         robot.shooter.lock();
-
     }
 
     @Override
@@ -63,6 +61,7 @@ public class AutoAlaBun extends OpMode {
         autoTimer.reset();
 
         dashboardTelemetry.update();
+        robot.shooter.update();
     }
 
     @Override
@@ -100,7 +99,6 @@ public class AutoAlaBun extends OpMode {
             dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
             dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
             dashboardTelemetry.addData("heading", robot.follower.getHeading());
-            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
             dashboardTelemetry.update();
         }
 
@@ -112,8 +110,9 @@ public class AutoAlaBun extends OpMode {
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
-        Robot.alliance= Robot.Alliance.BLUE;
+        Robot.alliance = Robot.Alliance.RED;
         robot.shooter.LL_TURRET_OFFSET_DEG = 0;
+
         robot.shooter.stopOverride();
     }
 
@@ -132,99 +131,100 @@ public class AutoAlaBun extends OpMode {
             shootPreload = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(20.923, 123.133),
-                                    new Pose(56.993, 96.392)
+                                    new Pose(123.077, 123.133),
+                                    new Pose(87.007, 96.392)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(144))
+                    .setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(36))
                     .build();
 
             grab2MID = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(56.993, 96.392),
-                                    new Pose(54.895, 60.262)
+                                    new Pose(87.007, 96.392),
+                                    new Pose(89.105, 60.262)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(0))
                     .build();
 
             grab2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(54.895, 60.262),
-                                    new Pose(12.685, 59.881)
+                                    new Pose(89.105, 60.262),
+                                    new Pose(131.315, 59.881)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             grab2GATE = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(12.685, 59.881),
-                                    new Pose(30.656, 55.189),
-                                    new Pose(18.752, 66.231)
+                                    new Pose(131.315, 59.881),
+                                    new Pose(113.344, 55.189),
+                                    new Pose(125.248, 66.231)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shoot2 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(18.752, 66.231),
-                                    new Pose(52.364, 61.594),
-                                    new Pose(55.000, 95.000)
+                                    new Pose(125.248, 66.231),
+                                    new Pose(91.636, 61.594),
+                                    new Pose(89.000, 95.000)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(36))
                     .build();
 
             gate1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(55.000, 95.000),
-                                    new Pose(37.161, 63.811),
-                                    new Pose(7.353, 56.045)
+                                    new Pose(89.000, 95.000),
+                                    new Pose(106.839, 63.811),
+                                    new Pose(134.147, 59.545)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(155))
+                    .setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(25))
                     .build();
 
             shoot3 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(7.853, 58.545),
-                                    new Pose(39.297, 65.871),
-                                    new Pose(55.000, 95.000)
+                                    new Pose(134.147, 59.545),
+                                    new Pose(104.703, 65.871),
+                                    new Pose(89.000, 95.000)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(144))
+                    .setLinearHeadingInterpolation(Math.toRadians(25), Math.toRadians(36))
                     .build();
 
             grab3 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(55.000, 95.000),
-                                    new Pose(67.185, 82.510),
-                                    new Pose(20.678, 84.252)
+                                    new Pose(89.000, 95.000),
+                                    new Pose(76.815, 82.510),
+                                    new Pose(123.322, 84.252)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(0))
                     .build();
 
             shoot4 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(20.678, 84.252),
-                                    new Pose(47.517, 102.175)
+                                    new Pose(123.322, 84.252),
+                                    new Pose(96.483, 102.175)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(36))
                     .build();
         }
     }
+
     public int autonomousPathUpdate() {
         switch (pathState) {
             case 0:
@@ -245,7 +245,7 @@ public class AutoAlaBun extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -254,7 +254,7 @@ public class AutoAlaBun extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>0.5)
+                        if (timer2.seconds()>1)
                         {
                             Robot.follower.followPath(paths.grab2MID);
                             robot.shooter.shooting = false;

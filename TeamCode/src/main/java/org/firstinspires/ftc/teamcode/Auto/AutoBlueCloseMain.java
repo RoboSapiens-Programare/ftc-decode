@@ -12,8 +12,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
-@Autonomous(name = "Auto C 'Tyche'", group = "0. Auto")
-public class AutoAlaReal extends OpMode {
+@Autonomous(name = "Auto C 'Artemis' B", group = "0. Auto")
+public class AutoBlueCloseMain extends OpMode {
 
 
     private int pathState; // Current autonomous path state (state machine)
@@ -31,7 +31,7 @@ public class AutoAlaReal extends OpMode {
     private final ElapsedTime autoTimer = new ElapsedTime();
 
     private byte gateLoops = 0;
-    int targetGateLoops = 2;
+    int targetGateLoops = 1;
 
     private boolean singletonRest = true;
 
@@ -48,6 +48,9 @@ public class AutoAlaReal extends OpMode {
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
         Robot.follower.setMaxPower(0.9);
+
+        robot.shooter.lock();
+
     }
 
     @Override
@@ -96,6 +99,7 @@ public class AutoAlaReal extends OpMode {
             dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
             dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
             dashboardTelemetry.addData("heading", robot.follower.getHeading());
+            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
             dashboardTelemetry.update();
         }
 
@@ -107,7 +111,9 @@ public class AutoAlaReal extends OpMode {
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
+        Robot.alliance= Robot.Alliance.BLUE;
         robot.shooter.LL_TURRET_OFFSET_DEG = 0;
+        robot.shooter.stopOverride();
     }
 
     public static class Paths {
@@ -179,7 +185,7 @@ public class AutoAlaReal extends OpMode {
                             new BezierCurve(
                                     new Pose(55.000, 95.000),
                                     new Pose(37.161, 63.811),
-                                    new Pose(9.853, 59.545)
+                                    new Pose(7.353, 56.045)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(155))
@@ -188,7 +194,7 @@ public class AutoAlaReal extends OpMode {
             shoot3 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(9.853, 59.545),
+                                    new Pose(7.853, 58.545),
                                     new Pose(39.297, 65.871),
                                     new Pose(55.000, 95.000)
                             )
@@ -238,7 +244,7 @@ public class AutoAlaReal extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -247,7 +253,7 @@ public class AutoAlaReal extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>0.4)
+                        if (timer2.seconds()>0.5)
                         {
                             Robot.follower.followPath(paths.grab2MID);
                             robot.shooter.shooting = false;
@@ -314,7 +320,7 @@ public class AutoAlaReal extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -323,7 +329,7 @@ public class AutoAlaReal extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>0.4)
+                        if (timer2.seconds()>0.5)
                         {
                             Robot.follower.followPath(paths.gate1);
                             Robot.follower.setMaxPower(0.72);
@@ -353,11 +359,6 @@ public class AutoAlaReal extends OpMode {
                 }
                 break;
             case 3:
-                if (pathTimer.seconds()>1.5) {
-                    Robot.follower.setMaxPower(0.72);
-                } else {
-                    Robot.follower.setMaxPower(1);
-                }
                 // go to grab 2
                 if (!pathingOnly)
                 {
@@ -387,7 +388,7 @@ public class AutoAlaReal extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -447,7 +448,7 @@ public class AutoAlaReal extends OpMode {
                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.4 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
                     {
                         robot.intake.shoot();
                     }
@@ -456,10 +457,18 @@ public class AutoAlaReal extends OpMode {
                     }
                     if (robot.intake.isEmpty())
                     {
-                        if (timer2.seconds()>1)
+                        if (timer2.seconds()>0.4)
                         {
                             robot.shooter.shooting = false;
-                            setPathState(-1);
+                            if (timer.seconds()<2)
+                            {Robot.follower.followPath(paths.gate1);}
+                            else
+                            {Robot.follower.setMaxPower(0);
+                                Robot.transitionPose=Robot.follower.getPose();}
+
+
+
+
                         }
                     } else {
                         timer2.reset();

@@ -6,17 +6,15 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto F 'Athena' S", group = "0. Auto")
-public class AutoCheGuevara extends OpMode {
+@Autonomous(name = "Auto F 'Hades' R", group = "0. Auto")
+public class AutoFarRedMain extends OpMode {
+
 
     private int pathState; // Current autonomous path state (state machine)
     int loopCount=0;
@@ -32,6 +30,9 @@ public class AutoCheGuevara extends OpMode {
     private final ElapsedTime timer2 = new ElapsedTime();
     private final ElapsedTime autoTimer = new ElapsedTime();
 
+    int gateLoops=0;
+    int desiredGateLoops = 2;
+
     private boolean singletonRest = true;
 
     Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
@@ -45,13 +46,18 @@ public class AutoCheGuevara extends OpMode {
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); //Build Paths
-        Robot.follower.setStartingPose(new Pose(56, 8, Math.toRadians(180)));
-        Robot.transitionPose = new Pose(56, 8, Math.toRadians(180));
-        Robot.follower.setMaxPower(0.9);
+        Robot.follower.setStartingPose(new Pose(88, 6, Math.toRadians(0)));
+        Robot.transitionPose = new Pose(88, 6, Math.toRadians(0));
+        Robot.follower.setMaxPower(1);
+
+        // TODO: tune
+        robot.shooter.goToAngle(Math.toRadians(95));
     }
 
     @Override
     public void init_loop() {
+
+        robot.shooter.update();
 
         autoTimer.reset();
 
@@ -96,6 +102,9 @@ public class AutoCheGuevara extends OpMode {
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
+        Robot.alliance = Robot.Alliance.RED;
+
+        robot.shooter.stopOverride();
     }
 
     public static class Paths {
@@ -111,83 +120,89 @@ public class AutoCheGuevara extends OpMode {
         public Paths(Follower follower) {
             grabHuman = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(56.000, 8.000),
-                                    new Pose(13.370, 8.476)
+                            new BezierCurve(
+                                    new Pose(88.000, 6.000),
+                                    new Pose(108.986, 17.944),
+                                    new Pose(132.476, 10.657)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shootHuman = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(13.370, 8.476),
-                                    new Pose(55.804, 8.077)
+                            new BezierCurve(
+                                    new Pose(132.476, 10.657),
+                                    new Pose(109.301, 17.843),
+                                    new Pose(88.000, 6.000)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             grab1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(55.804, 8.077),
-                                    new Pose(72.234, 43.056),
-                                    new Pose(11.993, 39.224)
+                                    new Pose(88.000, 6.000),
+                                    new Pose(71.766, 47.587),
+                                    new Pose(132.510, 42.749)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shoot1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(11.993, 39.224),
-                                    new Pose(56.496, 8.112)
+                                    new Pose(132.510, 42.749),
+                                    new Pose(88.000, 6.000)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             grabHuman2 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(56.496, 8.112),
-                                    new Pose(13.406, 8.608)
+                            new BezierCurve(
+                                    new Pose(88.000, 6.000),
+                                    new Pose(108.909, 17.745),
+                                    new Pose(132.776, 10.622)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shootHuman2 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(13.406, 8.608),
-                                    new Pose(56.238, 8.126)
+                            new BezierCurve(
+                                    new Pose(132.776, 10.622),
+                                    new Pose(109.080, 18.087),
+                                    new Pose(88.000, 6.000)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             grabHuman3 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(56.238, 8.126),
-                                    new Pose(13.315, 8.755)
+                            new BezierCurve(
+                                    new Pose(88.000, 6.000),
+                                    new Pose(109.035, 18.161),
+                                    new Pose(132.867, 10.601)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
             shootHuman3 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
-                                    new Pose(13.315, 8.755),
-                                    new Pose(55.839, 8.028)
+                            new BezierCurve(
+                                    new Pose(132.867, 10.601),
+                                    new Pose(109.066, 18.455),
+                                    new Pose(88.000, 6.000)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
         }
     }
@@ -202,19 +217,13 @@ public class AutoCheGuevara extends OpMode {
 //                    robot.shooter.turretLocked = true;
                     singleton = false;
                 }
-                    if (singletonRest && robot.shooter.velocityReached())
-                    {   pathTimer.reset();
-                        singletonRest = false;
-                    }
-                    if (pathTimer.seconds()>0.3 && !singletonRest)
-                    {
-                        robot.intake.shoot();
-                        if (pathTimer.seconds()>0.45 && !singletonRest)
-                        {
-                            robot.intake.rest();
-                            pathTimer.reset();
-                        }
-                    }
+                if (timer2.seconds()>1 && robot.shooter.velocityReached())
+                {
+                    robot.intake.shoot();
+                }
+                else {
+                    robot.intake.rest();
+                }
                 if (robot.intake.isEmpty())
                 {
                     if (timer.seconds()>1)
@@ -257,7 +266,7 @@ public class AutoCheGuevara extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -270,17 +279,11 @@ public class AutoCheGuevara extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1  /*&& robot.shooter.velocityReached()*/)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1  && robot.shooter.velocityReached())
                     {
-                        if (pathTimer.seconds()>0.3)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.45)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
+                    } else {
+                        robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
@@ -324,7 +327,7 @@ public class AutoCheGuevara extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -337,17 +340,11 @@ public class AutoCheGuevara extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
                     {
-                        if (pathTimer.seconds()>0.3)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.45)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
+                    } else {
+                        robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
@@ -394,7 +391,7 @@ public class AutoCheGuevara extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -407,25 +404,28 @@ public class AutoCheGuevara extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
                     {
-                        if (pathTimer.seconds()>0.3)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.45)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
+                    } else {
+                        robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
                         if (timer2.seconds()>1)
                         {
-                            Robot.follower.followPath(paths.grabHuman2);
-                            robot.shooter.shooting = false;
-                            setPathState(7);
+                            if(gateLoops<desiredGateLoops)
+                            {
+                                Robot.follower.followPath(paths.grabHuman2);
+                                robot.shooter.shooting = false;
+                                setPathState(5);
+                                gateLoops++;
+                            } else {
+                                Robot.follower.followPath(paths.grabHuman2);
+                                robot.shooter.shooting = false;
+                                setPathState(-1);
+                            }
+
                         }
                     } else {
                         timer2.reset();
@@ -464,7 +464,7 @@ public class AutoCheGuevara extends OpMode {
                     robot.shooter.update();
                     robot.shooter.shooting = true;
                 }
-                if (!Robot.follower.isBusy() /*&& robot.shooter.velocityReached()*/ && !pathingOnly)
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
                 {
                     robot.shooter.openGate();
                     if (singleton)
@@ -477,17 +477,11 @@ public class AutoCheGuevara extends OpMode {
                     {
                         timer.reset();
                     }
-                    if (!Robot.follower.isBusy() && timer.seconds()>1 /*&& robot.shooter.velocityReached()*/)
+                    if (!Robot.follower.isBusy() && timer.seconds()>1 && robot.shooter.velocityReached())
                     {
-                        if (pathTimer.seconds()>0.3)
-                        {
-                            robot.intake.shoot();
-                            if (pathTimer.seconds()>0.45)
-                            {
-                                robot.intake.rest();
-                                pathTimer.reset();
-                            }
-                        }
+                        robot.intake.shoot();
+                    } else {
+                        robot.intake.rest();
                     }
                     if (robot.intake.isEmpty())
                     {
