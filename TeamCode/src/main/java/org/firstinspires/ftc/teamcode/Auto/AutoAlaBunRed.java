@@ -38,21 +38,19 @@ public class AutoAlaBunRed extends OpMode {
 
     Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
 
-
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
 
-        Robot.alliance = Robot.Alliance.RED;
+        Robot.alliance = Robot.Alliance.BLUE;
 
         Robot.follower.setStartingPose(new Pose(123.077, 123.133, Math.toRadians(36)));
 
         pathTimer = new ElapsedTime();
-        paths = new AutoAlaBunRed.Paths(Robot.follower); //Build Paths
+        paths = new Paths(Robot.follower); //Build Paths
         Robot.follower.setMaxPower(0.9);
 
         robot.shooter.lock();
-
     }
 
     @Override
@@ -64,6 +62,7 @@ public class AutoAlaBunRed extends OpMode {
         autoTimer.reset();
 
         dashboardTelemetry.update();
+        robot.shooter.update();
     }
 
     @Override
@@ -101,7 +100,6 @@ public class AutoAlaBunRed extends OpMode {
             dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
             dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
             dashboardTelemetry.addData("heading", robot.follower.getHeading());
-            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
             dashboardTelemetry.update();
         }
 
@@ -113,11 +111,11 @@ public class AutoAlaBunRed extends OpMode {
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
-        Robot.alliance= Robot.Alliance.RED;
+        Robot.alliance = Robot.Alliance.RED;
         robot.shooter.LL_TURRET_OFFSET_DEG = 0;
+
         robot.shooter.stopOverride();
     }
-
 
     public static class Paths {
         public PathChain shootPreload;

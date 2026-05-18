@@ -6,6 +6,7 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -16,97 +17,113 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
+@SuppressWarnings("FieldCanBeLocal")
 @Config
 public class Shooter extends Subsystem {
 
+    public static double FIELD_ANGLE_OFFSET_DEG = -3.0;
+    public static double ENCODER_GEAR_RATIO     = 3.0;
+
     // =========================================================
-    // HARDWARE
+    // Motoare & Servouri
     // =========================================================
     public final DcMotorEx turretMotorLeft;
     public final DcMotorEx turretMotorRight;
     public final Servo     lobServo;
-    public final Servo     turretPivot;
+    public final CRServo   turretPivot;
     private final Servo    gate;
-    public  final Limelight3A limelight;
 
     // =========================================================
-    // TURNABLE CONSTANTS (live-tuneable via FTC Dashboard @Config)
+    // Senzori
     // =========================================================
-
-    // Turret servo geometry
-    public static double TURRET_ANGLE_OFFSET_DEG = -3.0;
-    public static double TURRET_SERVO_MIDPOINT   = 0.5;
-    public static double TURRET_MAX_ANGLE_DEG    = 90.0;
-    public static double TURRET_GEAR_RATIO       = 1.3;
-
-    // Flywheel PIDF gains
-    public static double FLYWHEEL_KP = 0.06;
-    public static double FLYWHEEL_KI = 0.00002;
-    public static double FLYWHEEL_KD = 0.0000001;
-    public static double FLYWHEEL_KF = 0.013;
-
-    // Lob polynomial:  A * dist^2 + B * dist + C
-    public static double LOB_A =  0.0;
-    public static double LOB_B = -0.01364;
-    public static double LOB_C =  1.0682;
-
-    // Velocity polynomial:  A * dist^2 + B * dist + C
-    public static double VEL_A =  0.0;
-    public static double VEL_B =  4.444;
-    public static double VEL_C =  1140.2;
-
-    // Limelight tracking
-    public static double LL_MAX_ERROR_DEG       = 20.0;
-    public double       LL_TURRET_OFFSET_DEG    =  0.0;
-    public static int   LL_STALE_FRAME_LIMIT    = 5;
-
-    // SOTM (Shot-On-The-Move)
-    public static double BALL_SPEED_INCHES_PER_SEC = 250.0;
-
-    // Aim readiness thresholds
-    public static double TURRET_AIM_THRESHOLD_DEG = 3.0;
+    public Limelight3A     ll;
+    public final DcMotorEx turretEncoder;
 
     // =========================================================
-    // OBJECT POOLS (avoid GC allocations in hot loop)
+    // CONFIGURARE HARDWARE
     // =========================================================
-    private final double[] sotmResult = new double[2];
+    public static double TICKS_PER_REV = 8192.0;
 
     // =========================================================
-    // FLYWHEEL PID CONTROLLER
+    // PIDF VALORI FLYWHEEL
     // =========================================================
-    private final PIDFController flywheelPID =
-            new PIDFController(FLYWHEEL_KP, FLYWHEEL_KI, FLYWHEEL_KD, FLYWHEEL_KF);
+    public static double shootKp = 0.06;
+    public static double shootKi = 0.00002;
+    public static double shootKd = 0.0000001;
+    public static double shootKf = 0.013;
 
     // =========================================================
-    // TARGET POSES (field-frame obelisk coordinates)
+    // POLINOAME PENTRU RPM SI LOB (Grad 2: A*x^2 + B*x + C)
     // =========================================================
-    private static final Pose BLUE_OBELISK = new Pose(12, 134);
-    private static final Pose RED_OBELISK  = new Pose(133, 134);
+    public static double velA =  0.0;
+    public static double velB =  4.444;
+    public static double velC =  1140.2;
+    public static double lobA =  0.0;
+    public static double lobB = -0.01364;
+    public static double lobC =  1.0682;
+    // =========================================================
+    // TRACKING & SOTM CONFIG
+    // =========================================================
+    public static double LL_THRESHOLD_DEG     = 20.0;
+    public double LL_TURRET_OFFSET_DEG =  0.0;
+    public static double BALL_SPEED_INCHES    = 250.0;
+    public static double TURRET_AIM_THRESHOLD_DEG = 3;
 
     // =========================================================
-    // INTERNAL STATE
+    // HYSTERESIS LIMELIGHT
+    // Robot ~100Hz, LL ~30fps → ~3 loop-uri intre frame-uri LL.
+    // Fara hysteresis → switch constant LL<->Odometrie → reset
+    // integral → oscilatie stanga-dreapta.
+    // LL_STALE_THRESHOLD = 5 loop-uri = ~50ms buffer de siguranta.
     // =========================================================
-    private boolean overrideActive = false;
-    private double  overrideAngleRad = 0.0;
-    private double  commandedServoPos = TURRET_SERVO_MIDPOINT;
+    public static int LL_STALE_THRESHOLD = 5;
+    private int       llStaleCount       = 0;
+    private double    lastTx             = Double.MAX_VALUE;
 
-    // Limelight hysteresis counters
-    private int    llStaleFrames = 0;
-    private double lastTxDeg     = Double.MAX_VALUE;
+    // =========================================================
+    // STATE PUBLIC — citit din TeleOp pentru telemetry
+    // =========================================================
+    public double  turretErrorRad = 0.0;
+    public boolean shooting       = false;
+    public boolean trackCurrent = false;
+    public double  llDistance     = 0;
+    public boolean shootingLobComp = false;
+    public String  trackState     = "IDLE";
+    public double  turretOutput   = 0.0;
+    public static double targetVelocity = 1300;
 
-    // Exposed for external reads (TeleOp telemetry, Auto checks)
-    public double  turretErrorRad     = 0.0;
-    public double  llDistance         = 0.0;
-    public boolean shooting           = false;
-    public boolean shootingLobComp    = false;
-    public double  turretServoPos     = 0.0;
-    public double  targetVelocity     = 1300.0;
-    public String  trackState         = "IDLE";
+    // hazu meu gen
+//    public boolean turretLocked = false;
+    private double lockedTurretAngleRad = 0.0;
+
+    // =========================================================
+    // CONTROLLERE PID
+    // =========================================================
+    private final PIDFController pidfController =
+            new PIDFController(shootKp, shootKi, shootKd, shootKf);
+
+    //TODO DECOMENTAT
+    private final PIDFController odometryTrackingController =
+            new PIDFController(uV.odometryKp, uV.odometryKi, uV.odometryKd, uV.odometryKf);
+
+    private final PIDFController limelightTrackingController =
+            new PIDFController(uV.limelightKp, uV.limelightKi, uV.limelightKd, uV.limelightKf);
+
+    private final Pose blueObeliskPose = new Pose(12, 134);
+    private final Pose redObeliskPose  = new Pose(133, 134);
+
+
+    // =========================================================
+    //
+    // =========================================================
+    private boolean override = false;
+    private double overrideAngle = 0;
 
     // =========================================================
     // CONSTRUCTOR
     // =========================================================
     public Shooter(HardwareMap hwMap) {
+
         lobServo = hwMap.get(Servo.class, "lobServo");
 
         turretMotorRight = hwMap.get(DcMotorEx.class, "turretMotorRight");
@@ -118,324 +135,396 @@ public class Shooter extends Subsystem {
         turretMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        flywheelPID.setTolerance(20);
-        flywheelPID.maxOut =  1.0;
-        flywheelPID.minOut = -1.0;
+        turretEncoder = hwMap.get(DcMotorEx.class, "rollerOne");
+        turretEncoder.setDirection(DcMotorSimple.Direction.REVERSE);
+        turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        limelight = hwMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(2);
-        limelight.start();
-        FtcDashboard.getInstance().startCameraStream(limelight, 30);
+        pidfController.setTolerance(20);
+        pidfController.maxOut =  1.0;
+        pidfController.minOut = -1.0;
 
-        turretPivot = hwMap.get(Servo.class, "turretPivot");
-        turretPivot.setDirection(Servo.Direction.REVERSE);
+        ll = hwMap.get(Limelight3A.class, "limelight");
+        ll.pipelineSwitch(2);
+        limelightTrackingController.setSetpoint(0);
+        limelightTrackingController.setTolerance(1);
+        ll.start();
 
-        gate = hwMap.get(Servo.class, "gateServo");
+        FtcDashboard.getInstance().startCameraStream(ll, 30);
+
+        odometryTrackingController.setSetpoint(0);
+        odometryTrackingController.setTolerance(0);
+
+        turretPivot = hwMap.get(CRServo.class, "turretPivot");
+
+        turretPivot.setDirection(DcMotorSimple.Direction.REVERSE);
+        gate        = hwMap.get(Servo.class, "gateServo");
     }
 
     // =========================================================
-    // FEEDER GATE
+    // GATE
     // =========================================================
     public void openGate()  { gate.setPosition(uV.gateOpen);   }
     public void closeGate() { gate.setPosition(uV.gateClosed); }
 
     // =========================================================
-    // FLYWHEEL READINESS
+    // VELOCITY REACHED
     // =========================================================
     public boolean velocityReached() {
-        double speed = -turretMotorLeft.getVelocity();
-        double tolerance = (llDistance < 80) ? 160.0 : 41.0;
-        return Math.abs(speed - targetVelocity) < tolerance;
+        double actual = -turretMotorLeft.getVelocity();
+        if(llDistance < 80)
+        {
+//            if (actual - targetVelocity > -80 && actual - targetVelocity < 0)
+//            {
+//                return true;
+//            }
+                return (Math.abs(actual - targetVelocity ))<160;
+            // actual e mai mare -> actual-target negativ
+        } else {
+            return Math.abs(actual - targetVelocity) < 41;
+        }
     }
+//    public void lockTurret() {
+//        lockedTurretAngleRad = (turretEncoder.getCurrentPosition()
+//                / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+//        turretLocked = true;
+//    }
+//
+//    public void unlockTurret() {
+//        turretLocked = false;
+//    }
 
     // =========================================================
-    // TURRET AIM CHECK
+    // IS AIMED
     // =========================================================
     public boolean isAimed() {
-        double threshold = (llDistance < 60)
-                ? TURRET_AIM_THRESHOLD_DEG
-                : TURRET_AIM_THRESHOLD_DEG + 2.0;
-        return Math.abs(Math.toDegrees(turretErrorRad)) < threshold;
+        if (llDistance<60)
+        {
+            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
+        }
+        else {
+            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG+2;
+        }
+//        return true;
     }
 
     // =========================================================
-    // PID RESET
+    // RESET PID FLYWHEEL
     // =========================================================
-    public void resetFlywheelPID() {
-        flywheelPID.reset();
-    }
-
-    /** @deprecated Use {@link #resetFlywheelPID()} */
-    @Deprecated
-    public void resetShooterPID() { resetFlywheelPID(); }
-
-    // =========================================================
-    // LOB SERVO POSITION
-    // =========================================================
-    private double computeLobPosition(double distanceInches) {
-        double position = (LOB_A * distanceInches + LOB_B) * distanceInches + LOB_C;
-        if (position <= uV.lobMin) return uV.lobMin;
-        if (position >= uV.lobMax) return uV.lobMax;
-        return position;
+    public void resetShooterPID() {
+        pidfController.reset();
     }
 
     // =========================================================
-    // FLYWHEEL VELOCITY
+    // COMPUTE LOB & VELOCITY
     // =========================================================
-    private double computeFlywheelVelocity(double distanceInches) {
-        double velocity = (VEL_A * distanceInches + VEL_B) * distanceInches + VEL_C;
-        if (distanceInches > 120) return 1880.0;
-        if (velocity <= 0)        return 0.0;
-        if (velocity >= 2300)     return 2300.0;
+    private double computeLob(double distance) {
+        double lob = (lobA * distance * distance) + (lobB * distance) + lobC;
+        if (lob <= uV.lobMin) return uV.lobMin;
+        if (lob >= uV.lobMax) return uV.lobMax;
+        return lob;
+    }
+
+    private double computeVelocity(double distance) {
+        double velocity = (velA * distance * distance) + (velB * distance) + velC;
+        if (distance>120)
+        {
+            return 1880;
+        }
+        if (velocity <= 0)    return 0;
+        if (velocity >= 2300) return 2300;
         return velocity;
     }
 
     // =========================================================
-    // SERVO GEOMETRY
+    // SOTM — Shot on the Move
+    // Returneaza: [targetAngleRad, rawDist]
     // =========================================================
-    private double servoPositionFromTurretAngle(double turretAngleRad) {
-        double turretDeg = Math.toDegrees(turretAngleRad);
-        turretDeg = Math.max(-TURRET_MAX_ANGLE_DEG, Math.min(TURRET_MAX_ANGLE_DEG, turretDeg));
-        double servoDeg = turretDeg / TURRET_GEAR_RATIO;
-        return TURRET_SERVO_MIDPOINT + (servoDeg / TURRET_MAX_ANGLE_DEG) * 0.5;
-    }
+    private double[] computeVirtualGoal(double rx, double ry, double vx, double vy) {
+        Pose   target = (Robot.alliance == Robot.Alliance.RED) ? redObeliskPose : blueObeliskPose;
+        double goalX  = target.getX();
+        double goalY  = target.getY();
 
-    private double turretAngleFromServoPosition(double servoPos) {
-        double servoDeg = (servoPos - TURRET_SERVO_MIDPOINT) * TURRET_MAX_ANGLE_DEG / 0.5;
-        return Math.toRadians(servoDeg * TURRET_GEAR_RATIO);
-    }
+        double dx      = goalX - rx;
+        double dy      = goalY - ry;
+        double rawDist = Math.hypot(dx, dy);
 
-    // =========================================================
-    // ANGLE NORMALIZATION
-    // =========================================================
-    private static double normalizeRadians(double angle) {
-        while (angle >  Math.PI) angle -= 2.0 * Math.PI;
-        while (angle < -Math.PI) angle += 2.0 * Math.PI;
-        return angle;
-    }
-
-    // =========================================================
-    // CHASSIS TARGET ANGLE (field-static)
-    // =========================================================
-    public double getTargetFieldAngleRad() {
-        Pose robot  = Robot.follower.getPose();
-        Pose target = (Robot.alliance == Robot.Alliance.RED) ? RED_OBELISK : BLUE_OBELISK;
-        return Math.atan2(target.getY() - robot.getY(), target.getX() - robot.getX());
-    }
-
-    /** @deprecated Use {@link #getTargetFieldAngleRad()} */
-    @Deprecated
-    public double getTargetFieldAngleRadStatic() { return getTargetFieldAngleRad(); }
-
-    // =========================================================
-    // SOTM — Shot-On-The-Move
-    //
-    // Computes the field-frame angle to the obelisk, corrected
-    // for robot velocity during the ball's time-of-flight.
-    //
-    // Populates sotmResult[0] = target angle (radians)
-    //            sotmResult[1] = raw distance (inches)
-    // =========================================================
-    private void computeSOTM(double robotX, double robotY,
-                             double velX, double velY) {
-        Pose targetPose = (Robot.alliance == Robot.Alliance.RED)
-                ? RED_OBELISK : BLUE_OBELISK;
-
-        double goalX = targetPose.getX();
-        double goalY = targetPose.getY();
-
-        double dx = goalX - robotX;
-        double dy = goalY - robotY;
-        double rawDist = Math.sqrt(dx * dx + dy * dy);
-
-        // Iterative time-of-flight correction (two iterations is enough
-        // when robot speed << ball speed).
-        double timeOfFlight = rawDist / BALL_SPEED_INCHES_PER_SEC;
-        double virtualX = goalX;
-        double virtualY = goalY;
+        double tof      = rawDist / BALL_SPEED_INCHES;
+        double virtualX = 0;
+        double virtualY = 0;
         for (int i = 0; i < 2; i++) {
-            virtualX = goalX - velX * timeOfFlight;
-            virtualY = goalY - velY * timeOfFlight;
-            double vDist = Math.sqrt(
-                    (virtualX - robotX) * (virtualX - robotX)
-                  + (virtualY - robotY) * (virtualY - robotY));
-            timeOfFlight = vDist / BALL_SPEED_INCHES_PER_SEC;
+            virtualX = goalX - vx * tof;
+            virtualY = goalY - vy * tof;
+            double virtualDist = Math.hypot(virtualX - rx, virtualY - ry);
+            tof = virtualDist / BALL_SPEED_INCHES;
         }
 
-        sotmResult[0] = Math.atan2(virtualY - robotY, virtualX - robotX);
-        sotmResult[1] = rawDist;
+        double targetAngleRad = Math.atan2(virtualY - ry, virtualX - rx);
+        return new double[]{targetAngleRad, rawDist};
+    }
+
+    public double getTargetFieldAngleRadStatic() {
+        Pose pose = Robot.follower.getPose();
+        Pose target = (Robot.alliance == Robot.Alliance.RED) ? redObeliskPose : blueObeliskPose;
+        double dx = target.getX() - pose.getX();
+        double dy = target.getY() - pose.getY();
+        return Math.atan2(dy, dx); // [-π, π], normalized below in aimChassis
     }
 
     // =========================================================
-    // LIMELIGHT TRACKING (with stale-frame hysteresis)
-    //
-    // Returns the servo position if a valid target is found,
-    // or NaN to signal "no valid LL data".
-    // =========================================================
-    private double trackWithLimelight() {
-        LLResult result = limelight.getLatestResult();
-        if (result == null || !result.isValid()) {
-            return Double.NaN;
-        }
-
-        int targetId = (Robot.alliance == Robot.Alliance.RED) ? 24 : 20;
-        for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-            if (fiducial.getFiducialId() != targetId) continue;
-
-            double tx = fiducial.getTargetXDegrees();
-
-            // Track whether we are getting new frames or a stale one
-            if (tx != lastTxDeg) {
-                lastTxDeg    = tx;
-                llStaleFrames = 0;
-            } else {
-                llStaleFrames++;
-            }
-
-            // Reject stale frames and targets outside the FOV threshold
-            if (llStaleFrames >= LL_STALE_FRAME_LIMIT
-                    || Math.abs(tx) >= LL_MAX_ERROR_DEG) {
-                return Double.NaN;
-            }
-
-            double correctedTx = tx + LL_TURRET_OFFSET_DEG;
-            turretErrorRad = Math.toRadians(correctedTx);
-            trackState = "LIMELIGHT tx=" + tx;
-
-            double currentTurretRad = turretAngleFromServoPosition(commandedServoPos);
-            return servoPositionFromTurretAngle(currentTurretRad + Math.toRadians(correctedTx));
-        }
-
-        return Double.NaN;
-    }
-
-    // =========================================================
-    // ODOMETRY TRACKING (fallback when Limelight is unavailable)
-    // =========================================================
-    private double trackWithOdometry(double fieldTargetAngleRad,
-                                     double robotHeading) {
-        double desiredAngleRad = fieldTargetAngleRad - robotHeading
-                + Math.toRadians(TURRET_ANGLE_OFFSET_DEG);
-        desiredAngleRad = normalizeRadians(desiredAngleRad);
-
-        // Clamp to physical turret range
-        double limitRad = Math.toRadians(TURRET_MAX_ANGLE_DEG);
-        desiredAngleRad = Math.max(-limitRad, Math.min(limitRad, desiredAngleRad));
-
-        double currentTurretAngleRad = turretAngleFromServoPosition(commandedServoPos);
-        turretErrorRad = normalizeRadians(desiredAngleRad - currentTurretAngleRad);
-
-        trackState = "ODOMETRY";
-        return servoPositionFromTurretAngle(desiredAngleRad);
-    }
-
-    // =========================================================
-    // TRACK — main turret-aiming loop
-    //
-    // Priority:  Limelight (precise) → Odometry + SOTM (fallback)
+    // TRACK — turret tracking principal
     // =========================================================
     public double track() {
-        // --- 1. Read robot state ---
-        Pose   robot   = Robot.follower.getPose();
-        double robotVx = Robot.follower.getVelocity().getXComponent();
-        double robotVy = Robot.follower.getVelocity().getYComponent();
-        double heading = robot.getHeading();
 
-        // Rotate velocity from robot-relative to field-frame
-        double fieldVx = robotVx * Math.cos(heading) - robotVy * Math.sin(heading);
-        double fieldVy = robotVx * Math.sin(heading) + robotVy * Math.cos(heading);
+//        if (turretLocked) {
+//            double currentAngleRad = (turretEncoder.getCurrentPosition()
+//                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+//            double errorRad = lockedTurretAngleRad - currentAngleRad;
+//            while (errorRad >  Math.PI) errorRad -= 2.0 * Math.PI;
+//            while (errorRad < -Math.PI) errorRad += 2.0 * Math.PI;
+//            turretErrorRad = errorRad;
+//            double output = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
+//            output = Math.max(-1.0, Math.min(1.0, output));
+//            turretPivot.setPower(output);
+////            return output;
+//        }
 
-        // --- 2. Compute SOTM field-target angle ---
-        computeSOTM(robot.getX(), robot.getY(), fieldVx, fieldVy);
-        double fieldTargetAngleRad = sotmResult[0];
-        llDistance = sotmResult[1];
+//        PIDFController odometryTrackingController =
+//                new PIDFController(uV.odometryKp, uV.odometryKi, uV.odometryKd, uV.odometryKf);
+//
+//        PIDFController limelightTrackingController =
+//                new PIDFController(uV.limelightKp, uV.limelightKi, uV.limelightKd, uV.limelightKf);
+        // -------------------------------------------------------
+        // 1. POZITIE & VITEZA — rotire in field frame
+        // -------------------------------------------------------
+        Pose   pose    = Robot.follower.getPose();
+        double vx      = Robot.follower.getVelocity().getXComponent();
+        double vy      = Robot.follower.getVelocity().getYComponent();
+        double heading = pose.getHeading();
 
-        // --- 3. Try Limelight first ---
-        double servoPos = trackWithLimelight();
+        double vxField = vx * Math.cos(heading) - vy * Math.sin(heading);
+        double vyField = vx * Math.sin(heading) + vy * Math.cos(heading);
 
-        // --- 4. Fall back to Odometry + SOTM ---
-        if (Double.isNaN(servoPos)) {
-            servoPos = trackWithOdometry(fieldTargetAngleRad, heading);
+        double[] sotm            = computeVirtualGoal(pose.getX(), pose.getY(), vxField, vyField);
+        double   fieldTargetAngleRad = sotm[0];
+        llDistance               = sotm[1];
+
+        // -------------------------------------------------------
+        // 2. LIMELIGHT cu hysteresis
+        // Nu resetam integratorul la tranzitii — cauzeaza spike/oscilatie
+        // -------------------------------------------------------
+        LLResult result       = ll.getLatestResult();
+        double   output       = 0.0;
+        boolean  useLimelight = false;
+
+        if (result != null && result.isValid()) {
+            int targetId = (Robot.alliance == Robot.Alliance.RED) ? 24 : 20;
+
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+//                FtcDashboard.getInstance().getTelemetry().addData("found tag with id", fiducial.getFiducialId());
+//                FtcDashboard.getInstance().getTelemetry().addData("searching for ", targetId);
+                if (fiducial.getFiducialId() == targetId) {
+                    double tx = fiducial.getTargetXDegrees();
+
+                    if (tx != lastTx) {
+                        // Frame nou de la limelight — reset contor stale
+                        lastTx       = tx;
+                        llStaleCount = 0;
+                    } else {
+                        // Acelasi frame — incrementam contorul
+                        llStaleCount++;
+                    }
+
+                    // LL activ daca frame recent SI tinta in frame
+//                    FtcDashboard.getInstance().getTelemetry().addData("ll stale count", llStaleCount);
+//                    FtcDashboard.getInstance().getTelemetry().addData("tx", tx);
+                    if (llStaleCount < LL_STALE_THRESHOLD && Math.abs(tx) < LL_THRESHOLD_DEG) {
+                        useLimelight = true;
+
+                        if (llDistance>180)
+                        {
+                            limelightTrackingController.kP = uV.limelightKpF;
+                            limelightTrackingController.kI = uV.limelightKiF;
+                            limelightTrackingController.kD = uV.limelightKdF;
+                            limelightTrackingController.kF = uV.limelightKfF;
+                        } else {
+                            limelightTrackingController.kP = uV.limelightKp;
+                            limelightTrackingController.kI = uV.limelightKi;
+                            limelightTrackingController.kD = uV.limelightKd;
+                            limelightTrackingController.kF = uV.limelightKf;
+                        }
+
+                        double txCorrected = tx + LL_TURRET_OFFSET_DEG;
+
+                        output = limelightTrackingController.updatePID(txCorrected);
+
+                        turretErrorRad = Math.toRadians(txCorrected);
+                        turretOutput   = output;
+                        trackState     = "LIMELIGHT tx=" + tx;
+                    }
+                    break;
+                }
+            }
         }
 
-        // --- 5. Apply to servo ---
-        servoPos = Math.max(0.0, Math.min(1.0, servoPos));
-        if (!overrideActive) {
-            turretPivot.setPosition(servoPos);
-            commandedServoPos = servoPos;
+
+
+        // -------------------------------------------------------
+        // 3. ODOMETRIE — fallback cand LL nu vede sau e stale
+        // -------------------------------------------------------
+        if (!useLimelight) {
+            double currentHeading        = pose.getHeading();
+            double currentTurretAngleRad = (turretEncoder.getCurrentPosition()
+                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+
+            double desiredTurretAngleRad = fieldTargetAngleRad - currentHeading
+                    + Math.toRadians(FIELD_ANGLE_OFFSET_DEG);
+
+            while (desiredTurretAngleRad >  Math.PI) desiredTurretAngleRad -= 2.0 * Math.PI;
+            while (desiredTurretAngleRad < -Math.PI) desiredTurretAngleRad += 2.0 * Math.PI;
+
+            double limitRad = Math.toRadians(180.0);
+            if (desiredTurretAngleRad > limitRad) {
+                desiredTurretAngleRad = limitRad;
+            } else if (desiredTurretAngleRad < -limitRad) {
+                desiredTurretAngleRad = -limitRad;
+            }
+
+            double errorRad = desiredTurretAngleRad - currentTurretAngleRad;
+
+            while (errorRad >  Math.PI) errorRad -= 2.0 * Math.PI;
+            while (errorRad < -Math.PI) errorRad += 2.0 * Math.PI;
+
+            turretErrorRad = errorRad;
+
+            if (llDistance>120)
+            {
+                odometryTrackingController.kP = uV.odometryKpF;
+                odometryTrackingController.kI = uV.odometryKiF;
+                odometryTrackingController.kD = uV.odometryKdF;
+                odometryTrackingController.kF = uV.odometryKfF;
+            } else {
+                odometryTrackingController.kP = uV.odometryKp;
+                odometryTrackingController.kI = uV.odometryKi;
+                odometryTrackingController.kD = uV.odometryKd;
+                odometryTrackingController.kF = uV.odometryKf;
+            }
+
+
+
+            // Semn pastrat exact ca in versiunea originala
+                output       = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
+
+            turretOutput = output; // actualizat DUPA calculul output
+            trackState   = "ODOMETRY";
+
         }
 
-        turretServoPos = servoPos;
-        return servoPos;
+//        FtcDashboard.getInstance().getTelemetry().addData("use ll", useLimelight);
+
+
+        output = Math.max(-1.0, Math.min(1.0, output));
+        if (!override) {
+            turretPivot.setPower(output);
+        }
+
+        return output;
+    }
+
+    @Override
+    public void reset() {
+        turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     // =========================================================
-    // OVERRIDE SYSTEM
+    // override
     // =========================================================
-    public void goToAngle(double angleRad) {
-        overrideActive = true;
-        double limitRad = Math.toRadians(TURRET_MAX_ANGLE_DEG);
-        overrideAngleRad = Math.max(-limitRad, Math.min(limitRad, angleRad));
+    public void goToAngle(double rad) {
+        override = true;
+
+        double limitRad = Math.toRadians(1000.0);
+        if (rad > limitRad) {
+            rad = limitRad;
+        } else if (rad < -limitRad) {
+            rad = -limitRad;
+        }
+
+        overrideAngle = rad;
     }
 
     public void stopOverride() {
-        overrideActive = false;
+        override = false;
     }
 
-    public void incremental(double deltaRad) {
-        if (!overrideActive) {
-            overrideAngleRad = turretAngleFromServoPosition(commandedServoPos);
+    public void incremental(double rad) {
+        if (!override) {
+            overrideAngle = (turretEncoder.getCurrentPosition()
+                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
         }
-        goToAngle(deltaRad + overrideAngleRad);
+        goToAngle(rad + overrideAngle);
     }
 
     public void lock() {
-        goToAngle(overrideAngleRad);
+        goToAngle(overrideAngle);
     }
 
     // =========================================================
-    // SUBSYSTEM LIFECYCLE
+    // UPDATE — apelat in fiecare loop
+    // FtcDashboard scos din update() si track() pentru a elimina
+    // lag-ul la sasiu — telemetry e gestionat din TeleOp
     // =========================================================
-    @Override
-    public void reset() {
-        commandedServoPos = TURRET_SERVO_MIDPOINT;
-    }
-
     @Override
     public void update() {
-        // Sync PID gains from Dashboard live-tuning
-        flywheelPID.kP = FLYWHEEL_KP;
-        flywheelPID.kI = FLYWHEEL_KI;
-        flywheelPID.kD = FLYWHEEL_KD;
-        flywheelPID.kF = FLYWHEEL_KF;
+        pidfController.kP = shootKp;
+        pidfController.kI = shootKi;
+        pidfController.kD = shootKd;
+        pidfController.kF = shootKf;
 
-        // --- Override: direct angle control ---
-        if (overrideActive) {
-            double pos = servoPositionFromTurretAngle(overrideAngleRad);
-            pos = Math.max(0.0, Math.min(1.0, pos));
-            turretPivot.setPosition(pos);
-            commandedServoPos = pos;
+        if (override) {
+            odometryTrackingController.kP = 0.02;
+            odometryTrackingController.kI = 0;
+            odometryTrackingController.kD = 0.000018;
+            odometryTrackingController.kF = 0.02;
+
+            double currentTurretAngleRad = (turretEncoder.getCurrentPosition()
+                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
+
+            double errorRad = overrideAngle - currentTurretAngleRad;
+
+            while (errorRad >  Math.PI) errorRad -= 2.0 * Math.PI;
+            while (errorRad < -Math.PI) errorRad += 2.0 * Math.PI;
+
+//            FtcDashboard.getInstance().getTelemetry().addData("err", errorRad);
+//            FtcDashboard.getInstance().getTelemetry().addData("ovr", overrideAngle);
+//            FtcDashboard.getInstance().getTelemetry().addData("cur", currentTurretAngleRad);
+
+            double output = odometryTrackingController.updatePID(-Math.toDegrees(errorRad));
+
+            turretPivot.setPower(output);
         }
 
-        // --- Shooting: tracking + flywheel + lob ---
         if (shooting) {
             track();
 
-            targetVelocity = computeFlywheelVelocity(llDistance);
-            flywheelPID.setSetpoint(targetVelocity);
 
+            targetVelocity = computeVelocity(llDistance);
+//            targetVelocity = 0;
+            pidfController.setSetpoint(targetVelocity);
             if (!shootingLobComp) {
-                lobServo.setPosition(computeLobPosition(llDistance));
+                lobServo.setPosition(computeLob(llDistance));
             }
 
-            double power = flywheelPID.updatePID(-turretMotorLeft.getVelocity());
-            turretMotorRight.setPower(power);
-            turretMotorLeft.setPower(power);
+            double pidOutput = pidfController.updatePID(-turretMotorLeft.getVelocity());
 
-        } else if (!overrideActive) {
-            // Idle: keep flywheel spinning slowly
-            turretMotorRight.setPower(0.2);
-            turretMotorLeft.setPower(0.2);
+            turretMotorRight.setPower(pidOutput);
+            turretMotorLeft.setPower(pidOutput);
+
+        } else {
+            if (!override) {
+                turretMotorRight.setPower(0.2);
+                turretMotorLeft.setPower(0.2);
+            }
         }
     }
 }
