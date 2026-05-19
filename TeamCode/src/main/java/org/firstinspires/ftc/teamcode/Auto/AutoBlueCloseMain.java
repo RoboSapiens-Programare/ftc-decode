@@ -22,6 +22,8 @@ public class AutoBlueCloseMain extends OpMode {
     private boolean singleton = true;
     private Paths paths; // Paths defined in the Paths class
 
+    private static Pose grabFromGate = new Pose(20, 56.045, Math.toRadians(155));
+
     private static Robot robot;
 
     private boolean pathingOnly=false;
@@ -152,7 +154,7 @@ public class AutoBlueCloseMain extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(54.895, 60.262),
-                                    new Pose(12.685, 59.881)
+                                    new Pose(16, 59.881)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -185,10 +187,10 @@ public class AutoBlueCloseMain extends OpMode {
                             new BezierCurve(
                                     new Pose(55.000, 95.000),
                                     new Pose(37.161, 63.811),
-                                    new Pose(7.353, 56.045)
+                                    grabFromGate
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(155))
+                    .setLinearHeadingInterpolation(Math.toRadians(144), grabFromGate.getHeading())
                     .build();
 
             shoot3 = follower.pathBuilder()
@@ -228,11 +230,8 @@ public class AutoBlueCloseMain extends OpMode {
         switch (pathState) {
             case 0:
                 // shoot preload
-                if (!pathingOnly)
-                {
-                    if (singleton)
-                    {
-//                        robot.shooter.turretLocked = true;
+                if (!pathingOnly) {
+                    if (singleton) {
                         robot.intake.rest();
                         robot.shooter.openGate();
                         singleton = false;
@@ -240,55 +239,48 @@ public class AutoBlueCloseMain extends OpMode {
                 }
                 robot.shooter.update();
                 robot.shooter.shooting = true;
-//                robot.shooter.turretLocked=true;
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
-                {
-//                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
-                    {
+
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached()) {
                         robot.intake.shoot();
-                    }
-                    else {
+
+                    } else {
                         robot.intake.rest();
                     }
-                    if (robot.intake.isEmpty())
-                    {
-                        if (timer2.seconds()>0.5)
-                        {
+                    if (robot.intake.isEmpty()) {
+                        if (timer2.seconds() > 0.5) {
                             Robot.follower.followPath(paths.grab2MID);
                             robot.shooter.shooting = false;
                             setPathState(101);
+
                         }
                     } else {
                         timer2.reset();
+
                     }
                 } else {
                     timer.reset();
                 }
                 break;
             case 101:
-                if (!pathingOnly)
-                {
+                if (!pathingOnly) {
                     robot.shooter.shooting = false;
                     robot.intake.pullBallsHard();
                     robot.shooter.closeGate();
                 }
-                if (!Robot.follower.isBusy())
-                {
+                if (!Robot.follower.isBusy()) {
                     Robot.follower.followPath(paths.grab2);
                     Robot.follower.setMaxPower(1);
                     setPathState(102);
                 }
                 break;
             case 102:
-                if (!pathingOnly)
-                {
+                if (!pathingOnly) {
                     robot.shooter.shooting = false;
                     robot.intake.pullBallsHard();
                     robot.shooter.closeGate();
                 }
-                if (!Robot.follower.isBusy())
-                {
+                if (!Robot.follower.isBusy()) {
                     Robot.follower.followPath(paths.grab2GATE);
                     Robot.follower.setMaxPower(1);
                     setPathState(1);
@@ -296,20 +288,17 @@ public class AutoBlueCloseMain extends OpMode {
                 break;
             case 1:
                 // go to grab 1
-                if (!pathingOnly)
-                {
+                if (!pathingOnly) {
                     robot.intake.rest();
                 }
-                if (!Robot.follower.isBusy())
-                {
+                if (!Robot.follower.isBusy()) {
                     Robot.follower.followPath(paths.shoot2);
                     Robot.follower.setMaxPower(1);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if (singleton)
-                {
+                if (singleton) {
                     robot.intake.rest();
                     robot.shooter.openGate();
                     singleton = false;
@@ -317,20 +306,17 @@ public class AutoBlueCloseMain extends OpMode {
                 robot.shooter.update();
                 robot.shooter.shooting = true;
 //                robot.shooter.turretLocked=true;
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
-                {
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
 //                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
-                    {
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */) {
                         robot.intake.shoot();
-                    }
-                    else {
+
+                    } else {
                         robot.intake.rest();
                     }
-                    if (robot.intake.isEmpty())
-                    {
-                        if (timer2.seconds()>0.5)
-                        {
+
+                    if (robot.intake.isEmpty()) {
+                        if (timer2.seconds() > 0.5) {
                             Robot.follower.followPath(paths.gate1);
                             Robot.follower.setMaxPower(0.72);
                             robot.shooter.shooting = false;
@@ -345,73 +331,59 @@ public class AutoBlueCloseMain extends OpMode {
                 }
                 break;
             case 301:
-                if (!pathingOnly)
-                {
+                if (!pathingOnly) {
                     robot.intake.pullBallsHard();
                     robot.shooter.shooting = false;
                     robot.shooter.closeGate();
                 }
-                if (!Robot.follower.isBusy())
-                {
-//                    Robot.follower.followPath(paths.gate1p);
+                if (!Robot.follower.isBusy()) {
                     Robot.follower.setMaxPower(1);
                     setPathState(3);
                 }
                 break;
             case 3:
                 // go to grab 2
-                if (!pathingOnly)
-                {
+                if (!pathingOnly) {
                     robot.intake.pullBallsHard();
                     robot.shooter.shooting = false;
                     robot.shooter.closeGate();
                 }
-                if (!Robot.follower.isBusy() && autoTimer.seconds() > 4)
-                {
+
+                if (!Robot.follower.isBusy() && autoTimer.seconds() > 4) {
                     Robot.follower.followPath(paths.shoot3);
                     Robot.follower.setMaxPower(1);
 
                     setPathState(4);
-
                 }
                 break;
             case 4:
-                if (singleton)
-                {
+                if (singleton) {
                     robot.intake.rest();
                     robot.shooter.openGate();
                     singleton = false;
                 }
                 robot.shooter.update();
                 robot.shooter.shooting = true;
-//                robot.shooter.turretLocked=true;
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
-                {
-//                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
-                    {
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached()) {
                         robot.intake.shoot();
-                    }
-                    else {
+
+                    } else {
                         robot.intake.rest();
                     }
-                    if (robot.intake.isEmpty())
-                    {
-                        if (timer2.seconds()>0.4)
-                        {
 
-//                            robot.shooter.shooting = false;
-                            if (gateLoops<targetGateLoops)
-                            {
+                    if (robot.intake.isEmpty()) {
+                        if (timer2.seconds()>0.4) {
+                            if (gateLoops<targetGateLoops) {
                                 setPathState(3);
                                 Robot.follower.followPath(paths.gate1);
                                 Robot.follower.setMaxPower(0.72);
                                 gateLoops++;
+
                             } else {
                                 setPathState(5);
                                 Robot.follower.followPath(paths.grab3);
                             }
-
                         }
                     } else {
                         timer2.reset();
@@ -423,52 +395,42 @@ public class AutoBlueCloseMain extends OpMode {
                 break;
             case 5:
                 // get spike 3
-                if (!pathingOnly)
-                {
+                if (!pathingOnly) {
                     robot.intake.pullBallsHard();
                     robot.shooter.shooting = false;
                     robot.shooter.closeGate();
                 }
-                if (!Robot.follower.isBusy())
-                {
+                if (!Robot.follower.isBusy()) {
                     Robot.follower.followPath(paths.shoot4);
                     setPathState(6);
                 }
                 break;
             case 6:
-                if (singleton)
-                {
+                if (singleton) {
                     robot.intake.rest();
                     robot.shooter.openGate();
                     singleton = false;
                 }
+
                 robot.shooter.update();
                 robot.shooter.shooting = true;
-//                robot.shooter.turretLocked=true;
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly)
-                {
-//                    robot.shooter.turretLocked=false;
-                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */)
-                    {
+                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
+                    if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached()) {
                         robot.intake.shoot();
-                    }
-                    else {
+
+                    } else {
                         robot.intake.rest();
                     }
-                    if (robot.intake.isEmpty())
-                    {
-                        if (timer2.seconds()>0.4)
-                        {
+
+                    if (robot.intake.isEmpty()) {
+                        if (timer2.seconds()>0.4) {
                             robot.shooter.shooting = false;
-                            if (timer.seconds()<2)
-                            {Robot.follower.followPath(paths.gate1);}
-                            else
-                            {Robot.follower.setMaxPower(0);
-                                Robot.transitionPose=Robot.follower.getPose();}
-
-
-
-
+                            if (timer.seconds()<2) {
+                                Robot.follower.followPath(paths.gate1);
+                            } else {
+                                Robot.follower.setMaxPower(0);
+                                Robot.transitionPose=Robot.follower.getPose();
+                            }
                         }
                     } else {
                         timer2.reset();
