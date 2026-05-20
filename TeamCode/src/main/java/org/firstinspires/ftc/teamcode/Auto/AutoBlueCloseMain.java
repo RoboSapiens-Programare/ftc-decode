@@ -85,25 +85,25 @@ public class AutoBlueCloseMain extends OpMode {
 
 
 
-        loopCount++;
-        if (loopCount % 5 == 0) {
-            dashboardTelemetry.addData("Path State", pathState);
-            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
-            dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
-            dashboardTelemetry.update();
-            dashboardTelemetry.addData("Track State", robot.shooter.trackState);
-            dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
-            dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
-            dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
-            dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
-            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
-            dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
-            dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
-            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
-            dashboardTelemetry.addData("heading", robot.follower.getHeading());
-            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
-            dashboardTelemetry.update();
-        }
+//        loopCount++;
+//        if (loopCount % 5 == 0) {
+//            dashboardTelemetry.addData("Path State", pathState);
+//            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+//            dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
+//            dashboardTelemetry.update();
+//            dashboardTelemetry.addData("Track State", robot.shooter.trackState);
+//            dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
+//            dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
+//            dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
+//            dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
+//            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+//            dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
+//            dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
+//            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
+//            dashboardTelemetry.addData("heading", robot.follower.getHeading());
+//            dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
+//            dashboardTelemetry.update();
+//        }
 
 
 
@@ -239,8 +239,8 @@ public class AutoBlueCloseMain extends OpMode {
                 }
                 robot.shooter.update();
                 robot.shooter.shooting = true;
-
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
+//
+                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
                     if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached()) {
                         robot.intake.shoot();
 
@@ -257,7 +257,7 @@ public class AutoBlueCloseMain extends OpMode {
                     } else {
                         timer2.reset();
 
-                    }
+                     }
                 } else {
                     timer.reset();
                 }
@@ -306,7 +306,7 @@ public class AutoBlueCloseMain extends OpMode {
                 robot.shooter.update();
                 robot.shooter.shooting = true;
 //                robot.shooter.turretLocked=true;
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
+                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
 //                    robot.shooter.turretLocked=false;
                     if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached() /* && robot.shooter.isAimed() */) {
                         robot.intake.shoot();
@@ -325,7 +325,7 @@ public class AutoBlueCloseMain extends OpMode {
                     } else {
                         timer2.reset();
                     }
-                }
+                 }
                 else {
                     timer.reset();
                 }
@@ -364,7 +364,7 @@ public class AutoBlueCloseMain extends OpMode {
                 }
                 robot.shooter.update();
                 robot.shooter.shooting = true;
-                if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
+                 if (!Robot.follower.isBusy() && robot.shooter.velocityReached() && !pathingOnly) {
                     if (!Robot.follower.isBusy() && timer.seconds()>0.7 && robot.shooter.velocityReached()) {
                         robot.intake.shoot();
 
@@ -388,7 +388,7 @@ public class AutoBlueCloseMain extends OpMode {
                     } else {
                         timer2.reset();
                     }
-                }
+                 }
                 else {
                     timer.reset();
                 }

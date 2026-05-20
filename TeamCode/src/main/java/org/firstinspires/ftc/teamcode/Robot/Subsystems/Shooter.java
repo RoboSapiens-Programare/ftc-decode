@@ -32,14 +32,14 @@ public class Shooter extends Subsystem {
     public static double shootKi = 0.00002;
     public static double shootKd = 0.0000001;
     public static double shootKf = 0.013;
-    public static double velA = 0.0;
+    public static double velA = 0.05;
     public static double velB = 4.444;
     public static double velC = 1140.2;
     public static double lobA = 0.0;
     public static double lobB = -0.01364;
     public static double lobC = 1.0682;
     public static double BALL_SPEED_INCHES = 250.0;
-    public static double TURRET_AIM_THRESHOLD_DEG = 3;
+    public static double TURRET_AIM_THRESHOLD_DEG = 2;
     public static double targetVelocity = 1300;
 
     // Hardware & State

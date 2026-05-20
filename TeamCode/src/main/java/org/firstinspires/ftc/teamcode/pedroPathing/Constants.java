@@ -18,10 +18,10 @@ public class Constants {
 
     public static FollowerConstants followerConstants =
             new FollowerConstants()
-                    .mass(15)
+                    .mass(13.2)
                     .forwardZeroPowerAcceleration(-43.5)
                     .lateralZeroPowerAcceleration(-65.3)
-                    .headingPIDFCoefficients(new PIDFCoefficients(1.5, 0, 0, 0));
+                    .headingPIDFCoefficients(new PIDFCoefficients(1.35, 0.03, 0.05, 0));
 
     //                    .useSecondaryTranslationalPIDF(true)
     //                    .useSecondaryHeadingPIDF(true)
