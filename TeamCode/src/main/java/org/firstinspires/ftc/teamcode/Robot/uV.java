@@ -67,4 +67,12 @@ public class uV {
     public static int velocityFar = 1870;
     public static double angleFar = 0.2;
 
+
+
+
+    // SHOOTER CONSTANTS
+    public static double scoreHeight = 26;
+    public static double scoreAngle = Math.toRadians(-30);
+    public static double passThroughPointRadius = 5;
+
 }

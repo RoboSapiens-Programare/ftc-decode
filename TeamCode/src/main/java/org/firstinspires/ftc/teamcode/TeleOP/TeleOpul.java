@@ -51,7 +51,7 @@ public class TeleOpul extends OpMode {
 
     @Override
     public void init_loop() {
-        Pose startPoseBlue = new Pose(56, 8, Math.toRadians(90));
+        Pose startPoseBlue = new Pose(54, 8, Math.toRadians(90));
         Pose startPoseRed = new Pose(88, 8, Math.toRadians(90));
         if (gamepad1.options) {
             Robot.alliance = Robot.Alliance.RED;
@@ -135,7 +135,7 @@ public class TeleOpul extends OpMode {
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
-            isAimingChassis = true;
+//            isAimingChassis = true;
             changeState(State.OUTTAKE);
         }
     }
