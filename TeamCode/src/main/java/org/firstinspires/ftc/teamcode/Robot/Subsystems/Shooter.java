@@ -1,25 +1,35 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
 import com.pedropathing.math.Vector;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
+import org.jetbrains.annotations.Contract;
+
+import dev.frozenmilk.dairy.cachinghardware.CachingDcMotorEx;
+import dev.frozenmilk.dairy.cachinghardware.CachingServo;
 
 @Config
 public class Shooter extends Subsystem {
+
+    private static final double WHEEL_RADIUS_INCHES = 1.4567; // 74mm diameter / 2
+    private static final double RAW_MOTOR_TICKS = 28.0;      // 1:1 kit bypasses gearbox completely
+    private static final double EXTERNAL_GEAR_RATIO = 1.0;   // Change if you use external gears/pulleys
+
+    private static double TICKS_TO_INCHES = (2.0 * Math.PI * WHEEL_RADIUS_INCHES) / (RAW_MOTOR_TICKS * EXTERNAL_GEAR_RATIO);
 
     public static double FIELD_ANGLE_OFFSET_DEG = -3.0;
     public static int LL_STALE_THRESHOLD = 5;
@@ -45,47 +55,42 @@ public class Shooter extends Subsystem {
     public static double targetVelocity = 1300;
 
     // Hardware & State
-    public final DcMotorEx turretMotorLeft;
-    public final DcMotorEx turretMotorRight;
-    public final Servo lobServo;
-    public final Servo turretPivot;
-    public Limelight3A ll;
-    public final DcMotorEx turretEncoder;
+    public final CachingDcMotorEx turretMotorLeft;
+    public final CachingDcMotorEx turretMotorRight;
+    public final CachingServo lobServo;
+    public final CachingServo turretPivot;
     public double turretServoPos = 0;
     public double LL_TURRET_OFFSET_DEG = 0.0;
     public double turretErrorRad = 0.0;
     public boolean shooting = false;
-    public boolean trackCurrent = false;
-    public double llDistance = 0;
+    public double distance = 0;
     public boolean shootingLobComp = false;
+
+    public boolean targetSelected = false;
+    public static Pose targetGoal;
+
     public String trackState = "IDLE";
     public double turretOutput = 0.0;
 
     // Internal State
-    private final Servo gate;
+    private final CachingServo gate;
     private double overrideAngleRad = 0.0;
     private double commandedServoPos = TURRET_SERVO_MIDPOINT;
-    private int llStaleCount = 0;
-    private double lastTx = Double.MAX_VALUE;
     private boolean override = false;
     private double overrideAngle = 0;
 
     // PID Controllers
     private final PIDFController pidfController =
             new PIDFController(shootKp, shootKi, shootKd, shootKf);
-    private final PIDFController odometryTrackingController =
-            new PIDFController(uV.odometryKp, uV.odometryKi, uV.odometryKd, uV.odometryKf);
-    private final PIDFController limelightTrackingController =
-            new PIDFController(uV.limelightKp, uV.limelightKi, uV.limelightKd, uV.limelightKf);
 
     private final Pose blueObeliskPose = new Pose(12, 134);
     private final Pose redObeliskPose = new Pose(133, 134);
 
     public Shooter(HardwareMap hwMap) {
-        lobServo = hwMap.get(Servo.class, "lobServo");
+        lobServo = new CachingServo(hwMap.get(Servo.class, "lobServo"));
 
-        turretMotorRight = hwMap.get(DcMotorEx.class, "turretMotorRight");
-        turretMotorLeft = hwMap.get(DcMotorEx.class, "turretMotorLeft");
+        turretMotorRight = new CachingDcMotorEx(hwMap.get(DcMotorEx.class, "turretMotorRight"));
+        turretMotorLeft = new CachingDcMotorEx(hwMap.get(DcMotorEx.class, "turretMotorLeft"));
         turretMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         turretMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -93,28 +98,8 @@ public class Shooter extends Subsystem {
         turretMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        turretEncoder = hwMap.get(DcMotorEx.class, "rollerOne");
-        turretEncoder.setDirection(DcMotorSimple.Direction.REVERSE);
-        turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        pidfController.setTolerance(20);
-        pidfController.maxOut = 1.0;
-        pidfController.minOut = -1.0;
-
-        ll = hwMap.get(Limelight3A.class, "limelight");
-        ll.pipelineSwitch(2);
-        limelightTrackingController.setSetpoint(0);
-        limelightTrackingController.setTolerance(1);
-        ll.start();
-
-        FtcDashboard.getInstance().startCameraStream(ll, 30);
-
-        odometryTrackingController.setSetpoint(0);
-        odometryTrackingController.setTolerance(0);
-
-        turretPivot = hwMap.get(Servo.class, "turretPivot");
-        gate = hwMap.get(Servo.class, "gateServo");
+        turretPivot = new CachingServo(hwMap.get(Servo.class, "turretPivot"));
+        gate = new CachingServo(hwMap.get(Servo.class, "gateServo"));
     }
 
     public void openGate() {
@@ -128,7 +113,7 @@ public class Shooter extends Subsystem {
     // Aiming
     public boolean velocityReached() {
         double actual = -turretMotorLeft.getVelocity();
-        if (llDistance < 80) {
+        if (distance < 80) {
             return Math.abs(actual - targetVelocity) < 160;
         } else {
             return Math.abs(actual - targetVelocity) < 41;
@@ -136,7 +121,7 @@ public class Shooter extends Subsystem {
     }
 
     public boolean isAimed() {
-        if (llDistance < 60) {
+        if (distance < 60) {
             return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
         } else {
             return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG + 2;
@@ -159,36 +144,35 @@ public class Shooter extends Subsystem {
         if (distance > 120) {
             return 1880;
         }
-        if (velocity <= 0) return 0;
-        if (velocity >= 2300) return 2300;
-        return velocity;
+        return Math.max(Math.min(velocity, 2300), 0);
     }
 
-    private double[] computeVirtualGoal(double rx, double ry, double vx, double vy) {
-        Pose target = (Robot.alliance == Robot.Alliance.RED) ? redObeliskPose : blueObeliskPose;
-        double goalX = target.getX();
-        double goalY = target.getY();
+    private double computeVirtualGoal(double rx, double ry, double vx, double vy) {
+        double goalX = targetGoal.getX();
+        double goalY = targetGoal.getY();
 
         double dx = goalX - rx;
         double dy = goalY - ry;
-        double rawDist = Math.hypot(dx, dy);
+        distance = Math.hypot(dx, dy);
 
-        double tof = rawDist / BALL_SPEED_INCHES;
+        targetVelocity = computeVelocity(distance);
+        pidfController.setSetpoint(targetVelocity);
+
+
+        double tof = distance / (targetVelocity * TICKS_TO_INCHES);
         double virtualX = 0;
         double virtualY = 0;
         for (int i = 0; i < 2; i++) {
-            virtualX = goalX - vx * tof;
-            virtualY = goalY - vy * tof;
+            virtualX = goalX + vx * tof;
+            virtualY = goalY + vy * tof;
             double virtualDist = Math.hypot(virtualX - rx, virtualY - ry);
-            tof = virtualDist / BALL_SPEED_INCHES;
+            tof = virtualDist / (targetVelocity * TICKS_TO_INCHES);
         }
 
-        double targetAngleRad = Math.atan2(virtualY - ry, virtualX - rx);
-        return new double[]{targetAngleRad, rawDist};
+        return Math.atan2(virtualY - ry, virtualX - rx);
     }
 
-    // pula luata de la copil de 12 ani pe yt
-    private void calculateShotVectorAndUpdateTurret(double robotHeading) {
+    private void mySOTM() {
         Pose robotPose = Robot.follower.getPose();
         Pose target = (Robot.alliance == Robot.Alliance.RED) ? redObeliskPose : blueObeliskPose;
 
@@ -233,7 +217,7 @@ public class Shooter extends Subsystem {
 
         // update turret
         double turretVelCompOffset = Math.atan(perpendicularComponent / ivr);
-        double turretAngle = robotHeading - robotToGoalVector.getTheta() + turretVelCompOffset;
+        double turretAngle = Robot.follower.getHeading() - robotToGoalVector.getTheta() + turretVelCompOffset;
 
         if (turretAngle > 180) {
             turretAngle -= 360;
@@ -258,10 +242,9 @@ public class Shooter extends Subsystem {
     }
 
     private double servoPositionFromTurretAngle(double turretAngleRad) {
-        double turretDeg = Math.toDegrees(turretAngleRad);
-        turretDeg = Math.max(-TURRET_MAX_ANGLE_DEG, Math.min(TURRET_MAX_ANGLE_DEG, turretDeg));
-        double servoDeg = turretDeg / TURRET_GEAR_RATIO;
-        return TURRET_SERVO_MIDPOINT + (servoDeg / TURRET_MAX_ANGLE_DEG) * 0.5;
+//        double turretDeg = Math.toDegrees(turretAngleRad);
+//        turretDeg = Math.max(-TURRET_MAX_ANGLE_DEG, Math.min(TURRET_MAX_ANGLE_DEG, turretDeg));
+        return TURRET_SERVO_MIDPOINT + (turretAngleRad / (TURRET_GEAR_RATIO * Math.PI)) * 0.5;
     }
 
     private double turretAngleFromServoPosition(double servoPos) {
@@ -269,105 +252,45 @@ public class Shooter extends Subsystem {
         return Math.toRadians(servoDeg * TURRET_GEAR_RATIO);
     }
 
-    // Limelight Tracking
-    // deprecated
-    private double trackWithLimelight() {
-        LLResult result = ll.getLatestResult();
-        if (result == null || !result.isValid()) {
-            return Double.NaN;
-        }
-
-        int targetId = (Robot.alliance == Robot.Alliance.RED) ? 24 : 20;
-        for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-            if (fiducial.getFiducialId() != targetId) continue;
-
-            double tx = fiducial.getTargetXDegrees();
-
-            if (tx != lastTx) {
-                lastTx = tx;
-                llStaleCount = 0;
-            } else {
-                llStaleCount++;
-            }
-
-            if (llStaleCount >= LL_STALE_THRESHOLD || Math.abs(tx) >= LL_THRESHOLD_DEG) {
-                return Double.NaN;
-            }
-
-//            double correctedTx = tx + LL_TURRET_OFFSET_DEG;
-            turretErrorRad = Math.toRadians(-tx);
-            trackState = "LIMELIGHT tx=" + tx;
-
-            double currentTurretRad = turretAngleFromServoPosition(commandedServoPos);
-            return servoPositionFromTurretAngle(currentTurretRad + Math.toRadians(tx));
-        }
-
-        return Double.NaN;
-    }
-
-    // Odometry Tracking (fallback)
-    private static double normalizeRadians(double angle) {
-        while (angle > Math.PI) angle -= 2.0 * Math.PI;
-        while (angle < -Math.PI) angle += 2.0 * Math.PI;
-        return angle;
-    }
-
-    private double trackWithOdometry(double fieldTargetAngleRad, double robotHeading) {
-        double desiredAngleRad = fieldTargetAngleRad - robotHeading
-                + Math.toRadians(TURRET_ANGLE_OFFSET_DEG);
-        desiredAngleRad = normalizeRadians(desiredAngleRad);
-
-        double limitRad = Math.toRadians(TURRET_MAX_ANGLE_DEG);
-        desiredAngleRad = Math.max(-limitRad, Math.min(limitRad, desiredAngleRad));
-
-        double currentTurretAngleRad = turretAngleFromServoPosition(commandedServoPos);
-        turretErrorRad = normalizeRadians(desiredAngleRad - currentTurretAngleRad);
-
-        trackState = "ODOMETRY";
-        return servoPositionFromTurretAngle(desiredAngleRad);
-    }
 
     // Main Tracking
-    public double track() {
+    public void track() {
         Pose pose = Robot.follower.getPose();
-
-        // comment for speed testing
-//        double vx = Robot.follower.getVelocity().getXComponent();
-//        double vy = Robot.follower.getVelocity().getYComponent();
         double heading = pose.getHeading();
 
-//        double vxField = vx * Math.cos(heading) - vy * Math.sin(heading);
-//        double vyField = vx * Math.sin(heading) + vy * Math.cos(heading);
+        Vector followerVelocity = Robot.follower.getVelocity();
 
-//        double[] sotm = computeVirtualGoal(pose.getX(), pose.getY(), vxField, vyField);
-//        double fieldTargetAngleRad = sotm[0];
-//        llDistance = sotm[1]
-//
-        Pose target = (Robot.alliance == Robot.Alliance.RED) ? redObeliskPose : blueObeliskPose;
-        llDistance = pose.distanceFrom(target);
+        double targetAngleRad = computeVirtualGoal(pose.getX(), pose.getY(), followerVelocity.getXComponent(), followerVelocity.getYComponent());
 
-//        double servoPos = trackWithLimelight();
+        double desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
 
-//        if (Double.isNaN(servoPos)) {
-        double targetAngleRad = Math.atan2(target.getY() - pose.getY(), target.getX() - pose.getX());
-        double servoPos = trackWithOdometry(targetAngleRad, heading);
-//        }
+        double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
 
-        servoPos = Math.max(0.0, Math.min(1.0, servoPos));
+        FtcDashboard.getInstance().getTelemetry().addData("desired angle: ", desiredAngleRad);
+        FtcDashboard.getInstance().getTelemetry().addData("servo pos: ", servoPos);
+
+        servoPos = Math.max(0.5-uV.pivotRange, Math.min(0.5+uV.pivotRange, servoPos));
+
         if (!override) {
             turretPivot.setPosition(servoPos);
             commandedServoPos = servoPos;
         }
 
         turretServoPos = servoPos;
-        return servoPos;
     }
 
     // Override Controls
     @Override
     public void reset() {
-        turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    @Override
+    public void init() {
+        turretPivot.setPosition(0.5);
+
+        targetSelected = false;
     }
 
     public void goToAngle(double rad) {
@@ -387,14 +310,6 @@ public class Shooter extends Subsystem {
         override = false;
     }
 
-    public void incremental(double rad) {
-        if (!override) {
-            overrideAngle = (turretEncoder.getCurrentPosition()
-                    / (TICKS_PER_REV * ENCODER_GEAR_RATIO)) * (2.0 * Math.PI);
-        }
-        goToAngle(rad + overrideAngle);
-    }
-
     public void lock() {
         goToAngle(overrideAngle);
     }
@@ -402,10 +317,15 @@ public class Shooter extends Subsystem {
     // Update Loop
     @Override
     public void update() {
-        pidfController.kP = shootKp;
-        pidfController.kI = shootKi;
-        pidfController.kD = shootKd;
-        pidfController.kF = shootKf;
+//        pidfController.kP = shootKp;
+//        pidfController.kI = shootKi;
+//        pidfController.kD = shootKd;
+//        pidfController.kF = shootKf;
+
+        if (!targetSelected) {
+            targetGoal = Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
+            targetSelected = true;
+        }
 
         if (override) {
             double pos = servoPositionFromTurretAngle(overrideAngleRad);
@@ -414,13 +334,11 @@ public class Shooter extends Subsystem {
             commandedServoPos = pos;
         }
 
-        if (shooting) {
-            track();
+        track();
 
-            targetVelocity = computeVelocity(llDistance);
-            pidfController.setSetpoint(targetVelocity);
+        if (shooting) {
             if (!shootingLobComp) {
-                lobServo.setPosition(computeLob(llDistance));
+                lobServo.setPosition(computeLob(distance));
             }
 
             double pidOutput = pidfController.updatePID(-turretMotorLeft.getVelocity());
@@ -428,11 +346,9 @@ public class Shooter extends Subsystem {
             turretMotorRight.setPower(-pidOutput);
             turretMotorLeft.setPower(-pidOutput);
 
-        } else {
-            if (!override) {
-                turretMotorRight.setPower(-0.2);
-                turretMotorLeft.setPower(-0.2);
-            }
+        } else if (!override) {
+            turretMotorRight.setPower(-0.2);
+            turretMotorLeft.setPower(-0.2);
         }
     }
 }

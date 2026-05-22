@@ -75,4 +75,7 @@ public class uV {
     public static double scoreAngle = Math.toRadians(-30);
     public static double passThroughPointRadius = 5;
 
+
+    public static double pivotRange = 0.45;
+
 }

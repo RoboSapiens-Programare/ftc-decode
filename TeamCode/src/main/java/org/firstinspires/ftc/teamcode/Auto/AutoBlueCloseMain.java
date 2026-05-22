@@ -51,6 +51,7 @@ public class AutoBlueCloseMain extends OpMode {
         paths = new Paths(Robot.follower); //Build Paths
         Robot.follower.setMaxPower(0.9);
 
+        robot.shooter.init();
         robot.shooter.lock();
 
     }
@@ -77,6 +78,7 @@ public class AutoBlueCloseMain extends OpMode {
 
     @Override
     public void loop() {
+        robot.resetCache();
 
         Robot.follower.update(); // Update Pedro Pathing
         robot.intake.update();

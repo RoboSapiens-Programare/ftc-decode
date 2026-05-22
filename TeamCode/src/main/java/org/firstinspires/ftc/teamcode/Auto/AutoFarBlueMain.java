@@ -50,7 +50,7 @@ public class AutoFarBlueMain extends OpMode {
         Robot.transitionPose = new Pose(56, 6, Math.toRadians(180));
         Robot.follower.setMaxPower(1);
 
-        // TODO: tune
+        robot.shooter.init();
         robot.shooter.goToAngle(-Math.toRadians(95));
     }
 
@@ -66,6 +66,7 @@ public class AutoFarBlueMain extends OpMode {
 
     @Override
     public void loop() {
+        robot.resetCache();
 
         Robot.follower.update(); // Update Pedro Pathing
         robot.intake.update();
@@ -77,7 +78,7 @@ public class AutoFarBlueMain extends OpMode {
         loopCount++;
         if (loopCount % 5 == 0) {
             dashboardTelemetry.addData("Path State", pathState);
-            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+            dashboardTelemetry.addData("Distance (in)", robot.shooter.distance);
             dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
             dashboardTelemetry.update();
             dashboardTelemetry.addData("Track State", robot.shooter.trackState);
@@ -85,10 +86,10 @@ public class AutoFarBlueMain extends OpMode {
             dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
             dashboardTelemetry.addData("Target RPM", robot.shooter.targetVelocity);
             dashboardTelemetry.addData("Actual RPM", -robot.shooter.turretMotorLeft.getVelocity());
-            dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+            dashboardTelemetry.addData("Distance (in)", robot.shooter.distance);
             dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
             dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
-            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
+//            dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
             dashboardTelemetry.addData("heading", robot.follower.getHeading());
             dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
             dashboardTelemetry.update();

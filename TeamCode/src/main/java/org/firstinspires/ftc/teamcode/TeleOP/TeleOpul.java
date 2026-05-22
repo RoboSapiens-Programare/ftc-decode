@@ -7,6 +7,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+//import com.seattlesolvers.solverslib.photon.PhotonCore;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -15,6 +16,8 @@ import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 
 @TeleOp(name = "TeleOp")
 public class TeleOpul extends OpMode {
+
+    long lastTime = System.nanoTime();
 
     private static final long INPUT_COOLDOWN_MS = 200;
     private static final long INPUT_COOLDOWN_LONG_MS = 400;
@@ -47,6 +50,8 @@ public class TeleOpul extends OpMode {
         state = State.INTAKE;
         gamepad1.setLedColor(0, 255, 0, 10);
         robot.shooter.openGate();
+
+        robot.shooter.init();
     }
 
     @Override
@@ -72,6 +77,8 @@ public class TeleOpul extends OpMode {
 
     @Override
     public void loop() {
+        robot.resetCache();
+
         switch (state) {
             case INTAKE:
                 handleIntake();
@@ -81,21 +88,24 @@ public class TeleOpul extends OpMode {
                 break;
         }
 
-        robot.intake.updateHeadlight();
+        robot.intake.update();
         handlePoseReset();
         handleOverrideButtons();
         handleChassisAiming();
         handleDriverOverride();
-        handleTurretControls();
+//        handleTurretControls();
         handleDrive();
 
         robot.shooter.update();
         Robot.follower.update();
-        loopCount++;
 
-        if (loopCount % 5 == 0) {
-            updateTelemetry();
-        }
+
+        updateTelemetry();
+
+//        LAST RESORT!
+//        PhotonCore.CONTROL_HUB.clearBulkCache();
+//        PhotonCore.EXPANSION_HUB.clearBulkCache();
+
     }
 
     @Override
@@ -234,7 +244,7 @@ public class TeleOpul extends OpMode {
         if (followerBusy) {
             followerIdleTimer.reset();
         }
-        boolean followerSettled = !followerBusy && followerIdleTimer.milliseconds() > FOLLOWER_SETTLE_MS;
+//        boolean followerSettled = !followerBusy && followerIdleTimer.milliseconds() > FOLLOWER_SETTLE_MS;
 
         if (isAimingChassis && aimOnce && !overrideCancelled && driverMovingSticks) {
             Robot.follower.breakFollowing();
@@ -243,28 +253,28 @@ public class TeleOpul extends OpMode {
         }
     }
 
-    private void handleTurretControls() {
-        if (gamepad2.dpad_left && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
-            robot.shooter.incremental(4 * Math.PI / 90);
-            inputTimer.reset();
-        }
-        if (gamepad2.dpad_right && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
-            robot.shooter.incremental(-4 * Math.PI / 90);
-            inputTimer.reset();
-        }
-        if (gamepad2.dpad_up && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
-            robot.shooter.incremental(Math.PI / 90);
-            inputTimer.reset();
-        }
-        if (gamepad2.dpad_down && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
-            robot.shooter.incremental(-Math.PI / 90);
-            inputTimer.reset();
-        }
-        if (gamepad2.touchpad && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
-            robot.shooter.stopOverride();
-            inputTimer.reset();
-        }
-    }
+//    private void handleTurretControls() {
+//        if (gamepad2.dpad_left && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
+//            robot.shooter.incremental(4 * Math.PI / 90);
+//            inputTimer.reset();
+//        }
+//        if (gamepad2.dpad_right && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
+//            robot.shooter.incremental(-4 * Math.PI / 90);
+//            inputTimer.reset();
+//        }
+//        if (gamepad2.dpad_up && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
+//            robot.shooter.incremental(Math.PI / 90);
+//            inputTimer.reset();
+//        }
+//        if (gamepad2.dpad_down && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
+//            robot.shooter.incremental(-Math.PI / 90);
+//            inputTimer.reset();
+//        }
+//        if (gamepad2.touchpad && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+//            robot.shooter.stopOverride();
+//            inputTimer.reset();
+//        }
+//    }
 
     private void handleDrive() {
         boolean allowDrive = !isAimingChassis || overrideCancelled
@@ -282,23 +292,33 @@ public class TeleOpul extends OpMode {
 
     // Telemetry
     private void updateTelemetry() {
-        dashboardTelemetry.addData("desired angle", robot.shooter.getTargetFieldAngleRadStatic());
-        dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
-        dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
-        dashboardTelemetry.addData("Sensor3", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
+        if (loopCount++ % 10 != 0)
+            return;
+
+        long currentTime = System.nanoTime();
+
+        double loopTimeSeconds = (currentTime - lastTime) / 1000000000.0;
+        double frequency = 10 / loopTimeSeconds;
+        lastTime = currentTime;
+
+        dashboardTelemetry.addData("Loop Hz", frequency);
+//        dashboardTelemetry.addData("desired angle", robot.shooter.getTargetFieldAngleRadStatic());
+//        dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
+//        dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
+//        dashboardTelemetry.addData("Sensor3", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
         dashboardTelemetry.addData("State", state);
-        dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
-        dashboardTelemetry.addData("Distance (in)", robot.shooter.llDistance);
+//        dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
+        dashboardTelemetry.addData("Distance (in)", robot.shooter.distance);
         dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
-        dashboardTelemetry.addData("Track State", robot.shooter.trackState);
-        dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
-        dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
+//        dashboardTelemetry.addData("Track State", robot.shooter.trackState);
+//        dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
+//        dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
         dashboardTelemetry.addData("Target RPM", Shooter.targetVelocity);
         dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
         dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
-        dashboardTelemetry.addData("encoder pos", robot.shooter.turretEncoder.getCurrentPosition());
-        dashboardTelemetry.addData("Angle pose", Robot.follower.getPose().getHeading());
-        dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
+//        dashboardTelemetry.addData("Angle pose", Robot.follower.getPose().getHeading());
+//        dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
+
         dashboardTelemetry.update();
     }
 }
