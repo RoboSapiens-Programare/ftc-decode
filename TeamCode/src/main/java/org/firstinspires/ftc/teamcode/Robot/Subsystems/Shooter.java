@@ -64,7 +64,7 @@ public class Shooter extends Subsystem {
     public double turretErrorRad = 0.0;
     public boolean shooting = false;
     public double distance = 0;
-    public boolean shootingLobComp = false;
+    public boolean shootingLobComp = true;
 
     public boolean targetSelected = false;
     public static Pose targetGoal;
@@ -134,17 +134,20 @@ public class Shooter extends Subsystem {
 
     // Trajectory
     private double computeLob(double distance) {
-        double lob = (lobA * distance * distance) + (lobB * distance) + lobC;
-        if (lob <= uV.lobMin) return uV.lobMin;
-        return Math.min(lob, uV.lobMax);
+//        double lob = (lobA * distance * distance) + (lobB * distance) + lobC;
+        double lob = -0.0000526853 * distance * distance * distance + 0.0101482 * distance * distance -0.646392 * distance + 13.95284;
+//        if (lob <= uV.lobMin) return uV.lobMin;
+//        return Math.min(lob, uV.lobMax);
+        return Math.max(Math.min(lob, 1), 0.2);
     }
 
     private double computeVelocity(double distance) {
-        double velocity = (velA * distance * distance) + (velB * distance) + velC;
+//        double velocity = (velA * distance * distance) + (velB * distance) + velC;
+        double velocity = 0.0167354 * distance * distance * distance -2.95692 * distance * distance + 176.80479 * distance - 2242.28866;
         if (distance > 120) {
             return 1880;
         }
-        return Math.max(Math.min(velocity, 2300), 0);
+        return Math.max(Math.min(velocity, 2300), 500);
     }
 
     private double computeVirtualGoal(double rx, double ry, double vx, double vy) {
@@ -266,9 +269,6 @@ public class Shooter extends Subsystem {
 
         double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
 
-        FtcDashboard.getInstance().getTelemetry().addData("desired angle: ", desiredAngleRad);
-        FtcDashboard.getInstance().getTelemetry().addData("servo pos: ", servoPos);
-
         servoPos = Math.max(0.5-uV.pivotRange, Math.min(0.5+uV.pivotRange, servoPos));
 
         if (!override) {
@@ -334,11 +334,12 @@ public class Shooter extends Subsystem {
             commandedServoPos = pos;
         }
 
-        track();
-
         if (shooting) {
-            if (!shootingLobComp) {
+            track();
+
+            if (shootingLobComp) {
                 lobServo.setPosition(computeLob(distance));
+                FtcDashboard.getInstance().getTelemetry().addData("lob", computeLob(distance));
             }
 
             double pidOutput = pidfController.updatePID(-turretMotorLeft.getVelocity());

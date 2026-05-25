@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOP;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -15,10 +16,13 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 
 @TeleOp(name = "TeleOp")
+@Config
 public class TeleOpul extends OpMode {
 
     long lastTime = System.nanoTime();
 
+    public static double pos = 0.0;
+    public static double velo = 0.0;
     private static final long INPUT_COOLDOWN_MS = 200;
     private static final long INPUT_COOLDOWN_LONG_MS = 400;
     private static final long FOLLOWER_SETTLE_MS = 300;
@@ -52,6 +56,7 @@ public class TeleOpul extends OpMode {
         robot.shooter.openGate();
 
         robot.shooter.init();
+//        robot.shooter.shootingLobComp = false;
     }
 
     @Override
@@ -292,13 +297,14 @@ public class TeleOpul extends OpMode {
 
     // Telemetry
     private void updateTelemetry() {
-        if (loopCount++ % 10 != 0)
+        if (loopCount++ >= 10)
             return;
 
         long currentTime = System.nanoTime();
 
         double loopTimeSeconds = (currentTime - lastTime) / 1000000000.0;
-        double frequency = 10 / loopTimeSeconds;
+        double frequency = (loopCount + 1) / loopTimeSeconds;
+        loopCount = 0;
         lastTime = currentTime;
 
         dashboardTelemetry.addData("Loop Hz", frequency);
