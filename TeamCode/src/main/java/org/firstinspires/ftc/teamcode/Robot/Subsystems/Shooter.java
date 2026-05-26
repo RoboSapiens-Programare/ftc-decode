@@ -30,29 +30,16 @@ public class Shooter extends Subsystem {
     private static final double EXTERNAL_GEAR_RATIO = 1.0;   // Change if you use external gears/pulleys
 
     private static double TICKS_TO_INCHES = (2.0 * Math.PI * WHEEL_RADIUS_INCHES) / (RAW_MOTOR_TICKS * EXTERNAL_GEAR_RATIO);
-
-    public static double FIELD_ANGLE_OFFSET_DEG = -3.0;
-    public static int LL_STALE_THRESHOLD = 5;
-    public static double LL_THRESHOLD_DEG = 20.0;
-    public static double ENCODER_GEAR_RATIO = 3.0;
-    public static double TURRET_ANGLE_OFFSET_DEG = -3.0;
     public static double TURRET_SERVO_MIDPOINT = 0.5;
     public static double TURRET_MAX_ANGLE_DEG = 90.0;
     public static double TURRET_GEAR_RATIO = 1.3;
-    public static double TICKS_PER_REV = 8192.0;
     public static double shootKp = 0.06;
     public static double shootKi = 0.00002;
     public static double shootKd = 0.0000001;
     public static double shootKf = 0.013;
-    public static double velA = 0.05;
-    public static double velB = 4.444;
-    public static double velC = 1140.2;
-    public static double lobA = 0.0;
-    public static double lobB = -0.01364;
-    public static double lobC = 1.0682;
-    public static double BALL_SPEED_INCHES = 250.0;
     public static double TURRET_AIM_THRESHOLD_DEG = 2;
     public static double targetVelocity = 1300;
+    public static double targetLob = 0;
 
     // Hardware & State
     public final CachingDcMotorEx turretMotorLeft;
@@ -141,6 +128,10 @@ public class Shooter extends Subsystem {
         return Math.max(Math.min(lob, 1), 0.2);
     }
 
+    private double lobToAngle(double lobPos) {
+        return 90-(-35 * lobPos + 51.75);
+    }
+
     private double computeVelocity(double distance) {
 //        double velocity = (velA * distance * distance) + (velB * distance) + velC;
         double velocity = 0.0167354 * distance * distance * distance -2.95692 * distance * distance + 176.80479 * distance - 2242.28866;
@@ -161,18 +152,34 @@ public class Shooter extends Subsystem {
         targetVelocity = computeVelocity(distance);
         pidfController.setSetpoint(targetVelocity);
 
+        double vel = targetVelocity * TICKS_TO_INCHES * Math.cos(Math.toRadians(lobToAngle(targetLob)));
 
-        double tof = distance / (targetVelocity * TICKS_TO_INCHES);
+        double tof = distance / vel;
         double virtualX = 0;
         double virtualY = 0;
         for (int i = 0; i < 2; i++) {
-            virtualX = goalX + vx * tof;
-            virtualY = goalY + vy * tof;
+            virtualX = goalX - vx * tof;
+            virtualY = goalY - vy * tof;
             double virtualDist = Math.hypot(virtualX - rx, virtualY - ry);
-            tof = virtualDist / (targetVelocity * TICKS_TO_INCHES);
+            tof = virtualDist / vel;
         }
 
-        return Math.atan2(virtualY - ry, virtualX - rx);
+        double virtualDist = Math.hypot(virtualX - rx, virtualY - ry);
+        targetLob = computeLob(virtualDist);
+
+
+        double v = Math.abs(vx) + Math.abs(vy);
+
+        FtcDashboard.getInstance().getTelemetry().addData("vx", vx);
+        FtcDashboard.getInstance().getTelemetry().addData("vy", vy);
+        FtcDashboard.getInstance().getTelemetry().addData("v", v);
+
+//        return Math.atan2(virtualY - ry, virtualX - rx) * ((Math.abs(vx) + Math.abs(vy) > 4 ) ? 1.1 : 1);
+//        return Math.atan2(virtualY - ry, virtualX - rx) * ((Math.abs(vx) + Math.abs(vy) > 4 ) ? 1.1*Math.signum(vx)*(vx-vy>0 ? -1 : 1) : 1);
+
+//        return Math.atan2(virtualY - ry, virtualX - rx) * ((Math.abs(vx) + Math.abs(vy) > 40 ) ? (vx>0 && vy>0 ? 1.1 : 0.9) : 1);
+
+        return Math.atan2(virtualY - ry, virtualX - rx) * ((v > 1 ) ? ((vx>0 && vy>0) ? 1+(v/((double) 400 /35 * distance)) : 1-(v/((double) 400 /35*distance))) : 1);
     }
 
     private void mySOTM() {
@@ -247,7 +254,7 @@ public class Shooter extends Subsystem {
     private double servoPositionFromTurretAngle(double turretAngleRad) {
 //        double turretDeg = Math.toDegrees(turretAngleRad);
 //        turretDeg = Math.max(-TURRET_MAX_ANGLE_DEG, Math.min(TURRET_MAX_ANGLE_DEG, turretDeg));
-        return TURRET_SERVO_MIDPOINT + (turretAngleRad / (TURRET_GEAR_RATIO * Math.PI)) * 0.5;
+        return TURRET_SERVO_MIDPOINT + (turretAngleRad * TURRET_GEAR_RATIO / Math.PI) * 0.5;
     }
 
     private double turretAngleFromServoPosition(double servoPos) {
@@ -265,11 +272,14 @@ public class Shooter extends Subsystem {
 
         double targetAngleRad = computeVirtualGoal(pose.getX(), pose.getY(), followerVelocity.getXComponent(), followerVelocity.getYComponent());
 
+        FtcDashboard.getInstance().getTelemetry().addData("turret heading", targetAngleRad);
+
+
         double desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
 
         double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
 
-        servoPos = Math.max(0.5-uV.pivotRange, Math.min(0.5+uV.pivotRange, servoPos));
+        servoPos = Math.max(0, Math.min(1, servoPos));
 
         if (!override) {
             turretPivot.setPosition(servoPos);
@@ -338,8 +348,7 @@ public class Shooter extends Subsystem {
             track();
 
             if (shootingLobComp) {
-                lobServo.setPosition(computeLob(distance));
-                FtcDashboard.getInstance().getTelemetry().addData("lob", computeLob(distance));
+                lobServo.setPosition(targetLob);
             }
 
             double pidOutput = pidfController.updatePID(-turretMotorLeft.getVelocity());

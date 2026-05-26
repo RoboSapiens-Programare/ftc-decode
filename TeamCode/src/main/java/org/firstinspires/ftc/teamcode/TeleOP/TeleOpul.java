@@ -102,6 +102,7 @@ public class TeleOpul extends OpMode {
         handleDrive();
 
         robot.shooter.update();
+//        robot.shooter.lobServo.setPosition(pos);
         Robot.follower.update();
 
 

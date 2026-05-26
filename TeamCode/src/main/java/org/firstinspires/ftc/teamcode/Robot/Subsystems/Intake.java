@@ -31,7 +31,6 @@ public class Intake extends Subsystem {
     public double midDistance = 0;
 
     public final ElapsedTime sensorTimer = new ElapsedTime();
-    private final ElapsedTime hlTimer = new ElapsedTime();
 
     public Intake(HardwareMap hwMap) {
         rollerOne = new CachingDcMotorEx(hwMap.get(DcMotorEx.class, "rollerOne"));
@@ -65,13 +64,11 @@ public class Intake extends Subsystem {
     }
 
     public void updateHeadlight() {
-        if (hlTimer.milliseconds() > 100) {
             if (outtakeDistance < 8 && midDistance < 8 && intakeDistance < 8) {
                 headlight.setPosition(1);
             } else {
                 headlight.setPosition(0.277);
             }
-        }
     }
 
     // Rollers
