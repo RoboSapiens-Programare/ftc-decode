@@ -1,0 +1,271 @@
+{
+  "version": "2.2.0",
+  "header": {
+    "info": "Created with Turtle Tracer",
+    "copyright": "Copyright 2026 Matthew Allen. Licensed under the Modified Apache License, Version 2.0.",
+    "link": "https://github.com/Mallen220/TurtleTracer"
+  },
+  "startPoint": {
+    "x": 23,
+    "y": 124,
+    "heading": "linear",
+    "startDeg": 143,
+    "endDeg": 180,
+    "locked": false
+  },
+  "lines": [
+    {
+      "id": "mpsl7vcg-tk8t4f",
+      "name": "shootPreload",
+      "endPoint": {
+        "x": 57.804799426934096,
+        "y": 86.01468481375358,
+        "heading": "linear",
+        "reverse": false,
+        "targetX": 12,
+        "targetY": 134,
+        "startDeg": 143,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#AABB7B",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
+    },
+    {
+      "id": "mpslefi6-byn8eu",
+      "name": "grabGPP",
+      "endPoint": {
+        "x": 20,
+        "y": 84,
+        "heading": "constant",
+        "targetX": 10,
+        "targetY": 84,
+        "startDeg": 135,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#75676C",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "isChain": false
+    },
+    {
+      "id": "mpslgzc8-ipo5pr",
+      "name": "shootGPP",
+      "endPoint": {
+        "x": 54.84992836676218,
+        "y": 84,
+        "heading": "constant",
+        "targetX": 12,
+        "targetY": 134,
+        "startDeg": 180,
+        "endDeg": 135,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#59A957",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpslive3-l32bm2",
+      "name": "grabPGP",
+      "endPoint": {
+        "x": 20,
+        "y": 61.13,
+        "heading": "constant",
+        "startDeg": 135,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [
+        {
+          "x": 65.04799426934098,
+          "y": 56.00716332378223
+        }
+      ],
+      "color": "#DA5978",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpslnaaz-119er1",
+      "name": "shootPGP",
+      "endPoint": {
+        "x": 54.84992836676218,
+        "y": 84,
+        "heading": "constant",
+        "startDeg": 180,
+        "endDeg": 135,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#66888C",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpslsut1-4ky2lo",
+      "name": "openGate",
+      "endPoint": {
+        "x": 16.835243553008596,
+        "y": 66.99453796561608,
+        "heading": "constant",
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#857B7B",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpslvy4i-5x9nv3",
+      "name": "grabGate",
+      "endPoint": {
+        "x": 13.865687679083095,
+        "y": 58.29799426934099,
+        "heading": "linear",
+        "degrees": 180,
+        "startDeg": 180,
+        "endDeg": 135
+      },
+      "controlPoints": [],
+      "color": "#5D568A",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "isChain": true
+    },
+    {
+      "id": "mpsly2xm-71ocfk",
+      "name": "shootGate",
+      "endPoint": {
+        "x": 54.84992836676218,
+        "y": 84,
+        "heading": "linear",
+        "startDeg": 135,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#5B57DC",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "mpsl7vcg-tk8t4f"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpslefi6-byn8eu",
+      "isChain": false
+    },
+    {
+      "kind": "path",
+      "lineId": "mpslgzc8-ipo5pr"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpslive3-l32bm2"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpslnaaz-119er1"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpslsut1-4ky2lo"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpslvy4i-5x9nv3",
+      "isChain": true
+    },
+    {
+      "kind": "path",
+      "lineId": "mpsly2xm-71ocfk"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "triangle-1",
+      "name": "Red Goal",
+      "vertices": [
+        {
+          "x": 143,
+          "y": 69.5
+        },
+        {
+          "x": 143,
+          "y": 143
+        },
+        {
+          "x": 118.5,
+          "y": 143
+        },
+        {
+          "x": 136.5,
+          "y": 118.5
+        },
+        {
+          "x": 136.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#dc2626",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    },
+    {
+      "id": "triangle-2",
+      "name": "Blue Goal",
+      "vertices": [
+        {
+          "x": 7.5,
+          "y": 118.5
+        },
+        {
+          "x": 25.5,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 69.5
+        },
+        {
+          "x": 7.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#0b08d9",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    }
+  ],
+  "extraData": {}
+}

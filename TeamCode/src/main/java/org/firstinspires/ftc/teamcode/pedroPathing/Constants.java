@@ -21,7 +21,8 @@ public class Constants {
                     .mass(13.2)
                     .forwardZeroPowerAcceleration(-43.5)
                     .lateralZeroPowerAcceleration(-65.3)
-                    .headingPIDFCoefficients(new PIDFCoefficients(1.35, 0.03, 0.05, 0));
+                    .headingPIDFCoefficients(new PIDFCoefficients(1.35, 0.03, 0.05, 0)).
+            translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0.001, 0.0004, 0.015));
 
     //                    .useSecondaryTranslationalPIDF(true)
     //                    .useSecondaryHeadingPIDF(true)

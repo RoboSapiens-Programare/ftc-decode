@@ -35,6 +35,7 @@ public class TeleOpul extends OpMode {
     private final ElapsedTime stateTimer = new ElapsedTime();
     private final ElapsedTime followerIdleTimer = new ElapsedTime();
     private final ElapsedTime inputTimer = new ElapsedTime();
+    private double averagedFrequency = 50.0; // Seed it with an expected baseline (e.g., 50-60Hz)
 
     private int loopCount = 0;
     private boolean aimOnce = true;
@@ -129,7 +130,10 @@ public class TeleOpul extends OpMode {
         robot.shooter.shooting = newState == State.OUTTAKE;
         if (newState == State.OUTTAKE) {
             robot.shooter.resetShooterPID();
+            robot.shooter.openGate();
+
         } else {
+
             robot.shooter.stopOverride();
             robot.shooter.closeGate();
         }
@@ -157,9 +161,6 @@ public class TeleOpul extends OpMode {
     }
 
     private void handleOuttake() {
-        robot.shooter.shooting = true;
-        robot.shooter.openGate();
-
         boolean fireMain = gamepad1.right_trigger > TRIGGER_THRESHOLD
                 && robot.shooter.velocityReached()
                 && robot.shooter.isAimed();
@@ -298,17 +299,27 @@ public class TeleOpul extends OpMode {
 
     // Telemetry
     private void updateTelemetry() {
-        if (loopCount++ >= 10)
-            return;
-
         long currentTime = System.nanoTime();
-
-        double loopTimeSeconds = (currentTime - lastTime) / 1000000000.0;
-        double frequency = (loopCount + 1) / loopTimeSeconds;
-        loopCount = 0;
+        double loopTimeSeconds = (currentTime - lastTime) / 1_000_000_000.0;
         lastTime = currentTime;
 
-        dashboardTelemetry.addData("Loop Hz", frequency);
+        // Guard against division by zero on initialization anomalies
+        if (loopTimeSeconds > 0) {
+            double instantFrequency = 1.0 / loopTimeSeconds;
+
+            // Exponential Moving Average Formula:
+            // Alpha (0.05) determines responsiveness vs smoothness. Lower = smoother.
+            double alpha = 0.05;
+            averagedFrequency = (alpha * instantFrequency) + ((1.0 - alpha) * averagedFrequency);
+        }
+
+        // Limit the dashboard telemetry network updates to every 10 frames
+        if (loopCount++ < 10) {
+            return;
+        }
+        loopCount = 0;
+
+        dashboardTelemetry.addData("Loop Hz (Avg)", Math.round(averagedFrequency));
 //        dashboardTelemetry.addData("desired angle", robot.shooter.getTargetFieldAngleRadStatic());
 //        dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
 //        dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));

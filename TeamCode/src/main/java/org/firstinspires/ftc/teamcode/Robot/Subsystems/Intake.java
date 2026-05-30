@@ -83,6 +83,12 @@ public class Intake extends Subsystem {
                 && outtakeDistance > 8;
     }
 
+    public boolean isFull() {
+        return midDistance < 8
+                && intakeDistance < 8
+                && outtakeDistance < 8;
+    }
+
     public void pullBalls() {
         if (outtakeDistance < 8) {
             rollerTwo.setPower(0);

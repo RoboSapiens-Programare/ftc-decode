@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
@@ -29,7 +30,7 @@ public class Shooter extends Subsystem {
     private static final double RAW_MOTOR_TICKS = 28.0;      // 1:1 kit bypasses gearbox completely
     private static final double EXTERNAL_GEAR_RATIO = 1.0;   // Change if you use external gears/pulleys
 
-    private static double TICKS_TO_INCHES = (2.0 * Math.PI * WHEEL_RADIUS_INCHES) / (RAW_MOTOR_TICKS * EXTERNAL_GEAR_RATIO);
+    private static final double TICKS_TO_INCHES = (2.0 * Math.PI * WHEEL_RADIUS_INCHES) / (RAW_MOTOR_TICKS * EXTERNAL_GEAR_RATIO);
     public static double TURRET_SERVO_MIDPOINT = 0.5;
     public static double TURRET_MAX_ANGLE_DEG = 90.0;
     public static double TURRET_GEAR_RATIO = 1.3;
@@ -65,6 +66,8 @@ public class Shooter extends Subsystem {
     private double commandedServoPos = TURRET_SERVO_MIDPOINT;
     private boolean override = false;
     private double overrideAngle = 0;
+
+    private final ElapsedTime trackingTimer = new ElapsedTime();
 
     // PID Controllers
     private final PIDFController pidfController =
@@ -133,12 +136,29 @@ public class Shooter extends Subsystem {
     }
 
     private double computeVelocity(double distance) {
-//        double velocity = (velA * distance * distance) + (velB * distance) + velC;
-        double velocity = 0.0167354 * distance * distance * distance -2.95692 * distance * distance + 176.80479 * distance - 2242.28866;
-        if (distance > 120) {
-            return 1880;
+        // 1. Guard clause for close-range target arrival
+        if (distance <= 20.0) {
+            return 500.0; // Or whatever your target holding/stop velocity is
         }
-        return Math.max(Math.min(velocity, 2300), 500);
+
+        // 2. Guard clause for long-range max velocity
+        if (distance > 120.0) {
+            return 1880.0;
+        }
+
+        // 3. Main cubic regression curve
+        double velocity = 0.0167354 * distance * distance * distance
+                - 2.95692 * distance * distance
+                + 176.80479 * distance
+                - 2242.28866;
+
+        // 4. Inject the aggressive acceleration boost for smaller distances
+        if (distance < 90.0) {
+            velocity += 35.0 * Math.exp(-0.06 * (distance - 40.0));
+        }
+
+        // 5. Final safety clamp
+        return Math.max(Math.min(velocity, 2300.0), 500.0);
     }
 
     private double computeVirtualGoal(double rx, double ry, double vx, double vy) {
@@ -150,13 +170,15 @@ public class Shooter extends Subsystem {
         distance = Math.hypot(dx, dy);
 
         targetVelocity = computeVelocity(distance);
-        pidfController.setSetpoint(targetVelocity);
 
+        // Calculate actual projectile horizontal velocity component
         double vel = targetVelocity * TICKS_TO_INCHES * Math.cos(Math.toRadians(lobToAngle(targetLob)));
-
         double tof = distance / vel;
-        double virtualX = 0;
-        double virtualY = 0;
+
+        double virtualX = goalX;
+        double virtualY = goalY;
+
+        // Core predictive targeting loop (Time of Flight convergence)
         for (int i = 0; i < 2; i++) {
             virtualX = goalX - vx * tof;
             virtualY = goalY - vy * tof;
@@ -165,8 +187,8 @@ public class Shooter extends Subsystem {
         }
 
         double virtualDist = Math.hypot(virtualX - rx, virtualY - ry);
-        targetLob = computeLob(virtualDist);
 
+        targetLob = computeLob(virtualDist);
 
         double v = Math.abs(vx) + Math.abs(vy);
 
@@ -174,12 +196,20 @@ public class Shooter extends Subsystem {
         FtcDashboard.getInstance().getTelemetry().addData("vy", vy);
         FtcDashboard.getInstance().getTelemetry().addData("v", v);
 
-//        return Math.atan2(virtualY - ry, virtualX - rx) * ((Math.abs(vx) + Math.abs(vy) > 4 ) ? 1.1 : 1);
-//        return Math.atan2(virtualY - ry, virtualX - rx) * ((Math.abs(vx) + Math.abs(vy) > 4 ) ? 1.1*Math.signum(vx)*(vx-vy>0 ? -1 : 1) : 1);
+        // --- SCALING ADJUSTMENT FIX ---
+        // If you need to manually over-compensate or tweak the lead because of friction/latency,
+        // apply an offset modifier directly to the virtual coordinates before atan2:
+        if (v > 1.0) {
+            // Example: Dynamically tweak the lead position based on velocity and distance
+            double gain = 1.0 + (v / ((400.0 / 35.0) * distance));
 
-//        return Math.atan2(virtualY - ry, virtualX - rx) * ((Math.abs(vx) + Math.abs(vy) > 40 ) ? (vx>0 && vy>0 ? 1.1 : 0.9) : 1);
+            // Push the virtual point further out along the vector of movement
+            virtualX = goalX - (vx * tof * gain);
+            virtualY = goalY - (vy * tof * gain);
+        }
 
-        return Math.atan2(virtualY - ry, virtualX - rx) * ((v > 1 ) ? ((vx>0 && vy>0) ? 1+(v/((double) 400 /35 * distance)) : 1-(v/((double) 400 /35*distance))) : 1);
+        // Return the pure, untampered heading angle to the compensated target position
+        return Math.atan2(virtualY - ry, virtualX - rx);
     }
 
     private void mySOTM() {
@@ -277,6 +307,8 @@ public class Shooter extends Subsystem {
 
         double desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
 
+        desiredAngleRad = Math.max(-Math.PI/2, Math.min(desiredAngleRad, Math.PI/2));
+
         double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
 
         servoPos = Math.max(0, Math.min(1, servoPos));
@@ -344,6 +376,12 @@ public class Shooter extends Subsystem {
             commandedServoPos = pos;
         }
 
+        if (!shooting && trackingTimer.milliseconds() > 300) {
+            trackingTimer.reset();
+
+            track();
+        }
+
         if (shooting) {
             track();
 
@@ -351,6 +389,7 @@ public class Shooter extends Subsystem {
                 lobServo.setPosition(targetLob);
             }
 
+            pidfController.setSetpoint(targetVelocity);
             double pidOutput = pidfController.updatePID(-turretMotorLeft.getVelocity());
 
             turretMotorRight.setPower(-pidOutput);
