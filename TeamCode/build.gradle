@@ -52,7 +52,7 @@ repositories {
 dependencies {
     implementation project(':FtcRobotController')
     implementation "com.bylazar:docs:1.0.4"
-    implementation "com.bylazar:fullpanels"
+    implementation "com.bylazar:fullpanels:1.0.12"
     implementation "com.bylazar:battery:1.0.3"
     implementation 'com.pedropathing:telemetry:1.0.0'
 //    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")

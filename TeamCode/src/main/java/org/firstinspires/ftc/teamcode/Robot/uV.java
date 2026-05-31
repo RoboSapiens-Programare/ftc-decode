@@ -47,7 +47,6 @@ public class uV {
     public static double tuningVel = 1400;
     public static double tuningLob = 1;
 
-
     // SHOOT ASSIST
     public static double llDistanceOne = 0.5;
     public static double llDistanceTwo = 1.1;
@@ -61,21 +60,15 @@ public class uV {
     public static double angleOne = 0.45;
     public static double angleTwo = 0.2;
 
-
     public static double llDistanceFar = 1.58;
     public static double odometruDistanceFar = 0;
     public static int velocityFar = 1870;
     public static double angleFar = 0.2;
-
-
-
 
     // SHOOTER CONSTANTS
     public static double scoreHeight = 26;
     public static double scoreAngle = Math.toRadians(-30);
     public static double passThroughPointRadius = 5;
 
-
     public static double pivotRange = 0.45;
-
 }

@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
@@ -13,24 +11,23 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import dev.frozenmilk.dairy.cachinghardware.CachingDcMotorEx;
+import dev.frozenmilk.dairy.cachinghardware.CachingServo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.Robot.uV;
-import org.jetbrains.annotations.Contract;
-
-import dev.frozenmilk.dairy.cachinghardware.CachingDcMotorEx;
-import dev.frozenmilk.dairy.cachinghardware.CachingServo;
 
 @Config
 public class Shooter extends Subsystem {
 
     private static final double WHEEL_RADIUS_INCHES = 1.4567; // 74mm diameter / 2
-    private static final double RAW_MOTOR_TICKS = 28.0;      // 1:1 kit bypasses gearbox completely
-    private static final double EXTERNAL_GEAR_RATIO = 1.0;   // Change if you use external gears/pulleys
+    private static final double RAW_MOTOR_TICKS = 28.0; // 1:1 kit bypasses gearbox completely
+    private static final double EXTERNAL_GEAR_RATIO =
+            1.0; // Change if you use external gears/pulleys
 
-    private static final double TICKS_TO_INCHES = (2.0 * Math.PI * WHEEL_RADIUS_INCHES) / (RAW_MOTOR_TICKS * EXTERNAL_GEAR_RATIO);
+    private static final double TICKS_TO_INCHES =
+            (2.0 * Math.PI * WHEEL_RADIUS_INCHES) / (RAW_MOTOR_TICKS * EXTERNAL_GEAR_RATIO);
     public static double TURRET_SERVO_MIDPOINT = 0.5;
     public static double TURRET_MAX_ANGLE_DEG = 90.0;
     public static double TURRET_GEAR_RATIO = 1.3;
@@ -124,15 +121,19 @@ public class Shooter extends Subsystem {
 
     // Trajectory
     private double computeLob(double distance) {
-//        double lob = (lobA * distance * distance) + (lobB * distance) + lobC;
-        double lob = -0.0000526853 * distance * distance * distance + 0.0101482 * distance * distance -0.646392 * distance + 13.95284;
-//        if (lob <= uV.lobMin) return uV.lobMin;
-//        return Math.min(lob, uV.lobMax);
+        //        double lob = (lobA * distance * distance) + (lobB * distance) + lobC;
+        double lob =
+                -0.0000526853 * distance * distance * distance
+                        + 0.0101482 * distance * distance
+                        - 0.646392 * distance
+                        + 13.95284;
+        //        if (lob <= uV.lobMin) return uV.lobMin;
+        //        return Math.min(lob, uV.lobMax);
         return Math.max(Math.min(lob, 1), 0.2);
     }
 
     private double lobToAngle(double lobPos) {
-        return 90-(-35 * lobPos + 51.75);
+        return 90 - (-35 * lobPos + 51.75);
     }
 
     private double computeVelocity(double distance) {
@@ -141,24 +142,35 @@ public class Shooter extends Subsystem {
             return 500.0; // Or whatever your target holding/stop velocity is
         }
 
+        double velocity =
+                0.0000000035 * Math.pow(distance, 6)
+                        + 0.0000000923 * Math.pow(distance, 5)
+                        + -0.0004210883 * Math.pow(distance, 4)
+                        + 0.0873266934 * Math.pow(distance, 3)
+                        + -7.3454955146 * Math.pow(distance, 2)
+                        + 283.5671321995 * distance
+                        + -2806.3856753832;
+        return Math.max(Math.min(velocity, 2300.0), 500.0);
+
         // 2. Guard clause for long-range max velocity
-        if (distance > 120.0) {
-            return 1880.0;
-        }
+        //        if (distance > 120.0) {
+        //            return 1880.0;
+        //        }
 
         // 3. Main cubic regression curve
-        double velocity = 0.0167354 * distance * distance * distance
-                - 2.95692 * distance * distance
-                + 176.80479 * distance
-                - 2242.28866;
+        //        double velocity =
+        //                0.0165354 * distance * distance * distance
+        //                        - 2.95692 * distance * distance
+        //                        + 176.80479 * distance
+        //                        - 2182.28866;
 
         // 4. Inject the aggressive acceleration boost for smaller distances
-        if (distance < 90.0) {
-            velocity += 35.0 * Math.exp(-0.06 * (distance - 40.0));
-        }
+        //        if (distance < 60.0) {
+        //            velocity += 85.0 * Math.exp(-0.06 * (distance - 20.0));
+        //        }
 
         // 5. Final safety clamp
-        return Math.max(Math.min(velocity, 2300.0), 500.0);
+        //        return Math.max(Math.min(velocity, 2300.0), 500.0);
     }
 
     private double computeVirtualGoal(double rx, double ry, double vx, double vy) {
@@ -169,10 +181,11 @@ public class Shooter extends Subsystem {
         double dy = goalY - ry;
         distance = Math.hypot(dx, dy);
 
-        targetVelocity = computeVelocity(distance);
+        //        targetVelocity = computeVelocity(distance);
 
         // Calculate actual projectile horizontal velocity component
-        double vel = targetVelocity * TICKS_TO_INCHES * Math.cos(Math.toRadians(lobToAngle(targetLob)));
+        double vel =
+                targetVelocity * TICKS_TO_INCHES * Math.cos(Math.toRadians(lobToAngle(targetLob)));
         double tof = distance / vel;
 
         double virtualX = goalX;
@@ -233,7 +246,14 @@ public class Shooter extends Subsystem {
         // calculate initial launch components
         double hoodAngle = MathFunctions.clamp(Math.atan(2 * y / x - Math.tan(a)), 0.2, 0.7);
 
-        double flywheelSpeed = Math.sqrt(g * x * x / (2 * Math.pow(Math.cos(hoodAngle), 2) * (x * Math.tan(hoodAngle) - y)));
+        double flywheelSpeed =
+                Math.sqrt(
+                        g
+                                * x
+                                * x
+                                / (2
+                                        * Math.pow(Math.cos(hoodAngle), 2)
+                                        * (x * Math.tan(hoodAngle) - y)));
 
         // get robot velocity and convert it into parallel and perpendicular components
         Vector robotVelocity = Robot.follower.getVelocity();
@@ -253,11 +273,19 @@ public class Shooter extends Subsystem {
         // recalculate launch components
         hoodAngle = MathFunctions.clamp(Math.atan(vz / nvr), uV.lobMin, uV.lobMax);
 
-        flywheelSpeed = Math.sqrt(g * ndr * ndr / (2 * Math.pow(Math.cos(hoodAngle), 2) * (ndr * Math.tan(hoodAngle) - y)));
+        flywheelSpeed =
+                Math.sqrt(
+                        g
+                                * ndr
+                                * ndr
+                                / (2
+                                        * Math.pow(Math.cos(hoodAngle), 2)
+                                        * (ndr * Math.tan(hoodAngle) - y)));
 
         // update turret
         double turretVelCompOffset = Math.atan(perpendicularComponent / ivr);
-        double turretAngle = Robot.follower.getHeading() - robotToGoalVector.getTheta() + turretVelCompOffset;
+        double turretAngle =
+                Robot.follower.getHeading() - robotToGoalVector.getTheta() + turretVelCompOffset;
 
         if (turretAngle > 180) {
             turretAngle -= 360;
@@ -282,8 +310,9 @@ public class Shooter extends Subsystem {
     }
 
     private double servoPositionFromTurretAngle(double turretAngleRad) {
-//        double turretDeg = Math.toDegrees(turretAngleRad);
-//        turretDeg = Math.max(-TURRET_MAX_ANGLE_DEG, Math.min(TURRET_MAX_ANGLE_DEG, turretDeg));
+        //        double turretDeg = Math.toDegrees(turretAngleRad);
+        //        turretDeg = Math.max(-TURRET_MAX_ANGLE_DEG, Math.min(TURRET_MAX_ANGLE_DEG,
+        // turretDeg));
         return TURRET_SERVO_MIDPOINT + (turretAngleRad * TURRET_GEAR_RATIO / Math.PI) * 0.5;
     }
 
@@ -292,23 +321,26 @@ public class Shooter extends Subsystem {
         return Math.toRadians(servoDeg * TURRET_GEAR_RATIO);
     }
 
-
     // Main Tracking
     public void track() {
         Pose pose = Robot.follower.getPose();
         double heading = pose.getHeading();
 
-        Vector followerVelocity = Robot.follower.getVelocity();
+        double targetAngleRad = 0;
 
-        double targetAngleRad = computeVirtualGoal(pose.getX(), pose.getY(), followerVelocity.getXComponent(), followerVelocity.getYComponent());
-
-        FtcDashboard.getInstance().getTelemetry().addData("turret heading", targetAngleRad);
-
+        //        if (shooting) {
+        //            Vector followerVelocity = Robot.follower.getVelocity();
+        //            targetAngleRad = computeVirtualGoal(pose.getX(), pose.getY(),
+        // followerVelocity.getXComponent(), followerVelocity.getYComponent());
+        //        } else {
+        distance = Math.hypot(targetGoal.getY() - pose.getY(), targetGoal.getX() - pose.getX());
+        targetAngleRad =
+                Math.atan2(targetGoal.getY() - pose.getY(), targetGoal.getX() - pose.getX());
+        targetLob = computeLob(distance);
+        //        }
 
         double desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
-
-        desiredAngleRad = Math.max(-Math.PI/2, Math.min(desiredAngleRad, Math.PI/2));
-
+        desiredAngleRad = Math.max(-Math.PI * 2 / 5, Math.min(desiredAngleRad, Math.PI * 2 / 5));
         double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
 
         servoPos = Math.max(0, Math.min(1, servoPos));
@@ -324,8 +356,8 @@ public class Shooter extends Subsystem {
     // Override Controls
     @Override
     public void reset() {
-//        turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //        turretEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //        turretEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
@@ -359,10 +391,10 @@ public class Shooter extends Subsystem {
     // Update Loop
     @Override
     public void update() {
-//        pidfController.kP = shootKp;
-//        pidfController.kI = shootKi;
-//        pidfController.kD = shootKd;
-//        pidfController.kF = shootKf;
+        //        pidfController.kP = shootKp;
+        //        pidfController.kI = shootKi;
+        //        pidfController.kD = shootKd;
+        //        pidfController.kF = shootKf;
 
         if (!targetSelected) {
             targetGoal = Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
@@ -394,8 +426,8 @@ public class Shooter extends Subsystem {
 
             turretMotorRight.setPower(-pidOutput);
             turretMotorLeft.setPower(-pidOutput);
+        } else {
 
-        } else if (!override) {
             turretMotorRight.setPower(-0.2);
             turretMotorLeft.setPower(-0.2);
         }

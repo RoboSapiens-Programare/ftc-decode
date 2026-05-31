@@ -6,10 +6,10 @@
     "link": "https://github.com/Mallen220/TurtleTracer"
   },
   "startPoint": {
-    "x": 23,
-    "y": 124,
+    "x": 24,
+    "y": 123.5,
     "heading": "linear",
-    "startDeg": 143,
+    "startDeg": 144,
     "endDeg": 180,
     "locked": false
   },
@@ -18,13 +18,13 @@
       "id": "mpsl7vcg-tk8t4f",
       "name": "shootPreload",
       "endPoint": {
-        "x": 57.804799426934096,
-        "y": 86.01468481375358,
+        "x": 54.84992836676218,
+        "y": 84,
         "heading": "linear",
         "reverse": false,
         "targetX": 12,
         "targetY": 134,
-        "startDeg": 143,
+        "startDeg": 144,
         "endDeg": 180
       },
       "controlPoints": [],

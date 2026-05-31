@@ -20,11 +20,9 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
-import org.firstinspires.ftc.teamcode.TeleOP.TeleOpul;
 
 @Autonomous(name = "Auto Blue Close - LFT", group = "Autonomous")
 @Config // Panels
@@ -47,10 +45,9 @@ public class AutoBlueLft extends OpMode {
 
         Robot.alliance = Robot.Alliance.BLUE;
 
-        // Determine starting heading: prefer geometric heading when a path exists, otherwise fall back to explicit startPoint values
-        Robot.follower.setStartingPose(
-                new Pose(23.000, 124.000, Math.toRadians(143.000))
-        );
+        // Determine starting heading: prefer geometric heading when a path exists, otherwise fall
+        // back to explicit startPoint values
+        Robot.follower.setStartingPose(new Pose(23.000, 124.000, Math.toRadians(143.000)));
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -60,18 +57,16 @@ public class AutoBlueLft extends OpMode {
     public void loop() {
         robot.resetCache();
 
-
         robot.intake.update();
         robot.shooter.update();
 
         pathState = autonomousPathUpdate(); // Update autonomous state machine
 
         Robot.follower.update(); // Update follower
-        
+
         // Log values to Panels and Driver Station
         updateTelemetry();
     }
-
 
     /* ============================================================= *
      *                 Turtle Tracer — Auto-Generated                *
@@ -94,72 +89,69 @@ public class AutoBlueLft extends OpMode {
         public PathChain shootGate;
 
         public Paths(Follower follower) {
-            shootPreload = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(24.000, 123.500), new Pose(54.850, 84.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
-                    .build();
+            shootPreload =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(24.000, 123.500), new Pose(54.850, 84.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                            .build();
 
-            grabGPP = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(54.850, 84.000), new Pose(20.000, 84.000))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            grabGPP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(54.850, 84.000), new Pose(20.000, 84.000)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .build();
 
-            shootGPP = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(20.000, 84.000), new Pose(54.850, 84.000))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            shootGPP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(20.000, 84.000), new Pose(54.850, 84.000)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .build();
 
-            grabPGP = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(54.850, 84.000),
-                                    new Pose(65.048, 56.007),
-                                    new Pose(20.000, 61.130)
-                            )
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            grabPGP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(54.850, 84.000),
+                                            new Pose(65.048, 56.007),
+                                            new Pose(20.000, 61.130)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .build();
 
-            shootPGP = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(20.000, 61.130), new Pose(54.850, 84.000))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            shootPGP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(20.000, 61.130), new Pose(54.850, 84.000)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .build();
 
-            openGate = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(54.850, 84.000), new Pose(16.835, 66.995))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .addPath(
-                            new BezierLine(new Pose(16.835, 66.995), new Pose(13.866, 58.298))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
-                    .build();
+            openGate =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(54.850, 84.000), new Pose(16.835, 66.995)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(16.835, 66.995), new Pose(13.866, 58.298)))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
+                            .build();
 
-            shootGate = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(13.866, 58.298), new Pose(54.850, 84.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
-                    .build();
+            shootGate =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(13.866, 58.298), new Pose(54.850, 84.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
+                            .build();
         }
     }
-
 
     private void autoShoot() {
         robot.shooter.shooting = true;
@@ -191,7 +183,6 @@ public class AutoBlueLft extends OpMode {
             robot.shooter.update();
             Robot.follower.update();
         }
-
     }
 
     public int autonomousPathUpdate() {
@@ -302,17 +293,22 @@ public class AutoBlueLft extends OpMode {
         loopCount = 0;
 
         dashboardTelemetry.addData("Loop Hz (Avg)", Math.round(averagedFrequency));
-//        dashboardTelemetry.addData("desired angle", robot.shooter.getTargetFieldAngleRadStatic());
-//        dashboardTelemetry.addData("Sensor1", robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
-//        dashboardTelemetry.addData("Sensor2", robot.intake.sensorMid.getDistance(DistanceUnit.CM));
-//        dashboardTelemetry.addData("Sensor3", robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
+        //        dashboardTelemetry.addData("desired angle",
+        // robot.shooter.getTargetFieldAngleRadStatic());
+        //        dashboardTelemetry.addData("Sensor1",
+        // robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
+        //        dashboardTelemetry.addData("Sensor2",
+        // robot.intake.sensorMid.getDistance(DistanceUnit.CM));
+        //        dashboardTelemetry.addData("Sensor3",
+        // robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
         dashboardTelemetry.addData("State", pathState);
-//        dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
+        //        dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
         dashboardTelemetry.addData("Distance (in)", robot.shooter.distance);
         dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
-//        dashboardTelemetry.addData("Track State", robot.shooter.trackState);
-//        dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
-//        dashboardTelemetry.addData("Turret Error", Math.toDegrees(robot.shooter.turretErrorRad));
+        //        dashboardTelemetry.addData("Track State", robot.shooter.trackState);
+        //        dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
+        //        dashboardTelemetry.addData("Turret Error",
+        // Math.toDegrees(robot.shooter.turretErrorRad));
         dashboardTelemetry.addData("Target RPM", Shooter.targetVelocity);
         dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
         dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
@@ -320,10 +316,9 @@ public class AutoBlueLft extends OpMode {
         dashboardTelemetry.addData("X", Robot.follower.getPose().getX());
         dashboardTelemetry.addData("Y", Robot.follower.getPose().getY());
         dashboardTelemetry.addData("Heading", Robot.follower.getPose().getHeading());
-//        dashboardTelemetry.addData("Angle pose", Robot.follower.getPose().getHeading());
-//        dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
+        //        dashboardTelemetry.addData("Angle pose", Robot.follower.getPose().getHeading());
+        //        dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
 
         dashboardTelemetry.update();
     }
-
 }

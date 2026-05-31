@@ -95,7 +95,7 @@ public class PIDFController {
         return Math.abs(error) < tolerance;
     }
 
-    public void resetIntegral(){
+    public void resetIntegral() {
         integral = 0;
     }
 }

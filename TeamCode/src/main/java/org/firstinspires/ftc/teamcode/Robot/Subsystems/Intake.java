@@ -5,14 +5,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import dev.frozenmilk.dairy.cachinghardware.CachingDcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Robot.uV;
-
-import dev.frozenmilk.dairy.cachinghardware.CachingDcMotorEx;
-import dev.frozenmilk.dairy.cachinghardware.CachingServo;
 
 public class Intake extends Subsystem {
 
@@ -20,13 +16,11 @@ public class Intake extends Subsystem {
     private final CachingDcMotorEx rollerOne;
     private final CachingDcMotorEx rollerTwo;
 
-    private final CachingServo headlight;
-
     private final DistanceSensor sensorIntake;
     private final DistanceSensor sensorOuttake;
     private final DistanceSensor sensorMid;
 
-    public  double intakeDistance = 0;
+    public double intakeDistance = 0;
     public double outtakeDistance = 0;
     public double midDistance = 0;
 
@@ -42,8 +36,6 @@ public class Intake extends Subsystem {
         rollerOne.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rollerTwo.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        headlight = new CachingServo(hwMap.get(Servo.class, "headlight"));
-
         sensorIntake = hwMap.get(DistanceSensor.class, "sensorIntake");
         sensorOuttake = hwMap.get(DistanceSensor.class, "sensorOuttake");
         sensorMid = hwMap.get(DistanceSensor.class, "sensorMid");
@@ -53,7 +45,6 @@ public class Intake extends Subsystem {
 
     @Override
     public void update() {
-        updateHeadlight();
         if (sensorTimer.milliseconds() > 100) {
             outtakeDistance = sensorOuttake.getDistance(DistanceUnit.CM);
             intakeDistance = sensorIntake.getDistance(DistanceUnit.CM);
@@ -63,14 +54,6 @@ public class Intake extends Subsystem {
         }
     }
 
-    public void updateHeadlight() {
-            if (outtakeDistance < 8 && midDistance < 8 && intakeDistance < 8) {
-                headlight.setPosition(1);
-            } else {
-                headlight.setPosition(0.277);
-            }
-    }
-
     // Rollers
     public void shoot() {
         rollerOne.setPower(uV.rollerOneP);
@@ -78,15 +61,11 @@ public class Intake extends Subsystem {
     }
 
     public boolean isEmpty() {
-        return midDistance > 8
-                && intakeDistance > 8
-                && outtakeDistance > 8;
+        return midDistance > 8 && intakeDistance > 8 && outtakeDistance > 8;
     }
 
     public boolean isFull() {
-        return midDistance < 8
-                && intakeDistance < 8
-                && outtakeDistance < 8;
+        return midDistance < 8 && intakeDistance < 8 && outtakeDistance < 8;
     }
 
     public void pullBalls() {

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import static com.pedropathing.math.MathFunctions.quadraticFit;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.changes;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawCurrent;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawCurrentAndHistory;
@@ -7,6 +8,7 @@ import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.stopRobot;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.telemetryM;
 
+import android.annotation.SuppressLint;
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
@@ -21,16 +23,11 @@ import com.pedropathing.math.*;
 import com.pedropathing.paths.*;
 import com.pedropathing.telemetry.SelectableOpMode;
 import com.pedropathing.util.*;
-import static com.pedropathing.math.MathFunctions.quadraticFit;
-
-import android.annotation.SuppressLint;
-
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,48 +42,61 @@ import java.util.List;
 public class Tuning extends SelectableOpMode {
     public static Follower follower;
 
-    @IgnoreConfigurable
-    static PoseHistory poseHistory;
+    @IgnoreConfigurable static PoseHistory poseHistory;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryM;
+    @IgnoreConfigurable static TelemetryManager telemetryM;
 
-    @IgnoreConfigurable
-    static ArrayList<String> changes = new ArrayList<>();
+    @IgnoreConfigurable static ArrayList<String> changes = new ArrayList<>();
 
     public Tuning() {
-        super("Select a Tuning OpMode", s -> {
-            s.folder("Localization", l -> {
-                l.add("Localization Test", LocalizationTest::new);
-                l.add("Offsets Tuner", OffsetsTuner::new);
-                l.add("Forward Tuner", ForwardTuner::new);
-                l.add("Lateral Tuner", LateralTuner::new);
-                l.add("Turn Tuner", TurnTuner::new);
-            });
-            s.folder("Automatic", a -> {
-                a.add("Forward Velocity Tuner", ForwardVelocityTuner::new);
-                a.add("Lateral Velocity Tuner", LateralVelocityTuner::new);
-                a.add("Forward Zero Power Acceleration Tuner", ForwardZeroPowerAccelerationTuner::new);
-                a.add("Lateral Zero Power Acceleration Tuner", LateralZeroPowerAccelerationTuner::new);
-                a.add("Predictive Braking Tuner", PredictiveBrakingTuner::new);
-            });
-            s.folder("Manual", p -> {
-                p.add("Translational Tuner", TranslationalTuner::new);
-                p.add("Heading Tuner", HeadingTuner::new);
-                p.add("Drive Tuner", DriveTuner::new);
-                p.add("Centripetal Tuner", CentripetalTuner::new);
-            });
-            s.folder("Tests", p -> {
-                p.add("Line", Line::new);
-                p.add("Triangle", Triangle::new);
-                p.add("Circle", Circle::new);
-            });
-            s.folder("Swerve", p-> {
-                p.add("Analog Min / Max Tuner", AnalogMinMaxTuner::new);
-                p.add("Swerve Offsets Test", SwerveOffsetsTest::new);
-                p.add("Swerve Turn Test", SwerveTurnTest::new);
-            });
-        });
+        super(
+                "Select a Tuning OpMode",
+                s -> {
+                    s.folder(
+                            "Localization",
+                            l -> {
+                                l.add("Localization Test", LocalizationTest::new);
+                                l.add("Offsets Tuner", OffsetsTuner::new);
+                                l.add("Forward Tuner", ForwardTuner::new);
+                                l.add("Lateral Tuner", LateralTuner::new);
+                                l.add("Turn Tuner", TurnTuner::new);
+                            });
+                    s.folder(
+                            "Automatic",
+                            a -> {
+                                a.add("Forward Velocity Tuner", ForwardVelocityTuner::new);
+                                a.add("Lateral Velocity Tuner", LateralVelocityTuner::new);
+                                a.add(
+                                        "Forward Zero Power Acceleration Tuner",
+                                        ForwardZeroPowerAccelerationTuner::new);
+                                a.add(
+                                        "Lateral Zero Power Acceleration Tuner",
+                                        LateralZeroPowerAccelerationTuner::new);
+                                a.add("Predictive Braking Tuner", PredictiveBrakingTuner::new);
+                            });
+                    s.folder(
+                            "Manual",
+                            p -> {
+                                p.add("Translational Tuner", TranslationalTuner::new);
+                                p.add("Heading Tuner", HeadingTuner::new);
+                                p.add("Drive Tuner", DriveTuner::new);
+                                p.add("Centripetal Tuner", CentripetalTuner::new);
+                            });
+                    s.folder(
+                            "Tests",
+                            p -> {
+                                p.add("Line", Line::new);
+                                p.add("Triangle", Triangle::new);
+                                p.add("Circle", Circle::new);
+                            });
+                    s.folder(
+                            "Swerve",
+                            p -> {
+                                p.add("Analog Min / Max Tuner", AnalogMinMaxTuner::new);
+                                p.add("Swerve Offsets Test", SwerveOffsetsTest::new);
+                                p.add("Swerve Turn Test", SwerveTurnTest::new);
+                            });
+                });
     }
 
     @Override
@@ -125,7 +135,7 @@ public class Tuning extends SelectableOpMode {
     /** This creates a full stop of the robot by setting the drive motors to run at 0 power. */
     public static void stopRobot() {
         follower.startTeleopDrive(true);
-        follower.setTeleOpDrive(0,0,0,true);
+        follower.setTeleOpDrive(0, 0, 0, true);
     }
 }
 
@@ -144,7 +154,7 @@ class LocalizationTest extends OpMode {
 
     @Override
     public void init() {
-        follower.setStartingPose(new Pose(72,72));
+        follower.setStartingPose(new Pose(72, 72));
     }
 
     /** This initializes the PoseUpdater, the drive motors, and the Panels telemetry. */
@@ -154,11 +164,13 @@ class LocalizationTest extends OpMode {
             debugStringEnabled = !debugStringEnabled;
         }
 
-
-        telemetryM.debug("This will print your robot's position to telemetry while "
-                + "allowing robot control through a basic drive on gamepad 1.");
-        telemetryM.debug("Drivetrain debug string " + (((debugStringEnabled) ? "enabled" : "disabled")) +
-                " (press gamepad a to toggle)");
+        telemetryM.debug(
+                "This will print your robot's position to telemetry while "
+                        + "allowing robot control through a basic drive on gamepad 1.");
+        telemetryM.debug(
+                "Drivetrain debug string "
+                        + (((debugStringEnabled) ? "enabled" : "disabled"))
+                        + " (press gamepad a to toggle)");
         telemetryM.update(telemetry);
         follower.update();
         drawCurrent();
@@ -171,8 +183,8 @@ class LocalizationTest extends OpMode {
     }
 
     /**
-     * This updates the robot's pose estimate, the simple drive, and updates the
-     * Panels telemetry with the robot's position as well as draws the robot's position.
+     * This updates the robot's pose estimate, the simple drive, and updates the Panels telemetry
+     * with the robot's position as well as draws the robot's position.
      */
     @Override
     public void loop() {
@@ -180,7 +192,8 @@ class LocalizationTest extends OpMode {
             debugStringEnabled = !debugStringEnabled;
         }
 
-        follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+        follower.setTeleOpDrive(
+                -gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         follower.update();
 
         telemetryM.debug("x:" + follower.getPose().getX());
@@ -188,8 +201,7 @@ class LocalizationTest extends OpMode {
         telemetryM.debug("heading:" + follower.getPose().getHeading());
         telemetryM.debug("total heading:" + follower.getTotalHeading());
         if (debugStringEnabled) {
-            telemetryM.debug("Drivetrain Debug String:\n" +
-                    follower.getDrivetrain().debugString());
+            telemetryM.debug("Drivetrain Debug String:\n" + follower.getDrivetrain().debugString());
         }
         telemetryM.update(telemetry);
 
@@ -201,10 +213,10 @@ class LocalizationTest extends OpMode {
  * This is the ForwardTuner OpMode. This tracks the forward movement of the robot and displays the
  * necessary ticks to inches multiplier. This displayed multiplier is what's necessary to scale the
  * robot's current distance in ticks to the specified distance in inches. So, to use this, run the
- * tuner, then pull/push the robot to the specified distance using a ruler on the ground. When you're
- * at the end of the distance, record the ticks to inches multiplier. Feel free to run multiple trials
- * and average the results. Then, input the multiplier into the forward ticks to inches in your
- * localizer of choice.
+ * tuner, then pull/push the robot to the specified distance using a ruler on the ground. When
+ * you're at the end of the distance, record the ticks to inches multiplier. Feel free to run
+ * multiple trials and average the results. Then, input the multiplier into the forward ticks to
+ * inches in your localizer of choice.
  *
  * @author Anyi Lin - 10158 Scott's Bots
  * @author Baron Henderson - 20077 The Indubitables
@@ -215,7 +227,7 @@ class ForwardTuner extends OpMode {
 
     @Override
     public void init() {
-        follower.setStartingPose(new Pose(72,72));
+        follower.setStartingPose(new Pose(72, 72));
         follower.update();
         drawCurrent();
     }
@@ -223,22 +235,34 @@ class ForwardTuner extends OpMode {
     /** This initializes the PoseUpdater as well as the Panels telemetry. */
     @Override
     public void init_loop() {
-        telemetryM.debug("Pull your robot forward " + DISTANCE + " inches. Your forward ticks to inches will be shown on the telemetry.");
+        telemetryM.debug(
+                "Pull your robot forward "
+                        + DISTANCE
+                        + " inches. Your forward ticks to inches will be shown on the telemetry.");
         telemetryM.update(telemetry);
         drawCurrent();
     }
 
     /**
-     * This updates the robot's pose estimate, and updates the Panels telemetry with the
-     * calculated multiplier and draws the robot.
+     * This updates the robot's pose estimate, and updates the Panels telemetry with the calculated
+     * multiplier and draws the robot.
      */
     @Override
     public void loop() {
         follower.update();
 
         telemetryM.debug("Distance Moved: " + follower.getPose().getX());
-        telemetryM.debug("The multiplier will display what your forward ticks to inches should be to scale your current distance to " + DISTANCE + " inches.");
-        telemetryM.debug("Multiplier: " + (DISTANCE / (follower.getPose().getX() / follower.getPoseTracker().getLocalizer().getForwardMultiplier())));
+        telemetryM.debug(
+                "The multiplier will display what your forward ticks to inches should be to scale your current distance to "
+                        + DISTANCE
+                        + " inches.");
+        telemetryM.debug(
+                "Multiplier: "
+                        + (DISTANCE
+                                / (follower.getPose().getX()
+                                        / follower.getPoseTracker()
+                                                .getLocalizer()
+                                                .getForwardMultiplier())));
         telemetryM.update(telemetry);
 
         drawCurrentAndHistory();
@@ -249,10 +273,10 @@ class ForwardTuner extends OpMode {
  * This is the LateralTuner OpMode. This tracks the strafe movement of the robot and displays the
  * necessary ticks to inches multiplier. This displayed multiplier is what's necessary to scale the
  * robot's current distance in ticks to the specified distance in inches. So, to use this, run the
- * tuner, then pull/push the robot to the specified distance using a ruler on the ground. When you're
- * at the end of the distance, record the ticks to inches multiplier. Feel free to run multiple trials
- * and average the results. Then, input the multiplier into the strafe ticks to inches in your
- * localizer of choice.
+ * tuner, then pull/push the robot to the specified distance using a ruler on the ground. When
+ * you're at the end of the distance, record the ticks to inches multiplier. Feel free to run
+ * multiple trials and average the results. Then, input the multiplier into the strafe ticks to
+ * inches in your localizer of choice.
  *
  * @author Anyi Lin - 10158 Scott's Bots
  * @author Baron Henderson - 20077 The Indubitables
@@ -263,7 +287,7 @@ class LateralTuner extends OpMode {
 
     @Override
     public void init() {
-        follower.setStartingPose(new Pose(72,72));
+        follower.setStartingPose(new Pose(72, 72));
         follower.update();
         drawCurrent();
     }
@@ -271,22 +295,34 @@ class LateralTuner extends OpMode {
     /** This initializes the PoseUpdater as well as the Panels telemetry. */
     @Override
     public void init_loop() {
-        telemetryM.debug("Pull your robot to the right " + DISTANCE + " inches. Your strafe ticks to inches will be shown on the telemetry.");
+        telemetryM.debug(
+                "Pull your robot to the right "
+                        + DISTANCE
+                        + " inches. Your strafe ticks to inches will be shown on the telemetry.");
         telemetryM.update(telemetry);
         drawCurrent();
     }
 
     /**
-     * This updates the robot's pose estimate, and updates the Panels telemetry with the
-     * calculated multiplier and draws the robot.
+     * This updates the robot's pose estimate, and updates the Panels telemetry with the calculated
+     * multiplier and draws the robot.
      */
     @Override
     public void loop() {
         follower.update();
 
         telemetryM.debug("Distance Moved: " + follower.getPose().getY());
-        telemetryM.debug("The multiplier will display what your strafe ticks to inches should be to scale your current distance to " + DISTANCE + " inches.");
-        telemetryM.debug("Multiplier: " + (DISTANCE / (follower.getPose().getY() / follower.getPoseTracker().getLocalizer().getLateralMultiplier())));
+        telemetryM.debug(
+                "The multiplier will display what your strafe ticks to inches should be to scale your current distance to "
+                        + DISTANCE
+                        + " inches.");
+        telemetryM.debug(
+                "Multiplier: "
+                        + (DISTANCE
+                                / (follower.getPose().getY()
+                                        / follower.getPoseTracker()
+                                                .getLocalizer()
+                                                .getLateralMultiplier())));
         telemetryM.update(telemetry);
 
         drawCurrentAndHistory();
@@ -296,11 +332,11 @@ class LateralTuner extends OpMode {
 /**
  * This is the TurnTuner OpMode. This tracks the turning movement of the robot and displays the
  * necessary ticks to inches multiplier. This displayed multiplier is what's necessary to scale the
- * robot's current angle in ticks to the specified angle in radians. So, to use this, run the
- * tuner, then pull/push the robot to the specified angle using a protractor or lines on the ground.
- * When you're at the end of the angle, record the ticks to inches multiplier. Feel free to run
- * multiple trials and average the results. Then, input the multiplier into the turning ticks to
- * radians in your localizer of choice.
+ * robot's current angle in ticks to the specified angle in radians. So, to use this, run the tuner,
+ * then pull/push the robot to the specified angle using a protractor or lines on the ground. When
+ * you're at the end of the angle, record the ticks to inches multiplier. Feel free to run multiple
+ * trials and average the results. Then, input the multiplier into the turning ticks to radians in
+ * your localizer of choice.
  *
  * @author Anyi Lin - 10158 Scott's Bots
  * @author Baron Henderson - 20077 The Indubitables
@@ -311,7 +347,7 @@ class TurnTuner extends OpMode {
 
     @Override
     public void init() {
-        follower.setStartingPose(new Pose(72,72));
+        follower.setStartingPose(new Pose(72, 72));
         follower.update();
         drawCurrent();
     }
@@ -319,23 +355,35 @@ class TurnTuner extends OpMode {
     /** This initializes the PoseUpdater as well as the Panels telemetry. */
     @Override
     public void init_loop() {
-        telemetryM.debug("Turn your robot " + ANGLE + " radians. Your turn ticks to inches will be shown on the telemetry.");
+        telemetryM.debug(
+                "Turn your robot "
+                        + ANGLE
+                        + " radians. Your turn ticks to inches will be shown on the telemetry.");
         telemetryM.update(telemetry);
 
         drawCurrent();
     }
 
     /**
-     * This updates the robot's pose estimate, and updates the Panels telemetry with the
-     * calculated multiplier and draws the robot.
+     * This updates the robot's pose estimate, and updates the Panels telemetry with the calculated
+     * multiplier and draws the robot.
      */
     @Override
     public void loop() {
         follower.update();
 
         telemetryM.debug("Total Angle: " + follower.getTotalHeading());
-        telemetryM.debug("The multiplier will display what your turn ticks to inches should be to scale your current angle to " + ANGLE + " radians.");
-        telemetryM.debug("Multiplier: " + (ANGLE / (follower.getTotalHeading() / follower.getPoseTracker().getLocalizer().getTurningMultiplier())));
+        telemetryM.debug(
+                "The multiplier will display what your turn ticks to inches should be to scale your current angle to "
+                        + ANGLE
+                        + " radians.");
+        telemetryM.debug(
+                "Multiplier: "
+                        + (ANGLE
+                                / (follower.getTotalHeading()
+                                        / follower.getPoseTracker()
+                                                .getLocalizer()
+                                                .getTurningMultiplier())));
         telemetryM.update(telemetry);
 
         drawCurrentAndHistory();
@@ -348,8 +396,8 @@ class TurnTuner extends OpMode {
  * reaching the end of the distance, it averages them and prints out the velocity obtained. It is
  * recommended to run this multiple times on a full battery to get the best results. What this does
  * is, when paired with StrafeVelocityTuner, allows FollowerConstants to create a Vector that
- * empirically represents the direction your wheels actually prefer to go in, allowing for
- * more accurate following.
+ * empirically represents the direction your wheels actually prefer to go in, allowing for more
+ * accurate following.
  *
  * @author Anyi Lin - 10158 Scott's Bots
  * @author Aaron Yang - 10158 Scott's Bots
@@ -369,12 +417,18 @@ class ForwardVelocityTuner extends OpMode {
         follower.setStartingPose(new Pose(72, 72));
     }
 
-    /** This initializes the drive motors as well as the cache of velocities and the Panels telemetry. */
+    /**
+     * This initializes the drive motors as well as the cache of velocities and the Panels
+     * telemetry.
+     */
     @Override
     public void init_loop() {
-        telemetryM.debug("The robot will run at 1 power until it reaches " + DISTANCE + " inches forward.");
-        telemetryM.debug("Make sure you have enough room, since the robot has inertia after cutting power.");
-        telemetryM.debug("After running the distance, the robot will cut power from the drivetrain and display the forward velocity.");
+        telemetryM.debug(
+                "The robot will run at 1 power until it reaches " + DISTANCE + " inches forward.");
+        telemetryM.debug(
+                "Make sure you have enough room, since the robot has inertia after cutting power.");
+        telemetryM.debug(
+                "After running the distance, the robot will cut power from the drivetrain and display the forward velocity.");
         telemetryM.debug("Press B on game pad 1 to stop.");
         telemetryM.debug("pose", follower.getPose());
         telemetryM.update(telemetry);
@@ -395,10 +449,10 @@ class ForwardVelocityTuner extends OpMode {
     }
 
     /**
-     * This runs the OpMode. At any point during the running of the OpMode, pressing B on
-     * game pad 1 will stop the OpMode. This continuously records the RECORD_NUMBER most recent
-     * velocities, and when the robot has run forward enough, these last velocities recorded are
-     * averaged and printed.
+     * This runs the OpMode. At any point during the running of the OpMode, pressing B on game pad 1
+     * will stop the OpMode. This continuously records the RECORD_NUMBER most recent velocities, and
+     * when the robot has run forward enough, these last velocities recorded are averaged and
+     * printed.
      */
     @Override
     public void loop() {
@@ -410,15 +464,15 @@ class ForwardVelocityTuner extends OpMode {
         follower.update();
         drawCurrentAndHistory();
 
-
         if (!end) {
             if (Math.abs(follower.getPose().getX()) > (DISTANCE + 72)) {
                 end = true;
                 stopRobot();
             } else {
-                follower.setTeleOpDrive(1,0,0,true);
-                //double currentVelocity = Math.abs(follower.getVelocity().getXComponent());
-                double currentVelocity = Math.abs(follower.poseTracker.getLocalizer().getVelocity().getX());
+                follower.setTeleOpDrive(1, 0, 0, true);
+                // double currentVelocity = Math.abs(follower.getVelocity().getXComponent());
+                double currentVelocity =
+                        Math.abs(follower.poseTracker.getLocalizer().getVelocity().getX());
                 velocities.add(currentVelocity);
                 velocities.remove(0);
             }
@@ -431,7 +485,8 @@ class ForwardVelocityTuner extends OpMode {
             average /= velocities.size();
             telemetryM.debug("Forward Velocity: " + average);
             telemetryM.debug("\n");
-            telemetryM.debug("Press A to set the Forward Velocity temporarily (while robot remains on).");
+            telemetryM.debug(
+                    "Press A to set the Forward Velocity temporarily (while robot remains on).");
 
             for (int i = 0; i < velocities.size(); i++) {
                 telemetry.addData(String.valueOf(i), velocities.get(i));
@@ -455,8 +510,8 @@ class ForwardVelocityTuner extends OpMode {
  * reaching the end of the distance, it averages them and prints out the velocity obtained. It is
  * recommended to run this multiple times on a full battery to get the best results. What this does
  * is, when paired with ForwardVelocityTuner, allows FollowerConstants to create a Vector that
- * empirically represents the direction your wheels actually prefer to go in, allowing for
- * more accurate following.
+ * empirically represents the direction your wheels actually prefer to go in, allowing for more
+ * accurate following.
  *
  * @author Anyi Lin - 10158 Scott's Bots
  * @author Aaron Yang - 10158 Scott's Bots
@@ -483,9 +538,14 @@ class LateralVelocityTuner extends OpMode {
      */
     @Override
     public void init_loop() {
-        telemetryM.debug("The robot will run at 1 power until it reaches " + DISTANCE + " inches to the right.");
-        telemetryM.debug("Make sure you have enough room, since the robot has inertia after cutting power.");
-        telemetryM.debug("After running the distance, the robot will cut power from the drivetrain and display the strafe velocity.");
+        telemetryM.debug(
+                "The robot will run at 1 power until it reaches "
+                        + DISTANCE
+                        + " inches to the right.");
+        telemetryM.debug(
+                "Make sure you have enough room, since the robot has inertia after cutting power.");
+        telemetryM.debug(
+                "After running the distance, the robot will cut power from the drivetrain and display the strafe velocity.");
         telemetryM.debug("Press B on Gamepad 1 to stop.");
         telemetryM.update(telemetry);
 
@@ -504,10 +564,10 @@ class LateralVelocityTuner extends OpMode {
     }
 
     /**
-     * This runs the OpMode. At any point during the running of the OpMode, pressing B on
-     * game pad1 will stop the OpMode. This continuously records the RECORD_NUMBER most recent
-     * velocities, and when the robot has run sideways enough, these last velocities recorded are
-     * averaged and printed.
+     * This runs the OpMode. At any point during the running of the OpMode, pressing B on game pad1
+     * will stop the OpMode. This continuously records the RECORD_NUMBER most recent velocities, and
+     * when the robot has run sideways enough, these last velocities recorded are averaged and
+     * printed.
      */
     @Override
     public void loop() {
@@ -524,8 +584,9 @@ class LateralVelocityTuner extends OpMode {
                 end = true;
                 stopRobot();
             } else {
-                follower.setTeleOpDrive(0,1,0,true);
-                double currentVelocity = Math.abs(follower.getVelocity().dot(new Vector(1, Math.PI / 2)));
+                follower.setTeleOpDrive(0, 1, 0, true);
+                double currentVelocity =
+                        Math.abs(follower.getVelocity().dot(new Vector(1, Math.PI / 2)));
                 velocities.add(currentVelocity);
                 velocities.remove(0);
             }
@@ -539,7 +600,8 @@ class LateralVelocityTuner extends OpMode {
 
             telemetryM.debug("Strafe Velocity: " + average);
             telemetryM.debug("\n");
-            telemetryM.debug("Press A to set the Lateral Velocity temporarily (while robot remains on).");
+            telemetryM.debug(
+                    "Press A to set the Lateral Velocity temporarily (while robot remains on).");
             telemetryM.update(telemetry);
 
             if (gamepad1.aWasPressed()) {
@@ -584,10 +646,12 @@ class ForwardZeroPowerAccelerationTuner extends OpMode {
     /** This initializes the drive motors as well as the Panels telemetryM. */
     @Override
     public void init_loop() {
-        telemetryM.debug("The robot will run forward until it reaches " + VELOCITY + " inches per second.");
+        telemetryM.debug(
+                "The robot will run forward until it reaches " + VELOCITY + " inches per second.");
         telemetryM.debug("Then, it will cut power from the drivetrain and roll to a stop.");
         telemetryM.debug("Make sure you have enough room.");
-        telemetryM.debug("After stopping, the forward zero power acceleration (natural deceleration) will be displayed.");
+        telemetryM.debug(
+                "After stopping, the forward zero power acceleration (natural deceleration) will be displayed.");
         telemetryM.debug("Press B on Gamepad 1 to stop.");
         telemetryM.update(telemetry);
         follower.update();
@@ -599,14 +663,14 @@ class ForwardZeroPowerAccelerationTuner extends OpMode {
     public void start() {
         follower.startTeleopDrive(false);
         follower.update();
-        follower.setTeleOpDrive(1,0,0,true);
+        follower.setTeleOpDrive(1, 0, 0, true);
     }
 
     /**
-     * This runs the OpMode. At any point during the running of the OpMode, pressing B on
-     * game pad 1 will stop the OpMode. When the robot hits the specified velocity, the robot will
-     * record its deceleration / negative acceleration until it stops. Then, it will average all the
-     * recorded deceleration / negative acceleration and print that value.
+     * This runs the OpMode. At any point during the running of the OpMode, pressing B on game pad 1
+     * will stop the OpMode. When the robot hits the specified velocity, the robot will record its
+     * deceleration / negative acceleration until it stops. Then, it will average all the recorded
+     * deceleration / negative acceleration and print that value.
      */
     @Override
     public void loop() {
@@ -625,11 +689,13 @@ class ForwardZeroPowerAccelerationTuner extends OpMode {
                     previousVelocity = follower.getVelocity().dot(heading);
                     previousTimeNano = System.nanoTime();
                     stopping = true;
-                    follower.setTeleOpDrive(0,0,0,true);
+                    follower.setTeleOpDrive(0, 0, 0, true);
                 }
             } else {
                 double currentVelocity = follower.getVelocity().dot(heading);
-                accelerations.add((currentVelocity - previousVelocity) / ((System.nanoTime() - previousTimeNano) / Math.pow(10.0, 9)));
+                accelerations.add(
+                        (currentVelocity - previousVelocity)
+                                / ((System.nanoTime() - previousTimeNano) / Math.pow(10.0, 9)));
                 previousVelocity = currentVelocity;
                 previousTimeNano = System.nanoTime();
                 if (currentVelocity < follower.getConstraints().getVelocityConstraint()) {
@@ -645,7 +711,8 @@ class ForwardZeroPowerAccelerationTuner extends OpMode {
 
             telemetryM.debug("Forward Zero Power Acceleration (Deceleration): " + average);
             telemetryM.debug("\n");
-            telemetryM.debug("Press A to set the Forward Zero Power Acceleration temporarily (while robot remains on).");
+            telemetryM.debug(
+                    "Press A to set the Forward Zero Power Acceleration temporarily (while robot remains on).");
             telemetryM.update(telemetry);
 
             if (gamepad1.aWasPressed()) {
@@ -658,13 +725,13 @@ class ForwardZeroPowerAccelerationTuner extends OpMode {
 }
 
 /**
- * This is the LateralZeroPowerAccelerationTuner autonomous follower OpMode. This runs the robot
- * to the right until a specified velocity is achieved. Then, the robot cuts power to the motors, setting
- * them to zero power. The deceleration, or negative acceleration, is then measured until the robot
- * stops. The accelerations across the entire time the robot is slowing down is then averaged and
- * that number is then printed. This is used to determine how the robot will decelerate in the
- * forward direction when power is cut, making the estimations used in the calculations for the
- * drive Vector more accurate and giving better braking at the end of Paths.
+ * This is the LateralZeroPowerAccelerationTuner autonomous follower OpMode. This runs the robot to
+ * the right until a specified velocity is achieved. Then, the robot cuts power to the motors,
+ * setting them to zero power. The deceleration, or negative acceleration, is then measured until
+ * the robot stops. The accelerations across the entire time the robot is slowing down is then
+ * averaged and that number is then printed. This is used to determine how the robot will decelerate
+ * in the forward direction when power is cut, making the estimations used in the calculations for
+ * the drive Vector more accurate and giving better braking at the end of Paths.
  *
  * @author Anyi Lin - 10158 Scott's Bots
  * @author Aaron Yang - 10158 Scott's Bots
@@ -688,10 +755,14 @@ class LateralZeroPowerAccelerationTuner extends OpMode {
     /** This initializes the drive motors as well as the Panels telemetry. */
     @Override
     public void init_loop() {
-        telemetryM.debug("The robot will run to the right until it reaches " + VELOCITY + " inches per second.");
+        telemetryM.debug(
+                "The robot will run to the right until it reaches "
+                        + VELOCITY
+                        + " inches per second.");
         telemetryM.debug("Then, it will cut power from the drivetrain and roll to a stop.");
         telemetryM.debug("Make sure you have enough room.");
-        telemetryM.debug("After stopping, the lateral zero power acceleration (natural deceleration) will be displayed.");
+        telemetryM.debug(
+                "After stopping, the lateral zero power acceleration (natural deceleration) will be displayed.");
         telemetryM.debug("Press B on game pad 1 to stop.");
         telemetryM.update(telemetry);
         follower.update();
@@ -703,14 +774,14 @@ class LateralZeroPowerAccelerationTuner extends OpMode {
     public void start() {
         follower.startTeleopDrive(false);
         follower.update();
-        follower.setTeleOpDrive(0,1,0,true);
+        follower.setTeleOpDrive(0, 1, 0, true);
     }
 
     /**
-     * This runs the OpMode. At any point during the running of the OpMode, pressing B on
-     * game pad 1 will stop the OpMode. When the robot hits the specified velocity, the robot will
-     * record its deceleration / negative acceleration until it stops. Then, it will average all the
-     * recorded deceleration / negative acceleration and print that value.
+     * This runs the OpMode. At any point during the running of the OpMode, pressing B on game pad 1
+     * will stop the OpMode. When the robot hits the specified velocity, the robot will record its
+     * deceleration / negative acceleration until it stops. Then, it will average all the recorded
+     * deceleration / negative acceleration and print that value.
      */
     @Override
     public void loop() {
@@ -729,11 +800,13 @@ class LateralZeroPowerAccelerationTuner extends OpMode {
                     previousVelocity = Math.abs(follower.getVelocity().dot(heading));
                     previousTimeNano = System.nanoTime();
                     stopping = true;
-                    follower.setTeleOpDrive(0,0,0,true);
+                    follower.setTeleOpDrive(0, 0, 0, true);
                 }
             } else {
                 double currentVelocity = Math.abs(follower.getVelocity().dot(heading));
-                accelerations.add((currentVelocity - previousVelocity) / ((System.nanoTime() - previousTimeNano) / Math.pow(10.0, 9)));
+                accelerations.add(
+                        (currentVelocity - previousVelocity)
+                                / ((System.nanoTime() - previousTimeNano) / Math.pow(10.0, 9)));
                 previousVelocity = currentVelocity;
                 previousTimeNano = System.nanoTime();
                 if (currentVelocity < follower.getConstraints().getVelocityConstraint()) {
@@ -749,7 +822,8 @@ class LateralZeroPowerAccelerationTuner extends OpMode {
 
             telemetryM.debug("Lateral Zero Power Acceleration (Deceleration): " + average);
             telemetryM.debug("\n");
-            telemetryM.debug("Press A to set the Lateral Zero Power Acceleration temporarily (while robot remains on).");
+            telemetryM.debug(
+                    "Press A to set the Lateral Zero Power Acceleration temporarily (while robot remains on).");
             telemetryM.update(telemetry);
 
             if (gamepad1.aWasPressed()) {
@@ -764,18 +838,19 @@ class LateralZeroPowerAccelerationTuner extends OpMode {
 /**
  * This is the Predictive Braking Tuner. It runs the robot forward and backward at various power
  * levels, recording the robot’s velocity and position immediately before braking. The motors are
- * then set to a reverse power, which represents the fastest theoretical braking the robot
- * can achieve. Once the robot comes to a complete stop, the tuner measures the stopping distance.
- * Using the collected data, it generates a velocity-vs-stopping-distance graph and fits a
- * quadratic curve to model the braking behavior.
+ * then set to a reverse power, which represents the fastest theoretical braking the robot can
+ * achieve. Once the robot comes to a complete stop, the tuner measures the stopping distance. Using
+ * the collected data, it generates a velocity-vs-stopping-distance graph and fits a quadratic curve
+ * to model the braking behavior.
  *
  * @author Ashay Sarda - 19745 Turtle Walkers
  * @author Jacob Ophoven - 18535 Frozen Code
  * @version 1.0, 12/26/2025
  */
 class PredictiveBrakingTuner extends OpMode {
-    private static final double[] TEST_POWERS =
-            {1, 1, 1, 0.9, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2};
+    private static final double[] TEST_POWERS = {
+        1, 1, 1, 0.9, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2
+    };
     private static final double BRAKING_POWER = -0.2;
 
     private static final int DRIVE_TIME_MS = 1000;
@@ -818,7 +893,8 @@ class PredictiveBrakingTuner extends OpMode {
 
     @Override
     public void init_loop() {
-        telemetryM.debug("The robot will move forwards and backwards starting at max speed and slowing down.");
+        telemetryM.debug(
+                "The robot will move forwards and backwards starting at max speed and slowing down.");
         telemetryM.debug("Make sure you have enough room. Leave at least 4-5 feet.");
         telemetryM.debug("After stopping, kFriction and kBraking will be displayed.");
         telemetryM.debug("Make sure to turn the timer off.");
@@ -849,100 +925,110 @@ class PredictiveBrakingTuner extends OpMode {
         double direction = (iteration % 2 == 0) ? 1 : -1;
 
         switch (state) {
-            case START_MOVE: {
-                if (iteration >= TEST_POWERS.length) {
-                    state = State.DONE;
+            case START_MOVE:
+                {
+                    if (iteration >= TEST_POWERS.length) {
+                        state = State.DONE;
+                        break;
+                    }
+
+                    double currentPower = TEST_POWERS[iteration];
+                    follower.setMaxPower(currentPower);
+                    follower.setTeleOpDrive(direction, 0, 0, true);
+
+                    timer.reset();
+                    state = State.WAIT_DRIVE_TIME;
                     break;
                 }
 
-                double currentPower = TEST_POWERS[iteration];
-                follower.setMaxPower(currentPower);
-                follower.setTeleOpDrive(direction, 0, 0, true);
-
-                timer.reset();
-                state = State.WAIT_DRIVE_TIME;
-                break;
-            }
-
-            case WAIT_DRIVE_TIME: {
-                if (timer.milliseconds() >= DRIVE_TIME_MS) {
-                    measuredVelocity = follower.getVelocity().getMagnitude();
-                    startPosition = follower.getPose().getAsVector();
-                    state = State.APPLY_BRAKE;
+            case WAIT_DRIVE_TIME:
+                {
+                    if (timer.milliseconds() >= DRIVE_TIME_MS) {
+                        measuredVelocity = follower.getVelocity().getMagnitude();
+                        startPosition = follower.getPose().getAsVector();
+                        state = State.APPLY_BRAKE;
+                    }
+                    break;
                 }
-                break;
-            }
 
-            case APPLY_BRAKE: {
-                follower.setTeleOpDrive(BRAKING_POWER * direction, 0, 0, true);
+            case APPLY_BRAKE:
+                {
+                    follower.setTeleOpDrive(BRAKING_POWER * direction, 0, 0, true);
 
-                timer.reset();
-                state = State.WAIT_BRAKE_TIME;
-                break;
-            }
-
-            case WAIT_BRAKE_TIME: {
-                double t = timer.milliseconds();
-                Pose currentPose = follower.getPose();
-                double currentVelocity = follower.getVelocity().getMagnitude();
-
-                brakeData.add(new BrakeRecord(t, currentPose, currentVelocity));
-
-                if (follower.getVelocity().dot(new Vector(direction,
-                        follower.getHeading())) <= 0) {
-                    state = State.RECORD;
+                    timer.reset();
+                    state = State.WAIT_BRAKE_TIME;
+                    break;
                 }
-                break;
-            }
 
-            case RECORD: {
-                Vector endPosition = follower.getPose().getAsVector();
-                double brakingDistance = endPosition.minus(startPosition).getMagnitude();
+            case WAIT_BRAKE_TIME:
+                {
+                    double t = timer.milliseconds();
+                    Pose currentPose = follower.getPose();
+                    double currentVelocity = follower.getVelocity().getMagnitude();
 
-                velocityToBrakingDistance.add(new double[]{measuredVelocity, brakingDistance});
+                    brakeData.add(new BrakeRecord(t, currentPose, currentVelocity));
 
-                telemetryM.debug("Test " + iteration,
-                        String.format("v=%.3f  d=%.3f", measuredVelocity,
-                                brakingDistance));
-                telemetryM.update(telemetry);
-
-                iteration++;
-                state = State.START_MOVE;
-
-                break;
-            }
-
-            case DONE: {
-                stopRobot();
-
-                double[] coefficients = quadraticFit(velocityToBrakingDistance);
-
-                telemetryM.debug("Tuning Complete");
-                telemetryM.debug("Braking Profile:");
-                telemetryM.debug("kQuadratic", coefficients[1]);
-                telemetryM.debug("kLinear", coefficients[0]);
-                telemetryM.update(telemetry);
-                telemetryM.debug("Tuning Complete");
-                telemetryM.debug("Braking Profile:");
-                telemetryM.debug("kQuadraticFriction", coefficients[1]);
-                telemetryM.debug("kLinearBraking", coefficients[0]);
-                for (BrakeRecord record : brakeData) {
-                    Pose p = record.pose;
-                    telemetryM.debug(String.format("t=%.0f ms, x=%.2f, y=%.2f, θ=%.2f, v=%.2f",
-                            record.timeMs, p.getX(), p.getY(),
-                            p.getHeading(),
-                            record.velocity));
+                    if (follower.getVelocity().dot(new Vector(direction, follower.getHeading()))
+                            <= 0) {
+                        state = State.RECORD;
+                    }
+                    break;
                 }
-                telemetryM.update();
-                break;
-            }
+
+            case RECORD:
+                {
+                    Vector endPosition = follower.getPose().getAsVector();
+                    double brakingDistance = endPosition.minus(startPosition).getMagnitude();
+
+                    velocityToBrakingDistance.add(new double[] {measuredVelocity, brakingDistance});
+
+                    telemetryM.debug(
+                            "Test " + iteration,
+                            String.format("v=%.3f  d=%.3f", measuredVelocity, brakingDistance));
+                    telemetryM.update(telemetry);
+
+                    iteration++;
+                    state = State.START_MOVE;
+
+                    break;
+                }
+
+            case DONE:
+                {
+                    stopRobot();
+
+                    double[] coefficients = quadraticFit(velocityToBrakingDistance);
+
+                    telemetryM.debug("Tuning Complete");
+                    telemetryM.debug("Braking Profile:");
+                    telemetryM.debug("kQuadratic", coefficients[1]);
+                    telemetryM.debug("kLinear", coefficients[0]);
+                    telemetryM.update(telemetry);
+                    telemetryM.debug("Tuning Complete");
+                    telemetryM.debug("Braking Profile:");
+                    telemetryM.debug("kQuadraticFriction", coefficients[1]);
+                    telemetryM.debug("kLinearBraking", coefficients[0]);
+                    for (BrakeRecord record : brakeData) {
+                        Pose p = record.pose;
+                        telemetryM.debug(
+                                String.format(
+                                        "t=%.0f ms, x=%.2f, y=%.2f, θ=%.2f, v=%.2f",
+                                        record.timeMs,
+                                        p.getX(),
+                                        p.getY(),
+                                        p.getHeading(),
+                                        record.velocity));
+                    }
+                    telemetryM.update();
+                    break;
+                }
         }
     }
 }
 
 /**
- * This is the Translational PIDF Tuner OpMode. It will keep the robot in place.
- * The user should push the robot laterally to test the PIDF and adjust the PIDF values accordingly.
+ * This is the Translational PIDF Tuner OpMode. It will keep the robot in place. The user should
+ * push the robot laterally to test the PIDF and adjust the PIDF values accordingly.
  *
  * @author Baron Henderson - 20077 The Indubitables
  * @author Anyi Lin - 10158 Scott's Bots
@@ -967,7 +1053,8 @@ class TranslationalTuner extends OpMode {
     public void init_loop() {
         telemetryM.debug("This will activate the translational PIDF(s)");
         telemetryM.debug("The robot will try to stay in place while you push it laterally.");
-        telemetryM.debug("You can adjust the PIDF values to tune the robot's translational PIDF(s).");
+        telemetryM.debug(
+                "You can adjust the PIDF values to tune the robot's translational PIDF(s).");
         telemetryM.update(telemetry);
         follower.update();
         drawCurrent();
@@ -977,14 +1064,17 @@ class TranslationalTuner extends OpMode {
     public void start() {
         follower.deactivateAllPIDFs();
         follower.activateTranslational();
-        forwards = new Path(new BezierLine(new Pose(72,72), new Pose(DISTANCE + 72,72)));
+        forwards = new Path(new BezierLine(new Pose(72, 72), new Pose(DISTANCE + 72, 72)));
         forwards.setConstantHeadingInterpolation(0);
-        backwards = new Path(new BezierLine(new Pose(DISTANCE + 72,72), new Pose(72,72)));
+        backwards = new Path(new BezierLine(new Pose(DISTANCE + 72, 72), new Pose(72, 72)));
         backwards.setConstantHeadingInterpolation(0);
         follower.followPath(forwards);
     }
 
-    /** This runs the OpMode, updating the Follower as well as printing out the debug statements to the Telemetry */
+    /**
+     * This runs the OpMode, updating the Follower as well as printing out the debug statements to
+     * the Telemetry
+     */
     @Override
     public void loop() {
         follower.update();
@@ -1002,16 +1092,18 @@ class TranslationalTuner extends OpMode {
 
         telemetryM.debug("Push the robot laterally to test the Translational PIDF(s).");
         telemetryM.addData("Zero Line", 0);
-        telemetryM.addData("Error X", follower.errorCalculator.getTranslationalError().getXComponent());
-        telemetryM.addData("Error Y", follower.errorCalculator.getTranslationalError().getYComponent());
+        telemetryM.addData(
+                "Error X", follower.errorCalculator.getTranslationalError().getXComponent());
+        telemetryM.addData(
+                "Error Y", follower.errorCalculator.getTranslationalError().getYComponent());
         telemetryM.update(telemetry);
     }
 }
 
 /**
- * This is the Heading PIDF Tuner OpMode. It will keep the robot in place.
- * The user should try to turn the robot to test the PIDF and adjust the PIDF values accordingly.
- * It will try to keep the robot at a constant heading while the user tries to turn it.
+ * This is the Heading PIDF Tuner OpMode. It will keep the robot in place. The user should try to
+ * turn the robot to test the PIDF and adjust the PIDF values accordingly. It will try to keep the
+ * robot at a constant heading while the user tries to turn it.
  *
  * @author Baron Henderson - 20077 The Indubitables
  * @author Anyi Lin - 10158 Scott's Bots
@@ -1038,7 +1130,8 @@ class HeadingTuner extends OpMode {
     @Override
     public void init_loop() {
         telemetryM.debug("This will activate the heading PIDF(s).");
-        telemetryM.debug("The robot will try to stay at a constant heading while you try to turn it.");
+        telemetryM.debug(
+                "The robot will try to stay at a constant heading while you try to turn it.");
         telemetryM.debug("You can adjust the PIDF values to tune the robot's heading PIDF(s).");
         telemetryM.update(telemetry);
         follower.update();
@@ -1049,9 +1142,9 @@ class HeadingTuner extends OpMode {
     public void start() {
         follower.deactivateAllPIDFs();
         follower.activateHeading();
-        forwards = new Path(new BezierLine(new Pose(72,72), new Pose(DISTANCE + 72,72)));
+        forwards = new Path(new BezierLine(new Pose(72, 72), new Pose(DISTANCE + 72, 72)));
         forwards.setConstantHeadingInterpolation(0);
-        backwards = new Path(new BezierLine(new Pose(DISTANCE + 72,72), new Pose(72,72)));
+        backwards = new Path(new BezierLine(new Pose(DISTANCE + 72, 72), new Pose(72, 72)));
         backwards.setConstantHeadingInterpolation(0);
         follower.followPath(forwards);
     }
@@ -1083,7 +1176,8 @@ class HeadingTuner extends OpMode {
 }
 
 /**
- * This is the Drive PIDF Tuner OpMode. It will run the robot in a straight line going forward and back.
+ * This is the Drive PIDF Tuner OpMode. It will run the robot in a straight line going forward and
+ * back.
  *
  * @author Baron Henderson - 20077 The Indubitables
  * @author Anyi Lin - 10158 Scott's Bots
@@ -1109,7 +1203,8 @@ class DriveTuner extends OpMode {
      */
     @Override
     public void init_loop() {
-        telemetryM.debug("This will run the robot in a straight line going " + DISTANCE + "inches forward.");
+        telemetryM.debug(
+                "This will run the robot in a straight line going " + DISTANCE + "inches forward.");
         telemetryM.debug("The robot will go forward and backward continuously along the path.");
         telemetryM.debug("Make sure you have enough room.");
         telemetryM.update(telemetry);
@@ -1122,17 +1217,19 @@ class DriveTuner extends OpMode {
         follower.deactivateAllPIDFs();
         follower.activateDrive();
 
-        forwards = follower.pathBuilder()
-                .setGlobalDeceleration()
-                .addPath(new BezierLine(new Pose(72,72), new Pose(DISTANCE + 72,72)))
-                .setConstantHeadingInterpolation(0)
-                .build();
+        forwards =
+                follower.pathBuilder()
+                        .setGlobalDeceleration()
+                        .addPath(new BezierLine(new Pose(72, 72), new Pose(DISTANCE + 72, 72)))
+                        .setConstantHeadingInterpolation(0)
+                        .build();
 
-        backwards = follower.pathBuilder()
-                .setGlobalDeceleration()
-                .addPath(new BezierLine(new Pose(DISTANCE + 72,72), new Pose(72,72)))
-                .setConstantHeadingInterpolation(0)
-                .build();
+        backwards =
+                follower.pathBuilder()
+                        .setGlobalDeceleration()
+                        .addPath(new BezierLine(new Pose(DISTANCE + 72, 72), new Pose(72, 72)))
+                        .setConstantHeadingInterpolation(0)
+                        .build();
 
         follower.followPath(forwards);
     }
@@ -1164,8 +1261,8 @@ class DriveTuner extends OpMode {
 }
 
 /**
- * This is the Line Test Tuner OpMode. It will drive the robot forward and back
- * The user should push the robot laterally and angular to test out the drive, heading, and translational PIDFs.
+ * This is the Line Test Tuner OpMode. It will drive the robot forward and back The user should push
+ * the robot laterally and angular to test out the drive, heading, and translational PIDFs.
  *
  * @author Baron Henderson - 20077 The Indubitables
  * @author Anyi Lin - 10158 Scott's Bots
@@ -1189,7 +1286,8 @@ class Line extends OpMode {
     @Override
     public void init_loop() {
         telemetryM.debug("This will activate all the PIDF(s)");
-        telemetryM.debug("The robot will go forward and backward continuously along the path while correcting.");
+        telemetryM.debug(
+                "The robot will go forward and backward continuously along the path while correcting.");
         telemetryM.debug("You can adjust the PIDF values to tune the robot's drive PIDF(s).");
         telemetryM.update(telemetry);
         follower.update();
@@ -1199,14 +1297,17 @@ class Line extends OpMode {
     @Override
     public void start() {
         follower.activateAllPIDFs();
-        forwards = new Path(new BezierLine(new Pose(72,72), new Pose(DISTANCE + 72,72)));
+        forwards = new Path(new BezierLine(new Pose(72, 72), new Pose(DISTANCE + 72, 72)));
         forwards.setConstantHeadingInterpolation(0);
-        backwards = new Path(new BezierLine(new Pose(DISTANCE + 72,72), new Pose(72,72)));
+        backwards = new Path(new BezierLine(new Pose(DISTANCE + 72, 72), new Pose(72, 72)));
         backwards.setConstantHeadingInterpolation(0);
         follower.followPath(forwards);
     }
 
-    /** This runs the OpMode, updating the Follower as well as printing out the debug statements to the Telemetry */
+    /**
+     * This runs the OpMode, updating the Follower as well as printing out the debug statements to
+     * the Telemetry
+     */
     @Override
     public void loop() {
         follower.update();
@@ -1228,11 +1329,10 @@ class Line extends OpMode {
 }
 
 /**
- * This is the Centripetal Tuner OpMode. It runs the robot in a specified distance
- * forward and to the left. On reaching the end of the forward Path, the robot runs the backward
- * Path the same distance back to the start. Rinse and repeat! This is good for testing a variety
- * of Vectors, like the drive Vector, the translational Vector, the heading Vector, and the
- * centripetal Vector.
+ * This is the Centripetal Tuner OpMode. It runs the robot in a specified distance forward and to
+ * the left. On reaching the end of the forward Path, the robot runs the backward Path the same
+ * distance back to the start. Rinse and repeat! This is good for testing a variety of Vectors, like
+ * the drive Vector, the translational Vector, the heading Vector, and the centripetal Vector.
  *
  * @author Baron Henderson - 20077 The Indubitables
  * @author Anyi Lin - 10158 Scott's Bots
@@ -1253,12 +1353,15 @@ class CentripetalTuner extends OpMode {
     }
 
     /**
-     * This initializes the Follower and creates the forward and backward Paths.
-     * Additionally, this initializes the Panels telemetry.
+     * This initializes the Follower and creates the forward and backward Paths. Additionally, this
+     * initializes the Panels telemetry.
      */
     @Override
     public void init_loop() {
-        telemetryM.debug("This will run the robot in a curve going " + DISTANCE + " inches to the left and the same number of inches forward.");
+        telemetryM.debug(
+                "This will run the robot in a curve going "
+                        + DISTANCE
+                        + " inches to the left and the same number of inches forward.");
         telemetryM.debug("The robot will go continuously along the path.");
         telemetryM.debug("Make sure you have enough room.");
         telemetryM.update(telemetry);
@@ -1269,8 +1372,18 @@ class CentripetalTuner extends OpMode {
     @Override
     public void start() {
         follower.activateAllPIDFs();
-        forwards = new Path(new BezierCurve(new Pose(72,72), new Pose(Math.abs(DISTANCE) + 72,72), new Pose(Math.abs(DISTANCE) + 72,DISTANCE + 72)));
-        backwards = new Path(new BezierCurve(new Pose(Math.abs(DISTANCE) + 72,DISTANCE + 72), new Pose(Math.abs(DISTANCE) + 72,72), new Pose(72,72)));
+        forwards =
+                new Path(
+                        new BezierCurve(
+                                new Pose(72, 72),
+                                new Pose(Math.abs(DISTANCE) + 72, 72),
+                                new Pose(Math.abs(DISTANCE) + 72, DISTANCE + 72)));
+        backwards =
+                new Path(
+                        new BezierCurve(
+                                new Pose(Math.abs(DISTANCE) + 72, DISTANCE + 72),
+                                new Pose(Math.abs(DISTANCE) + 72, 72),
+                                new Pose(72, 72)));
 
         backwards.setTangentHeadingInterpolation();
         backwards.reverseHeadingInterpolation();
@@ -1302,8 +1415,8 @@ class CentripetalTuner extends OpMode {
 }
 
 /**
- * This is the Triangle autonomous OpMode.
- * It runs the robot in a triangle, with the starting point being the bottom-middle point.
+ * This is the Triangle autonomous OpMode. It runs the robot in a triangle, with the starting point
+ * being the bottom-middle point.
  *
  * @author Baron Henderson - 20077 The Indubitables
  * @author Samarth Mahapatra - 1002 CircuitRunners Robotics Surge
@@ -1338,26 +1451,30 @@ class Triangle extends OpMode {
 
     @Override
     public void init_loop() {
-        telemetryM.debug("This will run in a roughly triangular shape, starting on the bottom-middle point.");
-        telemetryM.debug("So, make sure you have enough space to the left, front, and right to run the OpMode.");
+        telemetryM.debug(
+                "This will run in a roughly triangular shape, starting on the bottom-middle point.");
+        telemetryM.debug(
+                "So, make sure you have enough space to the left, front, and right to run the OpMode.");
         telemetryM.update(telemetry);
         follower.update();
         drawCurrent();
     }
 
-    /** Creates the PathChain for the "triangle".*/
+    /** Creates the PathChain for the "triangle". */
     @Override
     public void start() {
         follower.setStartingPose(startPose);
 
-        triangle = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, interPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), interPose.getHeading())
-                .addPath(new BezierLine(interPose, endPose))
-                .setLinearHeadingInterpolation(interPose.getHeading(), endPose.getHeading())
-                .addPath(new BezierLine(endPose, startPose))
-                .setLinearHeadingInterpolation(endPose.getHeading(), startPose.getHeading())
-                .build();
+        triangle =
+                follower.pathBuilder()
+                        .addPath(new BezierLine(startPose, interPose))
+                        .setLinearHeadingInterpolation(
+                                startPose.getHeading(), interPose.getHeading())
+                        .addPath(new BezierLine(interPose, endPose))
+                        .setLinearHeadingInterpolation(interPose.getHeading(), endPose.getHeading())
+                        .addPath(new BezierLine(endPose, startPose))
+                        .setLinearHeadingInterpolation(endPose.getHeading(), startPose.getHeading())
+                        .build();
 
         follower.followPath(triangle);
     }
@@ -1379,24 +1496,46 @@ class Circle extends OpMode {
     private PathChain circle;
 
     public void start() {
-        circle = follower.pathBuilder()
-                .addPath(new BezierCurve(new Pose(72, 72), new Pose(RADIUS + 72, 72), new Pose(RADIUS + 72, RADIUS + 72)))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
-                .addPath(new BezierCurve(new Pose(RADIUS + 72, RADIUS + 72), new Pose(RADIUS + 72, (2 * RADIUS) + 72), new Pose(72, (2 * RADIUS) + 72)))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
-                .addPath(new BezierCurve(new Pose(72, (2 * RADIUS) + 72), new Pose(-RADIUS + 72, (2 * RADIUS) + 72), new Pose(-RADIUS + 72, RADIUS + 72)))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
-                .addPath(new BezierCurve(new Pose(-RADIUS + 72, RADIUS + 72), new Pose(-RADIUS + 72, 72), new Pose(72, 72)))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
-                .build();
+        circle =
+                follower.pathBuilder()
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(72, 72),
+                                        new Pose(RADIUS + 72, 72),
+                                        new Pose(RADIUS + 72, RADIUS + 72)))
+                        .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(RADIUS + 72, RADIUS + 72),
+                                        new Pose(RADIUS + 72, (2 * RADIUS) + 72),
+                                        new Pose(72, (2 * RADIUS) + 72)))
+                        .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(72, (2 * RADIUS) + 72),
+                                        new Pose(-RADIUS + 72, (2 * RADIUS) + 72),
+                                        new Pose(-RADIUS + 72, RADIUS + 72)))
+                        .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(-RADIUS + 72, RADIUS + 72),
+                                        new Pose(-RADIUS + 72, 72),
+                                        new Pose(72, 72)))
+                        .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
+                        .build();
         follower.followPath(circle);
     }
 
     @Override
     public void init_loop() {
-        telemetryM.debug("This will run in a roughly circular shape of radius " + RADIUS + ", starting on the right-most edge. ");
-        telemetryM.debug("So, make sure you have enough space to the left, front, and back to run the OpMode.");
-        telemetryM.debug("It will also continuously face the center of the circle to test your heading and centripetal correction.");
+        telemetryM.debug(
+                "This will run in a roughly circular shape of radius "
+                        + RADIUS
+                        + ", starting on the right-most edge. ");
+        telemetryM.debug(
+                "So, make sure you have enough space to the left, front, and back to run the OpMode.");
+        telemetryM.debug(
+                "It will also continuously face the center of the circle to test your heading and centripetal correction.");
         telemetryM.update(telemetry);
         follower.update();
         drawCurrent();
@@ -1424,24 +1563,27 @@ class Circle extends OpMode {
 
 /**
  * Tuning OpMode to get the min and max encoder values for swerve pods
+ *
  * @author Kabir Goyal
  */
 class AnalogMinMaxTuner extends OpMode {
-    //populate the below with your names for the servos and encoders
-    public String[] encoderNames = {"leftFrontEncoder", "rightFrontEncoder", "leftBackEncoder", "rightBackEncoder"};
+    // populate the below with your names for the servos and encoders
+    public String[] encoderNames = {
+        "leftFrontEncoder", "rightFrontEncoder", "leftBackEncoder", "rightBackEncoder"
+    };
     public AnalogInput[] encoders = new AnalogInput[encoderNames.length];
     public double[] minVoltages = new double[encoderNames.length];
     public double[] maxVoltages = new double[encoderNames.length];
 
-    public List<LynxModule> lynxModules; //js to improve loop times a bit yk
+    public List<LynxModule> lynxModules; // js to improve loop times a bit yk
 
-    public void start() {
-    }
+    public void start() {}
 
     @Override
     public void init_loop() {
-        telemetryM.debug("Press START. Then, Spin each pod slowly for 4 to 5 full rotations.\n" +
-                "The OpMode will keep track of the min and max voltages seen so far and print them to telemetry.");
+        telemetryM.debug(
+                "Press START. Then, Spin each pod slowly for 4 to 5 full rotations.\n"
+                        + "The OpMode will keep track of the min and max voltages seen so far and print them to telemetry.");
         telemetryM.update(telemetry);
     }
 
@@ -1452,9 +1594,9 @@ class AnalogMinMaxTuner extends OpMode {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
-        for (int i = 0; i < encoders.length; i++)  {
+        for (int i = 0; i < encoders.length; i++) {
             encoders[i] = hardwareMap.get(AnalogInput.class, encoderNames[i]);
-            minVoltages[i] = 5; //bigger value than should ever be read
+            minVoltages[i] = 5; // bigger value than should ever be read
         }
     }
 
@@ -1468,8 +1610,9 @@ class AnalogMinMaxTuner extends OpMode {
             hub.clearBulkCache();
         }
 
-        telemetryM.debug("Spin each pod slowly for 4 to 5 full rotations.\n" +
-                "The OpMode will keep track of the min and max voltages seen so far and print them to telemetry.\n\n");
+        telemetryM.debug(
+                "Spin each pod slowly for 4 to 5 full rotations.\n"
+                        + "The OpMode will keep track of the min and max voltages seen so far and print them to telemetry.\n\n");
 
         for (int i = 0; i < encoders.length; i++) {
             double currentVoltage = encoders[i].getVoltage();
@@ -1485,10 +1628,10 @@ class AnalogMinMaxTuner extends OpMode {
 }
 
 /**
- * This is the SwerveOffsetsTest
- * You should use this to check how good your swerve angle offsets are and if your motor directions are correct
- * @author Kabir Goyal
+ * This is the SwerveOffsetsTest You should use this to check how good your swerve angle offsets are
+ * and if your motor directions are correct
  *
+ * @author Kabir Goyal
  */
 class SwerveOffsetsTest extends OpMode {
     boolean debugStringEnabled = false;
@@ -1503,11 +1646,13 @@ class SwerveOffsetsTest extends OpMode {
             debugStringEnabled = !debugStringEnabled;
         }
 
-
-        telemetryM.debug("This OpMode will run all four swerve pods in the direction they think is forward"
-                + "\nensure your bot is not on the ground while running");
-        telemetryM.debug("Drivetrain debug string " + (((debugStringEnabled) ? "enabled" : "disabled")) +
-                " (press gamepad a to toggle)");
+        telemetryM.debug(
+                "This OpMode will run all four swerve pods in the direction they think is forward"
+                        + "\nensure your bot is not on the ground while running");
+        telemetryM.debug(
+                "Drivetrain debug string "
+                        + (((debugStringEnabled) ? "enabled" : "disabled"))
+                        + " (press gamepad a to toggle)");
         telemetryM.update(telemetry);
         follower.update();
         drawCurrent();
@@ -1520,8 +1665,8 @@ class SwerveOffsetsTest extends OpMode {
     }
 
     /**
-     * This updates the robot's pose estimate, the simple drive, and updates the
-     * Panels telemetry with the robot's position as well as draws the robot's position.
+     * This updates the robot's pose estimate, the simple drive, and updates the Panels telemetry
+     * with the robot's position as well as draws the robot's position.
      */
     @Override
     public void loop() {
@@ -1533,8 +1678,7 @@ class SwerveOffsetsTest extends OpMode {
         follower.update();
 
         if (debugStringEnabled) {
-            telemetryM.debug("Drivetrain Debug String:\n" +
-                    follower.getDrivetrain().debugString());
+            telemetryM.debug("Drivetrain Debug String:\n" + follower.getDrivetrain().debugString());
         }
         telemetryM.update(telemetry);
 
@@ -1543,10 +1687,10 @@ class SwerveOffsetsTest extends OpMode {
 }
 
 /**
- * This is the SwerveTurnTest
- * You should use this to check your encoder directions and x/y pod offsets
- * @author Kabir Goyal
+ * This is the SwerveTurnTest You should use this to check your encoder directions and x/y pod
+ * offsets
  *
+ * @author Kabir Goyal
  */
 class SwerveTurnTest extends OpMode {
     boolean debugStringEnabled = false;
@@ -1561,11 +1705,13 @@ class SwerveTurnTest extends OpMode {
             debugStringEnabled = !debugStringEnabled;
         }
 
-
-        telemetryM.debug("This OpMode will run all four swerve pods in their turning direction (perpendicular to the center of the robot) "
-                + "\nrun this once off the ground to check servo directions and motor directions before testing on the ground");
-        telemetryM.debug("Drivetrain debug string " + (((debugStringEnabled) ? "enabled" : "disabled")) +
-                " (press gamepad a to toggle)");
+        telemetryM.debug(
+                "This OpMode will run all four swerve pods in their turning direction (perpendicular to the center of the robot) "
+                        + "\nrun this once off the ground to check servo directions and motor directions before testing on the ground");
+        telemetryM.debug(
+                "Drivetrain debug string "
+                        + (((debugStringEnabled) ? "enabled" : "disabled"))
+                        + " (press gamepad a to toggle)");
         telemetryM.update(telemetry);
         follower.update();
         drawCurrent();
@@ -1578,8 +1724,8 @@ class SwerveTurnTest extends OpMode {
     }
 
     /**
-     * This updates the robot's pose estimate, the simple drive, and updates the
-     * Panels telemetry with the robot's position as well as draws the robot's position.
+     * This updates the robot's pose estimate, the simple drive, and updates the Panels telemetry
+     * with the robot's position as well as draws the robot's position.
      */
     @Override
     public void loop() {
@@ -1591,8 +1737,7 @@ class SwerveTurnTest extends OpMode {
         follower.update();
 
         if (debugStringEnabled) {
-            telemetryM.debug("Drivetrain Debug String:\n" +
-                    follower.getDrivetrain().debugString());
+            telemetryM.debug("Drivetrain Debug String:\n" + follower.getDrivetrain().debugString());
         }
         telemetryM.update(telemetry);
 
@@ -1602,8 +1747,9 @@ class SwerveTurnTest extends OpMode {
 
 /**
  * This is the OffsetsTuner OpMode. This tracks the movement of the robot as it turns 180 degrees,
- * and calculates what the robot's strafeX and forwardY offsets should be. Ensure that your strafeX and forwardY offsets
- * are set to 0 before running this OpMode. After running, input the displayed offsets into your localizer constants.
+ * and calculates what the robot's strafeX and forwardY offsets should be. Ensure that your strafeX
+ * and forwardY offsets are set to 0 before running this OpMode. After running, input the displayed
+ * offsets into your localizer constants.
  *
  * @author Havish Sripada - 12808 RevAmped Robotics
  * @author Baron Henderson
@@ -1611,7 +1757,7 @@ class SwerveTurnTest extends OpMode {
 class OffsetsTuner extends OpMode {
     @Override
     public void init() {
-        follower.setStartingPose(new Pose(72,72));
+        follower.setStartingPose(new Pose(72, 72));
         follower.update();
         drawCurrent();
     }
@@ -1619,16 +1765,20 @@ class OffsetsTuner extends OpMode {
     /** This initializes the PoseUpdater as well as the Panels telemetry. */
     @Override
     public void init_loop() {
-        telemetryM.debug("Prerequisite: Make sure both your offsets are set to 0 in your localizer constants.");
-        telemetryM.debug("Turn your robot " + Math.PI + " radians. Your offsets in inches will be shown on the telemetry.");
+        telemetryM.debug(
+                "Prerequisite: Make sure both your offsets are set to 0 in your localizer constants.");
+        telemetryM.debug(
+                "Turn your robot "
+                        + Math.PI
+                        + " radians. Your offsets in inches will be shown on the telemetry.");
         telemetryM.update(telemetry);
 
         drawCurrent();
     }
 
     /**
-     * This updates the robot's pose estimate, and updates the Panels telemetry with the
-     * calculated offsets and draws the robot.
+     * This updates the robot's pose estimate, and updates the Panels telemetry with the calculated
+     * offsets and draws the robot.
      */
     @Override
     public void loop() {
@@ -1636,15 +1786,15 @@ class OffsetsTuner extends OpMode {
 
         telemetryM.debug("Total Angle: " + follower.getTotalHeading());
 
-        telemetryM.debug("The following values are the offsets in inches that should be applied to your localizer.");
-        telemetryM.debug("strafeX: " + ((72.0-follower.getPose().getX()) / 2.0));
-        telemetryM.debug("forwardY: " + ((72.0-follower.getPose().getY()) / 2.0));
+        telemetryM.debug(
+                "The following values are the offsets in inches that should be applied to your localizer.");
+        telemetryM.debug("strafeX: " + ((72.0 - follower.getPose().getX()) / 2.0));
+        telemetryM.debug("forwardY: " + ((72.0 - follower.getPose().getY()) / 2.0));
         telemetryM.update(telemetry);
 
         drawCurrentAndHistory();
     }
 }
-
 
 /**
  * This is the Drawing class. It handles the drawing of stuff on Panels Dashboard, like the robot.
@@ -1656,16 +1806,10 @@ class Drawing {
     public static final double ROBOT_RADIUS = 9; // woah
     private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
 
-    private static final Style robotLook = new Style(
-            "", "#3F51B5", 0.75
-    );
-    private static final Style historyLook = new Style(
-            "", "#4CAF50", 0.75
-    );
+    private static final Style robotLook = new Style("", "#3F51B5", 0.75);
+    private static final Style historyLook = new Style("", "#4CAF50", 0.75);
 
-    /**
-     * This prepares Panels Field for using Pedro Offsets
-     */
+    /** This prepares Panels Field for using Pedro Offsets */
     public static void init() {
         panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getPEDRO_PATHING());
     }
@@ -1679,8 +1823,16 @@ class Drawing {
     public static void drawDebug(Follower follower) {
         if (follower.getCurrentPath() != null) {
             drawPath(follower.getCurrentPath(), robotLook);
-            Pose closestPoint = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
-            drawRobot(new Pose(closestPoint.getX(), closestPoint.getY(), follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())), robotLook);
+            Pose closestPoint =
+                    follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
+            drawRobot(
+                    new Pose(
+                            closestPoint.getX(),
+                            closestPoint.getY(),
+                            follower.getCurrentPath()
+                                    .getHeadingGoal(
+                                            follower.getCurrentPath().getClosestPointTValue())),
+                    robotLook);
         }
         drawPoseHistory(follower.getPoseHistory(), historyLook);
         drawRobot(follower.getPose(), historyLook);
@@ -1689,14 +1841,17 @@ class Drawing {
     }
 
     /**
-     * This draws a robot at a specified Pose with a specified
-     * look. The heading is represented as a line.
+     * This draws a robot at a specified Pose with a specified look. The heading is represented as a
+     * line.
      *
-     * @param pose  the Pose to draw the robot at
+     * @param pose the Pose to draw the robot at
      * @param style the parameters used to draw the robot with
      */
     public static void drawRobot(Pose pose, Style style) {
-        if (pose == null || Double.isNaN(pose.getX()) || Double.isNaN(pose.getY()) || Double.isNaN(pose.getHeading())) {
+        if (pose == null
+                || Double.isNaN(pose.getX())
+                || Double.isNaN(pose.getY())
+                || Double.isNaN(pose.getHeading())) {
             return;
         }
 
@@ -1726,7 +1881,7 @@ class Drawing {
     /**
      * This draws a Path with a specified look.
      *
-     * @param path  the Path to draw
+     * @param path the Path to draw
      * @param style the parameters used to draw the Path with
      */
     public static void drawPath(Path path, Style style) {
@@ -1746,11 +1901,10 @@ class Drawing {
     }
 
     /**
-     * This draws all the Paths in a PathChain with a
-     * specified look.
+     * This draws all the Paths in a PathChain with a specified look.
      *
      * @param pathChain the PathChain to draw
-     * @param style     the parameters used to draw the PathChain with
+     * @param style the parameters used to draw the PathChain with
      */
     public static void drawPath(PathChain pathChain, Style style) {
         for (int i = 0; i < pathChain.size(); i++) {
@@ -1762,7 +1916,7 @@ class Drawing {
      * This draws the pose history of the robot.
      *
      * @param poseTracker the PoseHistory to get the pose history from
-     * @param style       the parameters used to draw the pose history with
+     * @param style the parameters used to draw the pose history with
      */
     public static void drawPoseHistory(PoseHistory poseTracker, Style style) {
         panelsField.setStyle(style);
@@ -1770,8 +1924,11 @@ class Drawing {
         int size = poseTracker.getXPositionsArray().length;
         for (int i = 0; i < size - 1; i++) {
 
-            panelsField.moveCursor(poseTracker.getXPositionsArray()[i], poseTracker.getYPositionsArray()[i]);
-            panelsField.line(poseTracker.getXPositionsArray()[i + 1], poseTracker.getYPositionsArray()[i + 1]);
+            panelsField.moveCursor(
+                    poseTracker.getXPositionsArray()[i], poseTracker.getYPositionsArray()[i]);
+            panelsField.line(
+                    poseTracker.getXPositionsArray()[i + 1],
+                    poseTracker.getYPositionsArray()[i + 1]);
         }
     }
 
@@ -1784,9 +1941,7 @@ class Drawing {
         drawPoseHistory(poseTracker, historyLook);
     }
 
-    /**
-     * This tries to send the current packet to FTControl Panels.
-     */
+    /** This tries to send the current packet to FTControl Panels. */
     public static void sendPacket() {
         panelsField.update();
     }

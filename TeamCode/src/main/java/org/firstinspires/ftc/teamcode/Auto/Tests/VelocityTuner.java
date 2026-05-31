@@ -5,10 +5,8 @@ import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.uV;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp(name = "Velocity")
@@ -30,7 +28,8 @@ public class VelocityTuner extends OpMode {
         robot.shooter.shooting = true;
 
         Robot.alliance = Robot.Alliance.BLUE;
-        Pose startPoseBlue = new Pose(54, 8, Math.toRadians(90));;
+        Pose startPoseBlue = new Pose(54, 8, Math.toRadians(90));
+        ;
         Robot.follower.setStartingPose(startPoseBlue);
     }
 

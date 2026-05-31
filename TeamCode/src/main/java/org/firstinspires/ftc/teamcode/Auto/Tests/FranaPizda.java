@@ -19,7 +19,7 @@ public class FranaPizda extends OpMode {
 
     // ADJUST THESE CONSTANTS
     private final double STOP_THRESHOLD = 2.0; // Ticks per second (near zero)
-    private final double COOLDOWN_MS = 140.0;  // Time to wait once stopped
+    private final double COOLDOWN_MS = 140.0; // Time to wait once stopped
 
     @Override
     public void init() {
@@ -56,10 +56,7 @@ public class FranaPizda extends OpMode {
             Robot.follower.setTeleOpDrive(0, 0, 0, true);
         } else {
             Robot.follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    true);
+                    -gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
 
         Robot.follower.update();
