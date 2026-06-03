@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -12,6 +13,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
+import org.firstinspires.ftc.teamcode.Robot.Utils.NNLogging;
+import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @TeleOp(name = "TeleOp")
 @Config
@@ -19,9 +22,6 @@ public class TeleOpul extends OpMode {
 
     long lastTime = System.nanoTime();
 
-    public static double pos = 0.0;
-    public static double velo = 0.0;
-    private static final long INPUT_COOLDOWN_MS = 200;
     private static final long INPUT_COOLDOWN_LONG_MS = 400;
     private static final long FOLLOWER_SETTLE_MS = 300;
     private static final double TRIGGER_THRESHOLD = 0.1;
@@ -47,6 +47,9 @@ public class TeleOpul extends OpMode {
 
     private State state = State.INTAKE;
 
+    private NNLogging logger = new NNLogging();
+    private boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
+
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
@@ -56,6 +59,8 @@ public class TeleOpul extends OpMode {
 
         robot.shooter.init();
         //        robot.shooter.shootingLobComp = false;
+        if (uV.NN_LOGGING_ENABLE)
+            logger.init(hardwareMap);
     }
 
     @Override
@@ -108,12 +113,15 @@ public class TeleOpul extends OpMode {
         //        LAST RESORT!
         //        PhotonCore.CONTROL_HUB.clearBulkCache();
         //        PhotonCore.EXPANSION_HUB.clearBulkCache();
-
     }
 
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
+
+        if (uV.NN_LOGGING_ENABLE) {
+            logger.close();
+        }
     }
 
     // State Transitions
@@ -166,6 +174,10 @@ public class TeleOpul extends OpMode {
 
         if (fireMain || fireSecondary) {
             robot.intake.shoot();
+        }
+
+        if (uV.NN_LOGGING_ENABLE) {
+            handleNNLogging();
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
@@ -296,6 +308,56 @@ public class TeleOpul extends OpMode {
         }
     }
 
+    // Define a boolean tracker for your trigger button state in your class variables
+    private double lastRightBumper = 0;
+
+    private void handleNNLogging() {
+        // 1. Drivetrain state capture loop
+        Pose p = Robot.follower.getPose();
+        Vector velocity = Robot.follower.getVelocity();
+
+        // 2. AUTOMATIC CAPTURE: Take a snapshot the split-second you shoot
+        // Replace 'gamepad1.right_bumper' with whatever trigger you use to activate your outtake
+        if (gamepad1.right_trigger > .5 && lastRightBumper < .5) {
+            logger.takeSnapshot(
+                    p.getX(), p.getY(), p.getHeading(),
+                    velocity.getXComponent(), velocity.getYComponent(), Robot.follower.getAngularVelocity()
+            );
+        }
+        lastRightBumper = gamepad1.right_trigger;
+
+        // 3. MANUAL INPUT: Commit the snapshot only if one is waiting in the chamber
+        if (logger.hasPendingSnapshot()) {
+            if (gamepad2.dpad_up && !lastUp){
+                logger.commitSnapshot(3);
+                gamepad1.rumbleBlips(3);
+                gamepad2.rumbleBlips(3);
+            }
+            if (gamepad2.dpad_right && !lastRight){
+                logger.commitSnapshot(2);
+                gamepad1.rumbleBlips(2);
+                gamepad2.rumbleBlips(2);
+            }
+
+            if (gamepad2.dpad_left && !lastLeft){
+                logger.commitSnapshot(1);
+                gamepad1.rumbleBlips(1);
+                gamepad2.rumbleBlips(1);
+            }
+            if (gamepad2.dpad_down && !lastDown){
+                logger.commitSnapshot(0);
+                gamepad1.rumbleBlips(0);
+                gamepad2.rumbleBlips(0);
+            }
+
+        }
+
+        // Standard edge detection state tracking
+        lastUp = gamepad1.dpad_up;
+        lastRight = gamepad1.dpad_right;
+        lastLeft = gamepad1.dpad_left;
+        lastDown = gamepad1.dpad_down;
+    }
     // Telemetry
     private void updateTelemetry() {
         long currentTime = System.nanoTime();
@@ -344,6 +406,7 @@ public class TeleOpul extends OpMode {
         //        dashboardTelemetry.addData("Angle pose", Robot.follower.getPose().getHeading());
         //        dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
 
+        dashboardTelemetry.addData("Total Balls Scored Captured", logger.getTotalBallsScored());
         dashboardTelemetry.update();
     }
 }

@@ -30,7 +30,7 @@ public class Shooter extends Subsystem {
             (2.0 * Math.PI * WHEEL_RADIUS_INCHES) / (RAW_MOTOR_TICKS * EXTERNAL_GEAR_RATIO);
     public static double TURRET_SERVO_MIDPOINT = 0.5;
     public static double TURRET_MAX_ANGLE_DEG = 90.0;
-    public static double TURRET_GEAR_RATIO = 1.3;
+    public static double TURRET_GEAR_RATIO = 1.2;
     public static double shootKp = 0.06;
     public static double shootKi = 0.00002;
     public static double shootKd = 0.0000001;
@@ -108,11 +108,12 @@ public class Shooter extends Subsystem {
     }
 
     public boolean isAimed() {
-        if (distance < 60) {
-            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
-        } else {
-            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG + 2;
-        }
+//        if (distance < 60) {
+//            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
+//        } else {
+//            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG + 2;
+//        }
+        return true;
     }
 
     public void resetShooterPID() {
@@ -142,14 +143,7 @@ public class Shooter extends Subsystem {
             return 500.0; // Or whatever your target holding/stop velocity is
         }
 
-        double velocity =
-                0.0000000035 * Math.pow(distance, 6)
-                        + 0.0000000923 * Math.pow(distance, 5)
-                        + -0.0004210883 * Math.pow(distance, 4)
-                        + 0.0873266934 * Math.pow(distance, 3)
-                        + -7.3454955146 * Math.pow(distance, 2)
-                        + 283.5671321995 * distance
-                        + -2806.3856753832;
+        double velocity = -0.0006780758 * Math.pow(distance, 3) + 0.1700239691 * Math.pow(distance, 2) + -5.9676194360 * distance + 1305.8793678170;
         return Math.max(Math.min(velocity, 2300.0), 500.0);
 
         // 2. Guard clause for long-range max velocity
@@ -181,7 +175,7 @@ public class Shooter extends Subsystem {
         double dy = goalY - ry;
         distance = Math.hypot(dx, dy);
 
-        //        targetVelocity = computeVelocity(distance);
+        targetVelocity = computeVelocity(distance);
 
         // Calculate actual projectile horizontal velocity component
         double vel =
@@ -328,22 +322,29 @@ public class Shooter extends Subsystem {
 
         double targetAngleRad = 0;
 
-        //        if (shooting) {
-        //            Vector followerVelocity = Robot.follower.getVelocity();
-        //            targetAngleRad = computeVirtualGoal(pose.getX(), pose.getY(),
-        // followerVelocity.getXComponent(), followerVelocity.getYComponent());
-        //        } else {
-        distance = Math.hypot(targetGoal.getY() - pose.getY(), targetGoal.getX() - pose.getX());
-        targetAngleRad =
-                Math.atan2(targetGoal.getY() - pose.getY(), targetGoal.getX() - pose.getX());
-        targetLob = computeLob(distance);
-        //        }
+        if (shooting) {
+            Vector followerVelocity = Robot.follower.getVelocity();
+            targetAngleRad =
+                    computeVirtualGoal(
+                            pose.getX(),
+                            pose.getY(),
+                            followerVelocity.getXComponent(),
+                            followerVelocity.getYComponent());
+        } else {
+            distance = Math.hypot(targetGoal.getY() - pose.getY(), targetGoal.getX() - pose.getX());
+            targetAngleRad =
+                    Math.atan2(targetGoal.getY() - pose.getY(), targetGoal.getX() - pose.getX());
+            targetLob = computeLob(distance);
+            targetVelocity = computeVelocity(distance);
+        }
 
         double desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
         desiredAngleRad = Math.max(-Math.PI * 2 / 5, Math.min(desiredAngleRad, Math.PI * 2 / 5));
         double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
 
         servoPos = Math.max(0, Math.min(1, servoPos));
+
+        turretErrorRad = desiredAngleRad - turretAngleFromServoPosition(commandedServoPos);
 
         if (!override) {
             turretPivot.setPosition(servoPos);

@@ -124,4 +124,9 @@ public class Robot {
         shooter.update();
         follower.update();
     }
+
+    public void init() {
+        intake.init();
+        shooter.init();
+    }
 }

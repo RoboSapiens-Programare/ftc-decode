@@ -82,3 +82,5 @@ lint/tmp/
 
 # vscode
 .vscode/
+venv/
+.venv/

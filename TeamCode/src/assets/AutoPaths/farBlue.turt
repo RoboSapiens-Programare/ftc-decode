@@ -1,0 +1,323 @@
+{
+  "version": "2.2.0",
+  "header": {
+    "info": "Created with Turtle Tracer",
+    "copyright": "Copyright 2026 Matthew Allen. Licensed under the Modified Apache License, Version 2.0.",
+    "link": "https://github.com/Mallen220/TurtleTracer"
+  },
+  "startPoint": {
+    "x": 54,
+    "y": 9,
+    "heading": "linear",
+    "startDeg": 90,
+    "endDeg": 180,
+    "locked": false
+  },
+  "lines": [
+    {
+      "id": "mpwu67qz-l97w4t",
+      "name": "grabHuman",
+      "endPoint": {
+        "x": 12,
+        "y": 11.246589997325497,
+        "heading": "linear",
+        "reverse": false,
+        "degrees": 0,
+        "startDeg": 90,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 62.02353570473389,
+          "y": 18.63573147900509
+        }
+      ],
+      "color": "#9A56B8",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwu9gz4-9dzmlr",
+      "name": "shootHuman",
+      "endPoint": {
+        "x": 54,
+        "y": 17.999465097619677,
+        "heading": "constant",
+        "startDeg": 180,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#99DABD",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwua8ut-29o4zy",
+      "name": "grabPPG",
+      "endPoint": {
+        "x": 18.67290719443701,
+        "y": 36.32468574485157,
+        "heading": "constant",
+        "startDeg": 180,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [
+        {
+          "x": 47.56138004814121,
+          "y": 38.0583043594544
+        }
+      ],
+      "color": "#B88566",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwub02n-ild4of",
+      "name": "shootPPG",
+      "endPoint": {
+        "x": 54,
+        "y": 17.999465097619677,
+        "heading": "constant",
+        "startDeg": 180,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#D5CBB5",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwubsnn-55v95w",
+      "name": "grabGate",
+      "endPoint": {
+        "x": 10.123294998662745,
+        "y": 29.11460283498263,
+        "heading": "linear",
+        "degrees": 180,
+        "startDeg": 180,
+        "endDeg": 90
+      },
+      "controlPoints": [
+        {
+          "x": 9,
+          "y": 5.043995720780961
+        }
+      ],
+      "color": "#CBBCDA",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwugk6p-59tb2y",
+      "name": "shootGate",
+      "endPoint": {
+        "x": 54,
+        "y": 17.999465097619677,
+        "heading": "linear",
+        "startDeg": 90,
+        "endDeg": 180,
+        "degrees": 90
+      },
+      "controlPoints": [],
+      "color": "#C7A565",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwuksph-b7zdn7",
+      "name": "grabGate2",
+      "endPoint": {
+        "x": 12,
+        "y": 11.246589997325497,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 62.700722118213434,
+          "y": 8
+        }
+      ],
+      "color": "#957B88",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwuljsw-761js1",
+      "name": "shootGate2",
+      "endPoint": {
+        "x": 54,
+        "y": 17.999465097619677,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#67C7D9",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwun1tm-hhc85b",
+      "name": "grabGate3",
+      "endPoint": {
+        "x": 9,
+        "y": 34,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 58.898368547740034,
+          "y": 30.439957207809577
+        }
+      ],
+      "color": "#AD76CA",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mpwun6jp-2w7fbe",
+      "name": "shootGate3",
+      "endPoint": {
+        "x": 54,
+        "y": 17.999465097619677,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#6C779B",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "mpwu67qz-l97w4t"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwu9gz4-9dzmlr"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwua8ut-29o4zy"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwub02n-ild4of"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwubsnn-55v95w"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwugk6p-59tb2y"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwuksph-b7zdn7"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwuljsw-761js1"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwun1tm-hhc85b"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwun6jp-2w7fbe"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "triangle-1",
+      "name": "Red Goal",
+      "vertices": [
+        {
+          "x": 143,
+          "y": 69.5
+        },
+        {
+          "x": 143,
+          "y": 143
+        },
+        {
+          "x": 118.5,
+          "y": 143
+        },
+        {
+          "x": 136.5,
+          "y": 118.5
+        },
+        {
+          "x": 136.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#dc2626",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    },
+    {
+      "id": "triangle-2",
+      "name": "Blue Goal",
+      "vertices": [
+        {
+          "x": 7.5,
+          "y": 118.5
+        },
+        {
+          "x": 25.5,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 69.5
+        },
+        {
+          "x": 7.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#0b08d9",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    }
+  ],
+  "extraData": {}
+}

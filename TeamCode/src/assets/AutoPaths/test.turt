@@ -1,0 +1,318 @@
+{
+  "version": "2.2.0",
+  "header": {
+    "info": "Created with Turtle Tracer",
+    "copyright": "Copyright 2026 Matthew Allen. Licensed under the Modified Apache License, Version 2.0.",
+    "link": "https://github.com/Mallen220/TurtleTracer"
+  },
+  "startPoint": {
+    "x": 24,
+    "y": 124,
+    "heading": "linear",
+    "startDeg": 143,
+    "endDeg": 180,
+    "locked": false
+  },
+  "lines": [
+    {
+      "id": "shootPreload-line-1",
+      "name": "shootPreload",
+      "endPoint": {
+        "x": 54.85,
+        "y": 84,
+        "heading": "linear",
+        "startDeg": 143,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#7669A9",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    },
+    {
+      "id": "grabGPP-line-1",
+      "name": "grabGPP",
+      "endPoint": {
+        "x": 20,
+        "y": 83,
+        "heading": "constant",
+        "startDeg": 180,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#3b82f6",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    },
+    {
+      "id": "shootGPP-line-1",
+      "name": "shootGPP",
+      "endPoint": {
+        "x": 54.85,
+        "y": 84,
+        "heading": "constant",
+        "startDeg": 180,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [],
+      "color": "#10b981",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    },
+    {
+      "id": "grabPGP-curve-1",
+      "name": "grabPGP",
+      "endPoint": {
+        "x": 20,
+        "y": 58.16047071409467,
+        "heading": "constant",
+        "startDeg": 180,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [
+        {
+          "x": 54.85,
+          "y": 57.51858785771596
+        }
+      ],
+      "color": "#f59e0b",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    },
+    {
+      "id": "mpwr1r9u-p97fos",
+      "endPoint": {
+        "x": 17,
+        "y": 66,
+        "heading": "linear",
+        "degrees": 180,
+        "startDeg": 180,
+        "endDeg": 270
+      },
+      "controlPoints": [],
+      "color": "#77BD99",
+      "name": "openGatePGP",
+      "eventMarkers": [],
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "isChain": true
+    },
+    {
+      "id": "grabPGP-line-2",
+      "name": "shootPGP",
+      "endPoint": {
+        "x": 54.85,
+        "y": 84,
+        "heading": "linear",
+        "startDeg": 270,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#ef4444",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    },
+    {
+      "id": "shootPGP-line-1",
+      "name": "openGate",
+      "endPoint": {
+        "x": 21.4442364268521,
+        "y": 69.5,
+        "heading": "constant",
+        "startDeg": -90,
+        "endDeg": 180,
+        "degrees": 180
+      },
+      "controlPoints": [
+        {
+          "x": 40.296407912597154,
+          "y": 77.47505312668632
+        }
+      ],
+      "color": "#8b5cf6",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    },
+    {
+      "id": "mpwr3n2h-vq140x",
+      "endPoint": {
+        "x": 15.234822144958546,
+        "y": 58.16047071409467,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 135,
+        "degrees": 180
+      },
+      "controlPoints": [
+        {
+          "x": 24,
+          "y": 64.39529285905323
+        }
+      ],
+      "color": "#D96AD6",
+      "name": "grabGate",
+      "eventMarkers": [],
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "isChain": true
+    },
+    {
+      "id": "shootGate-line-1",
+      "name": "shootGate",
+      "endPoint": {
+        "x": 54.85,
+        "y": 84,
+        "heading": "linear",
+        "startDeg": 135,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#14b8a6",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    }
+  ],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "shootPreload-line-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "grabGPP-line-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "shootGPP-line-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "grabPGP-curve-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwr1r9u-p97fos",
+      "isChain": true
+    },
+    {
+      "kind": "path",
+      "lineId": "grabPGP-line-2"
+    },
+    {
+      "kind": "path",
+      "lineId": "shootPGP-line-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "mpwr3n2h-vq140x",
+      "isChain": true
+    },
+    {
+      "kind": "path",
+      "lineId": "shootGate-line-1"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "triangle-1",
+      "name": "Red Goal",
+      "vertices": [
+        {
+          "x": 143,
+          "y": 69.5
+        },
+        {
+          "x": 143,
+          "y": 143
+        },
+        {
+          "x": 118.5,
+          "y": 143
+        },
+        {
+          "x": 136.5,
+          "y": 118.5
+        },
+        {
+          "x": 136.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#dc2626",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    },
+    {
+      "id": "triangle-2",
+      "name": "Blue Goal",
+      "vertices": [
+        {
+          "x": 7.5,
+          "y": 118.5
+        },
+        {
+          "x": 25.5,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 69.5
+        },
+        {
+          "x": 7.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#0b08d9",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    }
+  ],
+  "extraData": {}
+}
