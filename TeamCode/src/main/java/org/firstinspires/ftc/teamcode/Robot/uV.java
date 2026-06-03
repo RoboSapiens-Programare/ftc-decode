@@ -29,4 +29,5 @@ public class uV {
     public static double MINIMUM_SHOOT_TIMEOUT_MS = 2_000;
 
     public static boolean NN_LOGGING_ENABLE = false;
+    public static boolean USE_NN_AIM_ASSIST = true;
 }

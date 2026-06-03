@@ -8,12 +8,14 @@ import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 // import com.seattlesolvers.solverslib.photon.PhotonCore;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.Utils.NNLogging;
+import org.firstinspires.ftc.teamcode.Robot.Utils.ShootAssist;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
 @TeleOp(name = "TeleOp")
@@ -40,6 +42,8 @@ public class TeleOpul extends OpMode {
     private boolean overrideCancelled = true;
     private boolean isAimingChassis = false;
 
+    private ElapsedTime rumbleTimer = new ElapsedTime();
+
     private enum State {
         INTAKE,
         OUTTAKE
@@ -48,6 +52,7 @@ public class TeleOpul extends OpMode {
     private State state = State.INTAKE;
 
     private NNLogging logger = new NNLogging();
+    private ShootAssist shootAssist = new ShootAssist();
     private boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
 
     @Override
@@ -61,6 +66,11 @@ public class TeleOpul extends OpMode {
         //        robot.shooter.shootingLobComp = false;
         if (uV.NN_LOGGING_ENABLE)
             logger.init(hardwareMap);
+
+        if (uV.USE_NN_AIM_ASSIST) {
+            shootAssist.init("shoot_predictor.tflite");
+            shootAssist.debugModelLoading();
+        }
     }
 
     @Override
@@ -178,6 +188,83 @@ public class TeleOpul extends OpMode {
 
         if (uV.NN_LOGGING_ENABLE) {
             handleNNLogging();
+        }
+
+        if (uV.USE_NN_AIM_ASSIST && rumbleTimer.milliseconds() > 300) {
+            rumbleTimer.reset();
+
+            double robotX = Robot.follower.getPose().getX();
+            double robotY = Robot.follower.getPose().getY();
+            double heading = Robot.follower.getHeading();
+
+            // 2. Replicate the Logger's Math to get true spatial targets
+            double deltaX = 12.0 - robotX;  // Matches your GOAL_X
+            double deltaY = 134.0 - robotY; // Matches your GOAL_Y
+            double targetDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            double absoluteAngleToGoal = Math.atan2(deltaY, deltaX);
+            double angleError = absoluteAngleToGoal - heading;
+
+            // Normalize angle error to [-pi, pi] to perfectly match the training scaling
+            while (angleError > Math.PI) angleError -= 2 * Math.PI;
+            while (angleError < -Math.PI) angleError += 2 * Math.PI;
+
+            // 3. Extract ROBOT-CENTRIC local velocities instead of global field ones
+            // If your follower doesn't have a direct "getRelativeVelocity()" method,
+            // we rotate the global vectors into the robot's heading frame:
+            double globalVx = Robot.follower.getVelocity().getXComponent();
+            double globalVy = Robot.follower.getVelocity().getYComponent();
+
+            double localVx = globalVx * Math.cos(-heading) - globalVy * Math.sin(-heading);
+            double localVy = globalVx * Math.sin(-heading) + globalVy * Math.cos(-heading);
+
+            double omega = Robot.follower.getAngularVelocity();
+            double voltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
+
+            // 4. Feed the perfectly aligned features to the interpreter
+            int predictedBalls = shootAssist.predictBallCount(
+                    targetDist,
+                    angleError,
+                    localVx,
+                    localVy,
+                    omega,
+                    voltage
+            );
+            FtcDashboard.getInstance().getTelemetry().addData("prediction", predictedBalls);
+
+            switch (predictedBalls) {
+                case 3: // Perfect Shot Green Light -> Aggressive Double Pulse
+                    gamepad1.runRumbleEffect(
+                            new Gamepad.RumbleEffect.Builder()
+                                    .addStep(1.0, 1.0, 200)
+                                    .addStep(0.0, 0.0, 100)
+                                    .addStep(1.0, 1.0, 200)
+                                    .build()
+                    );
+                    break;
+
+                case 2: // High Likelihood -> Single Crisp Pulse
+                    gamepad1.runRumbleEffect(
+                            new Gamepad.RumbleEffect.Builder()
+                                    .addStep(1.0, 1.0, 150)
+                                    .build()
+                    );
+                    break;
+
+                case 1: // Risky Shot -> Soft Warning Buzz
+                    gamepad1.runRumbleEffect(
+                            new Gamepad.RumbleEffect.Builder()
+                                    .addStep(0.3, 0.3, 250)
+                                    .build()
+                    );
+                    break;
+
+                case 0: // Complete Failure State -> Flat Out Blocked / No Rumble
+                default:
+                    // Optional: Explicitly stop rumble if transitioning out of a good state
+                    gamepad1.stopRumble();
+                    break;
+            }
         }
 
         if (gamepad1.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
@@ -328,26 +415,26 @@ public class TeleOpul extends OpMode {
 
         // 3. MANUAL INPUT: Commit the snapshot only if one is waiting in the chamber
         if (logger.hasPendingSnapshot()) {
-            if (gamepad2.dpad_up && !lastUp){
+            if (gamepad1.dpad_up && !lastUp){
                 logger.commitSnapshot(3);
                 gamepad1.rumbleBlips(3);
                 gamepad2.rumbleBlips(3);
             }
-            if (gamepad2.dpad_right && !lastRight){
+            if (gamepad1.dpad_right && !lastRight){
                 logger.commitSnapshot(2);
                 gamepad1.rumbleBlips(2);
                 gamepad2.rumbleBlips(2);
             }
 
-            if (gamepad2.dpad_left && !lastLeft){
-                logger.commitSnapshot(1);
-                gamepad1.rumbleBlips(1);
-                gamepad2.rumbleBlips(1);
-            }
-            if (gamepad2.dpad_down && !lastDown){
+            if (gamepad1.dpad_left && !lastLeft){
                 logger.commitSnapshot(0);
                 gamepad1.rumbleBlips(0);
                 gamepad2.rumbleBlips(0);
+            }
+            if (gamepad1.dpad_down && !lastDown){
+                logger.commitSnapshot(1);
+                gamepad1.rumbleBlips(1);
+                gamepad2.rumbleBlips(1);
             }
 
         }

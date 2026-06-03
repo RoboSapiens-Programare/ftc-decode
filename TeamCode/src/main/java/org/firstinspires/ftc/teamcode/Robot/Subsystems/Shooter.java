@@ -63,6 +63,7 @@ public class Shooter extends Subsystem {
     private double commandedServoPos = TURRET_SERVO_MIDPOINT;
     private boolean override = false;
     private double overrideAngle = 0;
+    public double desiredAngleRad = 0;
 
     private final ElapsedTime trackingTimer = new ElapsedTime();
 
@@ -338,7 +339,7 @@ public class Shooter extends Subsystem {
             targetVelocity = computeVelocity(distance);
         }
 
-        double desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
+        desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
         desiredAngleRad = Math.max(-Math.PI * 2 / 5, Math.min(desiredAngleRad, Math.PI * 2 / 5));
         double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
 
