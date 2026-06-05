@@ -133,7 +133,7 @@ history = model.fit(
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 
-with open("shot_predictor.tflite", "wb") as f:
+with open("shoot_predictor.tflite", "wb") as f:
     f.write(tflite_model)
 print("\nDone! Model successfully saved as 'shot_predictor.tflite'")
 

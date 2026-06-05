@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode.TeleOP;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
-import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -38,11 +36,9 @@ public class TeleOpul extends OpMode {
     private double averagedFrequency = 50.0; // Seed it with an expected baseline (e.g., 50-60Hz)
 
     private int loopCount = 0;
-    private boolean aimOnce = true;
     private boolean overrideCancelled = true;
-    private boolean isAimingChassis = false;
 
-    private ElapsedTime rumbleTimer = new ElapsedTime();
+    private final ElapsedTime rumbleTimer = new ElapsedTime();
 
     private enum State {
         INTAKE,
@@ -51,8 +47,8 @@ public class TeleOpul extends OpMode {
 
     private State state = State.INTAKE;
 
-    private NNLogging logger = new NNLogging();
-    private ShootAssist shootAssist = new ShootAssist();
+    private final NNLogging logger = new NNLogging();
+    private final ShootAssist shootAssist = new ShootAssist();
     private boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
 
     @Override
@@ -64,8 +60,7 @@ public class TeleOpul extends OpMode {
 
         robot.shooter.init();
         //        robot.shooter.shootingLobComp = false;
-        if (uV.NN_LOGGING_ENABLE)
-            logger.init(hardwareMap);
+        if (uV.NN_LOGGING_ENABLE) logger.init(hardwareMap);
 
         if (uV.USE_NN_AIM_ASSIST) {
             shootAssist.init("shoot_predictor.tflite");
@@ -111,12 +106,7 @@ public class TeleOpul extends OpMode {
 
         handlePoseReset();
         handleOverrideButtons();
-        handleChassisAiming();
-        handleDriverOverride();
-        //        handleTurretControls();
         handleDrive();
-
-        //        robot.shooter.lobServo.setPosition(pos);
 
         updateTelemetry();
 
@@ -138,7 +128,6 @@ public class TeleOpul extends OpMode {
     private void changeState(State newState) {
         state = newState;
         stateTimer.reset();
-        aimOnce = false;
         overrideCancelled = false;
 
         robot.shooter.shooting = newState == State.OUTTAKE;
@@ -198,8 +187,8 @@ public class TeleOpul extends OpMode {
             double heading = Robot.follower.getHeading();
 
             // 2. Replicate the Logger's Math to get true spatial targets
-            double deltaX = 12.0 - robotX;  // Matches your GOAL_X
-            double deltaY = 134.0 - robotY; // Matches your GOAL_Y
+            double deltaX = Shooter.targetGoal.getX() - robotX; // Matches your GOAL_X
+            double deltaY = Shooter.targetGoal.getY() - robotY; // Matches your GOAL_Y
             double targetDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
             double absoluteAngleToGoal = Math.atan2(deltaY, deltaX);
@@ -210,8 +199,6 @@ public class TeleOpul extends OpMode {
             while (angleError < -Math.PI) angleError += 2 * Math.PI;
 
             // 3. Extract ROBOT-CENTRIC local velocities instead of global field ones
-            // If your follower doesn't have a direct "getRelativeVelocity()" method,
-            // we rotate the global vectors into the robot's heading frame:
             double globalVx = Robot.follower.getVelocity().getXComponent();
             double globalVy = Robot.follower.getVelocity().getYComponent();
 
@@ -222,46 +209,52 @@ public class TeleOpul extends OpMode {
             double voltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
 
             // 4. Feed the perfectly aligned features to the interpreter
-            int predictedBalls = shootAssist.predictBallCount(
-                    targetDist,
-                    angleError,
-                    localVx,
-                    localVy,
-                    omega,
-                    voltage
-            );
-            FtcDashboard.getInstance().getTelemetry().addData("prediction", predictedBalls);
+            int predictedBalls =
+                    shootAssist.predictBallCount(
+                            targetDist, angleError, localVx, localVy, omega, voltage);
 
+            FtcDashboard.getInstance()
+                    .getTelemetry()
+                    .addData("NN Target Prediction", predictedBalls);
+
+            // --- ENHANCED HAPTIC RUMBLE PATTERNS ---
             switch (predictedBalls) {
-                case 3: // Perfect Shot Green Light -> Aggressive Double Pulse
+                case 3:
+                    // 3 Balls (Perfect): Sharp, rapid triple-click burst (In-Sync, Crisp)
                     gamepad1.runRumbleEffect(
                             new Gamepad.RumbleEffect.Builder()
-                                    .addStep(1.0, 1.0, 200)
-                                    .addStep(0.0, 0.0, 100)
-                                    .addStep(1.0, 1.0, 200)
-                                    .build()
-                    );
+                                    .addStep(1.0, 1.0, 70) // Click 1
+                                    .addStep(0.0, 0.0, 40) // Gap
+                                    .addStep(1.0, 1.0, 70) // Click 2
+                                    .addStep(0.0, 0.0, 40) // Gap
+                                    .addStep(1.0, 1.0, 90) // Click 3 (Slightly longer accent)
+                                    .build());
                     break;
 
-                case 2: // High Likelihood -> Single Crisp Pulse
+                case 2:
+                    // 2 Balls (Good Likelihood): Clean, authoritative double-pulse
                     gamepad1.runRumbleEffect(
                             new Gamepad.RumbleEffect.Builder()
-                                    .addStep(1.0, 1.0, 150)
-                                    .build()
-                    );
+                                    .addStep(0.9, 0.9, 80) // Click 1
+                                    .addStep(0.0, 0.0, 50) // Gap
+                                    .addStep(0.9, 0.9, 80) // Click 2
+                                    .build());
                     break;
 
-                case 1: // Risky Shot -> Soft Warning Buzz
+                case 1:
+                    // 1 Ball (Sub-optimal/Risky): Rough, low-frequency warning buzz (Gritty feel)
                     gamepad1.runRumbleEffect(
                             new Gamepad.RumbleEffect.Builder()
-                                    .addStep(0.3, 0.3, 250)
-                                    .build()
-                    );
+                                    .addStep(
+                                            0.6, 0.1,
+                                            180) // Heavy offset balance creates a "grating"
+                                    // sensation
+                                    .build());
                     break;
 
-                case 0: // Complete Failure State -> Flat Out Blocked / No Rumble
+                case 0:
                 default:
-                    // Optional: Explicitly stop rumble if transitioning out of a good state
+                    // 0 Balls (Deadzone): Completely clean cut-off. Immediate stop.
                     gamepad1.stopRumble();
                     break;
             }
@@ -269,59 +262,27 @@ public class TeleOpul extends OpMode {
 
         if (gamepad1.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
             robot.intake.rest();
-            isAimingChassis = false;
             Robot.follower.breakFollowing();
             Robot.follower.startTeleOpDrive(true);
             changeState(State.INTAKE);
         }
     }
 
-    // Chassis
-    private void aimChassis(double targetHeadingRad) {
-        Pose current = Robot.follower.getPose();
-
-        while (targetHeadingRad < 0) targetHeadingRad += 2.0 * Math.PI;
-        while (targetHeadingRad >= 2.0 * Math.PI) targetHeadingRad -= 2.0 * Math.PI;
-
-        double currentHeading = current.getHeading();
-
-        Pose target =
-                new Pose(
-                        current.getX() + Math.cos(targetHeadingRad),
-                        current.getY() + Math.sin(targetHeadingRad),
-                        targetHeadingRad);
-
-        PathChain path =
-                Robot.follower
-                        .pathBuilder()
-                        .addPath(new BezierLine(current, target))
-                        .setLinearHeadingInterpolation(currentHeading, targetHeadingRad)
-                        .build();
-        Robot.follower.followPath(path, true);
-    }
-
     private void handlePoseReset() {
-        Pose homingPoseRed = new Pose(123.077, 123.133, Math.toRadians(36));
-        Pose homingPoseBlue = new Pose(20.9, 123.1, Math.toRadians(144));
+        Pose homingPose = new Pose(72, 134, Math.toRadians(90));
 
         if (gamepad1.circle) {
-            Robot.alliance = Robot.Alliance.RED;
-            Robot.transitionPose = homingPoseRed;
-            Robot.follower.setPose(Robot.transitionPose);
+            Robot.follower.breakFollowing();
+            Robot.follower.setPose(homingPose);
+            Robot.follower.startTeleOpDrive(true);
             robot.shooter.reset();
-            gamepad1.setLedColor(255, 0, 0, 10000);
-        } else if (gamepad1.square) {
-            Robot.alliance = Robot.Alliance.BLUE;
-            Robot.transitionPose = homingPoseBlue;
-            Robot.follower.setPose(Robot.transitionPose);
-            robot.shooter.reset();
-            gamepad1.setLedColor(0, 0, 255, 10000);
+            gamepad1.setLedColor(0xff, 0xff, 0x00, 100);
         }
     }
 
     private void handleOverrideButtons() {
         if (gamepad1.right_bumper && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
-            robot.shooter.lock();
+            robot.shooter.goToAngle(0);
             inputTimer.reset();
         }
 
@@ -331,61 +292,9 @@ public class TeleOpul extends OpMode {
         }
     }
 
-    private void handleChassisAiming() {
-        if (isAimingChassis && !aimOnce) {
-            Robot.follower.breakFollowing();
-            aimChassis(robot.shooter.getTargetFieldAngleRadStatic());
-            aimOnce = true;
-        }
-    }
-
-    private void handleDriverOverride() {
-        boolean driverMovingSticks =
-                Math.abs(gamepad1.left_stick_x) > STICK_THRESHOLD
-                        || Math.abs(gamepad1.left_stick_y) > STICK_THRESHOLD
-                        || Math.abs(gamepad1.right_stick_x) > STICK_THRESHOLD;
-
-        boolean followerBusy = Robot.follower.isBusy();
-        if (followerBusy) {
-            followerIdleTimer.reset();
-        }
-        //        boolean followerSettled = !followerBusy && followerIdleTimer.milliseconds() >
-        // FOLLOWER_SETTLE_MS;
-
-        if (isAimingChassis && aimOnce && !overrideCancelled && driverMovingSticks) {
-            Robot.follower.breakFollowing();
-            Robot.follower.startTeleOpDrive(true);
-            overrideCancelled = true;
-        }
-    }
-
-    //    private void handleTurretControls() {
-    //        if (gamepad2.dpad_left && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
-    //            robot.shooter.incremental(4 * Math.PI / 90);
-    //            inputTimer.reset();
-    //        }
-    //        if (gamepad2.dpad_right && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
-    //            robot.shooter.incremental(-4 * Math.PI / 90);
-    //            inputTimer.reset();
-    //        }
-    //        if (gamepad2.dpad_up && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
-    //            robot.shooter.incremental(Math.PI / 90);
-    //            inputTimer.reset();
-    //        }
-    //        if (gamepad2.dpad_down && inputTimer.milliseconds() > INPUT_COOLDOWN_MS) {
-    //            robot.shooter.incremental(-Math.PI / 90);
-    //            inputTimer.reset();
-    //        }
-    //        if (gamepad2.touchpad && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
-    //            robot.shooter.stopOverride();
-    //            inputTimer.reset();
-    //        }
-    //    }
-
     private void handleDrive() {
         boolean allowDrive =
-                !isAimingChassis
-                        || overrideCancelled
+                overrideCancelled
                         || (!Robot.follower.isBusy()
                                 && followerIdleTimer.milliseconds() > FOLLOWER_SETTLE_MS);
 
@@ -407,36 +316,38 @@ public class TeleOpul extends OpMode {
         // Replace 'gamepad1.right_bumper' with whatever trigger you use to activate your outtake
         if (gamepad1.right_trigger > .5 && lastRightBumper < .5) {
             logger.takeSnapshot(
-                    p.getX(), p.getY(), p.getHeading(),
-                    velocity.getXComponent(), velocity.getYComponent(), Robot.follower.getAngularVelocity()
-            );
+                    p.getX(),
+                    p.getY(),
+                    p.getHeading(),
+                    velocity.getXComponent(),
+                    velocity.getYComponent(),
+                    Robot.follower.getAngularVelocity());
         }
         lastRightBumper = gamepad1.right_trigger;
 
         // 3. MANUAL INPUT: Commit the snapshot only if one is waiting in the chamber
         if (logger.hasPendingSnapshot()) {
-            if (gamepad1.dpad_up && !lastUp){
+            if (gamepad1.dpad_up && !lastUp) {
                 logger.commitSnapshot(3);
                 gamepad1.rumbleBlips(3);
                 gamepad2.rumbleBlips(3);
             }
-            if (gamepad1.dpad_right && !lastRight){
+            if (gamepad1.dpad_right && !lastRight) {
                 logger.commitSnapshot(2);
                 gamepad1.rumbleBlips(2);
                 gamepad2.rumbleBlips(2);
             }
 
-            if (gamepad1.dpad_left && !lastLeft){
+            if (gamepad1.dpad_left && !lastLeft) {
                 logger.commitSnapshot(0);
                 gamepad1.rumbleBlips(0);
                 gamepad2.rumbleBlips(0);
             }
-            if (gamepad1.dpad_down && !lastDown){
+            if (gamepad1.dpad_down && !lastDown) {
                 logger.commitSnapshot(1);
                 gamepad1.rumbleBlips(1);
                 gamepad2.rumbleBlips(1);
             }
-
         }
 
         // Standard edge detection state tracking
@@ -445,6 +356,7 @@ public class TeleOpul extends OpMode {
         lastLeft = gamepad1.dpad_left;
         lastDown = gamepad1.dpad_down;
     }
+
     // Telemetry
     private void updateTelemetry() {
         long currentTime = System.nanoTime();
@@ -468,30 +380,15 @@ public class TeleOpul extends OpMode {
         loopCount = 0;
 
         dashboardTelemetry.addData("Loop Hz (Avg)", Math.round(averagedFrequency));
-        //        dashboardTelemetry.addData("desired angle",
-        // robot.shooter.getTargetFieldAngleRadStatic());
-        //        dashboardTelemetry.addData("Sensor1",
-        // robot.intake.sensorIntake.getDistance(DistanceUnit.CM));
-        //        dashboardTelemetry.addData("Sensor2",
-        // robot.intake.sensorMid.getDistance(DistanceUnit.CM));
-        //        dashboardTelemetry.addData("Sensor3",
-        // robot.intake.sensorOuttake.getDistance(DistanceUnit.CM));
         dashboardTelemetry.addData("State", state);
-        //        dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
         dashboardTelemetry.addData("Distance (in)", robot.shooter.distance);
         dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
-        //        dashboardTelemetry.addData("Track State", robot.shooter.trackState);
-        //        dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
-        //        dashboardTelemetry.addData("Turret Error",
-        // Math.toDegrees(robot.shooter.turretErrorRad));
         dashboardTelemetry.addData("Target RPM", Shooter.targetVelocity);
         dashboardTelemetry.addData("Velocity OK", robot.shooter.velocityReached());
         dashboardTelemetry.addData("Aimed", robot.shooter.isAimed());
         dashboardTelemetry.addData("X", Robot.follower.getPose().getX());
         dashboardTelemetry.addData("Y", Robot.follower.getPose().getY());
         dashboardTelemetry.addData("Heading", Robot.follower.getPose().getHeading());
-        //        dashboardTelemetry.addData("Angle pose", Robot.follower.getPose().getHeading());
-        //        dashboardTelemetry.addData("0. POSE", Robot.follower.getPose());
 
         dashboardTelemetry.addData("Total Balls Scored Captured", logger.getTotalBallsScored());
         dashboardTelemetry.update();

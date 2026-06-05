@@ -51,7 +51,6 @@ public class AutoBlueCloseMain extends OpMode {
         Robot.follower.setMaxPower(0.9);
 
         robot.shooter.init();
-        robot.shooter.lock();
     }
 
     @Override

@@ -6,7 +6,7 @@
     "link": "https://github.com/Mallen220/TurtleTracer"
   },
   "startPoint": {
-    "x": 54,
+    "x": 52,
     "y": 9,
     "heading": "linear",
     "startDeg": 90,
@@ -36,7 +36,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwu9gz4-9dzmlr",
@@ -54,7 +56,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwua8ut-29o4zy",
@@ -77,7 +81,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwub02n-ild4of",
@@ -95,7 +101,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwubsnn-55v95w",
@@ -118,7 +126,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwugk6p-59tb2y",
@@ -136,7 +146,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwuksph-b7zdn7",
@@ -158,7 +170,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwuljsw-761js1",
@@ -175,7 +189,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwun1tm-hhc85b",
@@ -197,7 +213,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     },
     {
       "id": "mpwun6jp-2w7fbe",
@@ -214,7 +232,9 @@
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
-      "waitAfterName": ""
+      "waitAfterName": "",
+      "eventMarkers": [],
+      "hidden": false
     }
   ],
   "sequence": [

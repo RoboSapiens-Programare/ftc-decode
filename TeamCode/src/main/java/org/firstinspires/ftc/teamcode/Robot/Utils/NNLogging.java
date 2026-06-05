@@ -58,11 +58,11 @@ public class NNLogging {
     }
 
     /**
-     * Captures the physical parameters of the robot at the exact moment of launch.
-     * Call this when your outtake mechanism physically launches the balls.
+     * Captures the physical parameters of the robot at the exact moment of launch. Call this when
+     * your outtake mechanism physically launches the balls.
      */
-    public void takeSnapshot(double robotX, double robotY, double heading,
-                             double velX, double velY, double omega) {
+    public void takeSnapshot(
+            double robotX, double robotY, double heading, double velX, double velY, double omega) {
         if (!isReady) return;
 
         pendingSnapshot.x = robotX;
@@ -76,8 +76,8 @@ public class NNLogging {
     }
 
     /**
-     * Permanently writes the cached snapshot to disk along with the human-observed score.
-     * Call this when you press the D-pad to input the results.
+     * Permanently writes the cached snapshot to disk along with the human-observed score. Call this
+     * when you press the D-pad to input the results.
      */
     public void commitSnapshot(int ballsScored) {
         if (!isReady || writer == null || !pendingSnapshot.isValid) return;
@@ -96,10 +96,16 @@ public class NNLogging {
         totalBallsShotCounter += ballsScored;
 
         try {
-            String line = String.format("%.3f,%.4f,%.3f,%.3f,%.3f,%.2f,%d\n",
-                    targetDist, angleError,
-                    pendingSnapshot.velX, pendingSnapshot.velY, pendingSnapshot.omega,
-                    pendingSnapshot.voltage, ballsScored);
+            String line =
+                    String.format(
+                            "%.3f,%.4f,%.3f,%.3f,%.3f,%.2f,%d\n",
+                            targetDist,
+                            angleError,
+                            pendingSnapshot.velX,
+                            pendingSnapshot.velY,
+                            pendingSnapshot.omega,
+                            pendingSnapshot.voltage,
+                            ballsScored);
             writer.write(line);
             writer.flush();
 

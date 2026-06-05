@@ -23,9 +23,15 @@ public class Constants {
                     .forwardZeroPowerAcceleration(-43.5)
                     .lateralZeroPowerAcceleration(-65.3)
                     .headingPIDFCoefficients(new PIDFCoefficients(1.6, 0.04, 0.07, 0.02))
-                    .translationalPIDFCoefficients(new PIDFCoefficients(0.18, 0.0002, 0.004, 0.006))
+                    .translationalPIDFCoefficients(new PIDFCoefficients(0.16, 0.0002, 0.01, 0.0031))
+                    .secondaryTranslationalPIDFCoefficients(
+                            new PIDFCoefficients(0.6, 0, 0.05, 0.04))
                     .drivePIDFCoefficients(
-                            new FilteredPIDFCoefficients(0.009, 0.0004, 0.000007, 0.6, 0.02));
+                            new FilteredPIDFCoefficients(0.006, 0.0008, 0.0002, 0.6, 0.05))
+                    .secondaryDrivePIDFCoefficients(
+                            new FilteredPIDFCoefficients(0.02, 0.005, 0.009, 0.1, 0.04))
+                    .useSecondaryTranslationalPIDF(true)
+                    .useSecondaryDrivePIDF(true);
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {

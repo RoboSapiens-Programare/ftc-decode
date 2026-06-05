@@ -22,10 +22,10 @@ public class uV {
     public static double scoreAngle = Math.toRadians(-30);
     public static double passThroughPointRadius = 5;
 
-
     public static double INTAKE_TIMEOUT_MS = 1000;
     public static double AUTOPARK_TIMEOUT_MS = 28_000;
-    public static double STABILIZATION_TIMEOUT_MS = 400;
+    public static double STABILIZATION_TIMEOUT_MS = 800;
+    public static double GATE_PICKUP_WAIT = 350;
     public static double MINIMUM_SHOOT_TIMEOUT_MS = 2_000;
 
     public static boolean NN_LOGGING_ENABLE = false;

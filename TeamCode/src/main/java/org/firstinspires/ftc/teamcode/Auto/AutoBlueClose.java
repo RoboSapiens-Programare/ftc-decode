@@ -48,7 +48,7 @@ public class AutoBlueClose extends OpMode {
     private final ElapsedTime intakeTimeout = new ElapsedTime();
 
     private int gateCycleCounter = 0;
-    private final static int MAX_GATE_CYCLES = 3;
+    private static final int MAX_GATE_CYCLES = 3;
 
     private final ElapsedTime emergencyTimer = new ElapsedTime();
     private boolean timeRanOut = false;
@@ -57,22 +57,22 @@ public class AutoBlueClose extends OpMode {
     private final ElapsedTime minimumShootTimer = new ElapsedTime();
 
     private final Pose[] LEAVE_POINTS = {
-            // inside close shoot zone
-            new Pose(40.000, 130.000, Math.toRadians(180)),
-            new Pose(59.000, 105.000, Math.toRadians(180)),
-            new Pose(60.000, 130.000, Math.toRadians(180)),
+        // inside close shoot zone
+        new Pose(40.000, 130.000, Math.toRadians(180)),
+        new Pose(59.000, 105.000, Math.toRadians(180)),
+        new Pose(60.000, 130.000, Math.toRadians(180)),
 
-            // mid field
-            new Pose(20.000, 95.000, Math.toRadians(180)),
-            new Pose(20.000, 70.000, Math.toRadians(180)),
-            new Pose(35.000, 75.000, Math.toRadians(180)),
+        // mid field
+        new Pose(20.000, 95.000, Math.toRadians(180)),
+        new Pose(20.000, 70.000, Math.toRadians(180)),
+        new Pose(35.000, 75.000, Math.toRadians(180)),
 
-            // far field
-            new Pose(48.000, 72.000, Math.toRadians(180)),
-            new Pose(25.000, 45.000, Math.toRadians(180)),
-            new Pose(53.000, 35.000, Math.toRadians(180)),
-            new Pose(35.000, 15.000, Math.toRadians(180)),
-            new Pose(52.000, 22.000, Math.toRadians(180)),
+        // far field
+        new Pose(48.000, 72.000, Math.toRadians(180)),
+        new Pose(25.000, 45.000, Math.toRadians(180)),
+        new Pose(53.000, 35.000, Math.toRadians(180)),
+        new Pose(35.000, 15.000, Math.toRadians(180)),
+        new Pose(52.000, 22.000, Math.toRadians(180)),
     };
 
     @Override
@@ -103,8 +103,7 @@ public class AutoBlueClose extends OpMode {
 
         robot.update();
 
-        if (!timeRanOut)
-            pathState = autonomousPathUpdate(); // Update autonomous state machine
+        if (!timeRanOut) pathState = autonomousPathUpdate(); // Update autonomous state machine
 
         autoPark();
         // Log values to Panels and Driver Station
@@ -115,6 +114,7 @@ public class AutoBlueClose extends OpMode {
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
     }
+
     /* ============================================================= *
      *                 Turtle Tracer — Auto-Generated                *
      *                                                               *
@@ -136,81 +136,91 @@ public class AutoBlueClose extends OpMode {
         public PathChain shootGate;
 
         public Paths(Follower follower) {
-            shootPreload = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(24.000, 124.000), new Pose(54.850, 84.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(143), Math.toRadians(180))
-                    .build();
+            shootPreload =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(24.000, 124.000), new Pose(54.850, 84.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(143), Math.toRadians(180))
+                            .build();
 
-            grabGPP = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(54.850, 84.000), new Pose(20.000, 83.000))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            grabGPP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(54.850, 84.000), new Pose(22.000, 83.000)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .build();
 
-            shootGPP = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(20.000, 83.000), new Pose(54.850, 84.000))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            shootGPP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(22.000, 83.000), new Pose(54.850, 84.000)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .build();
 
-            grabPGP = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(54.850, 84.000),
-                                    new Pose(54.850, 57.519),
-                                    new Pose(20.000, 58.160)
-                            )
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .addPath(
-                            new BezierLine(new Pose(20.000, 58.160), new Pose(17.000, 66.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
-                    .build();
+            grabPGP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(54.850, 84.000),
+                                            new Pose(54.850, 57.519),
+                                            new Pose(25.000, 58.160)))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(25.000, 58.160), new Pose(19.200, 66.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
+                            .build();
 
-            shootPGP = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(17.000, 66.000), new Pose(54.850, 84.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
-                    .build();
+            shootPGP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(19.200, 66.000), new Pose(55.850, 84.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
+                            .build();
 
-            openGate = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(54.850, 84.000),
-                                    new Pose(40.296, 77.475),
-                                    new Pose(21.444, 69.500)
-                            )
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(21.444, 69.500),
-                                    new Pose(23.500, 64.395),
-                                    new Pose(14.235, 58.160)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
-                    .build();
+            openGate =
+                    follower
+                            //                    .pathBuilder()
+                            //                    .addPath(
+                            //                            new BezierCurve(
+                            //                                    new Pose(55.850, 84.000),
+                            //                                    new Pose(40.296, 77.475),
+                            //                                    new Pose(24.444, 68.500)
+                            //                            )
+                            //                    )
+                            //
+                            // .setConstantHeadingInterpolation(Math.toRadians(180))
+                            //                    .addPath(
+                            //                            new BezierCurve(
+                            //                                    new Pose(24.444, 68.500),
+                            //                                    new Pose(33.500, 54.395),
+                            //                                    new Pose(15.235, 60.160)
+                            //                            )
+                            //                    )
+                            //
+                            // .setLinearHeadingInterpolation(Math.toRadians(180),
+                            // Math.toRadians(155))
+                            //                    .build();
+                            .pathBuilder()
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(55.850, 84.000),
+                                            new Pose(23.500, 50.395),
+                                            new Pose(15.235, 60.160)))
+                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(155))
+                            .build();
 
-            shootGate = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(14.235, 58.160), new Pose(54.850, 84.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
-                    .build();
+            shootGate =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(15.235, 60.160), new Pose(54.850, 84.000)))
+                            .setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(180))
+                            .build();
         }
     }
 
@@ -242,7 +252,8 @@ public class AutoBlueClose extends OpMode {
 
                 robot.intake.shoot();
 
-                if (robot.intake.isEmpty() && minimumShootTimer.milliseconds() > uV.MINIMUM_SHOOT_TIMEOUT_MS) {
+                if (robot.intake.isEmpty()
+                        && minimumShootTimer.milliseconds() > uV.MINIMUM_SHOOT_TIMEOUT_MS) {
                     shootState = ShootStates.COMPLETED;
 
                     robot.shooter.closeGate();
@@ -274,7 +285,6 @@ public class AutoBlueClose extends OpMode {
         }
     }
 
-
     private PathChain generateEmergencyLeavePath() {
         // Grab the absolute latest position tracking from Pedro Pathing
         Pose currentPose = Robot.follower.getPose();
@@ -284,8 +294,12 @@ public class AutoBlueClose extends OpMode {
 
         // Loop through all points to find the closest one geometrically
         for (Pose target : LEAVE_POINTS) {
-            // Calculate stand                                                                                                                                          ard Euclidean distance: sqrt((x2-x1)^2 + (y2-y1)^2)
-            double distance = Math.hypot(target.getX() - currentPose.getX(), target.getY() - currentPose.getY());
+            // Calculate stand
+            //                                                                    ard Euclidean
+            // distance: sqrt((x2-x1)^2 + (y2-y1)^2)
+            double distance =
+                    Math.hypot(
+                            target.getX() - currentPose.getX(), target.getY() - currentPose.getY());
 
             if (distance < shortestDistance) {
                 shortestDistance = distance;
@@ -295,17 +309,20 @@ public class AutoBlueClose extends OpMode {
 
         // Smoothly interpolate from wherever the robot physically is right now
         // to the closest safe zone heading
-        return Robot.follower.pathBuilder()
+        return Robot.follower
+                .pathBuilder()
                 .addPath(new BezierLine(currentPose, closestTarget))
                 .setLinearHeadingInterpolation(currentPose.getHeading(), closestTarget.getHeading())
                 .build();
     }
+
     private void autoPark() {
         if (emergencyTimer.seconds() >= uV.AUTOPARK_TIMEOUT_MS && !timeRanOut) {
             // DO NOT autopark if going for score (would win 9 points instead of 6)
             timeRanOut = true;
 
-            if (!Robot.follower.isBusy() && (shootState == ShootStates.SPOOL_UP || shootState == ShootStates.SHOOTING)) {
+            if (!Robot.follower.isBusy()
+                    && (shootState == ShootStates.SPOOL_UP || shootState == ShootStates.SHOOTING)) {
                 return;
             }
 
@@ -372,16 +389,18 @@ public class AutoBlueClose extends OpMode {
                 }
                 break;
             case 10:
-                ++gateCycleCounter;
-
-                Robot.follower.followPath(paths.openGate, true);
-                setPathState(11);
+                if (pathTimer.milliseconds() > uV.GATE_PICKUP_WAIT) {
+                    ++gateCycleCounter;
+                    Robot.follower.followPath(paths.openGate, true);
+                    setPathState(11);
+                }
                 break;
             case 11:
                 autoIntake();
-
-                if (intakeState == IntakeStates.COMPLETED) {
-                    setPathState(12);
+                if (pathTimer.seconds() > 2) {
+                    if (intakeState == IntakeStates.COMPLETED) {
+                        setPathState(12);
+                    }
                 }
                 break;
             case 12:
@@ -395,10 +414,8 @@ public class AutoBlueClose extends OpMode {
             case 14:
                 autoShoot();
                 if (shootState == ShootStates.COMPLETED) {
-                    if (gateCycleCounter >= MAX_GATE_CYCLES)
-                        setPathState(15);
-                    else
-                        setPathState(10);
+                    if (gateCycleCounter >= MAX_GATE_CYCLES) setPathState(15);
+                    else setPathState(10);
                 }
                 break;
             case 15:

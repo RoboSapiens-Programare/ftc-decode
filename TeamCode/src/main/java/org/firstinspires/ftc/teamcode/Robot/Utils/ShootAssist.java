@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.Robot.Utils;
 
-import org.tensorflow.lite.Interpreter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import org.tensorflow.lite.Interpreter;
 
 public class ShootAssist {
 
@@ -15,27 +15,31 @@ public class ShootAssist {
     // Pre-allocated memory containers to eliminate garbage collection overhead in iterative loops
     private final float[][] inputArray = new float[1][6];
 
-    // CRITICAL UPDATE: Changed array dimensions to match your new 4-class Softmax layer [0, 1, 2, 3 balls]
+    // CRITICAL UPDATE: Changed array dimensions to match your new 4-class Softmax layer [0, 1, 2, 3
+    // balls]
     private final float[][] outputArray = new float[1][4];
 
-    // HARDCODED SCALING CONSTANTS (Ensure these match your newly generated balanced-dataset printouts!)
-    private final double[] MEANS = new double[]{
-            2.503,  // target_dist mean
-            0.001,  // angle_error mean
-            3.512,  // vel_x mean
-            -0.004, // vel_y mean
-            0.015,  // omega mean
-            12.485  // voltage mean
-    };
+    // HARDCODED SCALING CONSTANTS (Ensure these match your newly generated balanced-dataset
+    // printouts!)
+    private final double[] MEANS =
+            new double[] {
+                2.503, // target_dist mean
+                0.001, // angle_error mean
+                3.512, // vel_x mean
+                -0.004, // vel_y mean
+                0.015, // omega mean
+                12.485 // voltage mean
+            };
 
-    private final double[] STDS = new double[]{
-            0.871,  // target_dist std dev
-            0.235,  // angle_error std dev
-            0.865,  // vel_x std dev
-            0.582,  // vel_y std dev
-            1.164,  // omega std dev
-            0.579   // voltage std dev
-    };
+    private final double[] STDS =
+            new double[] {
+                0.871, // target_dist std dev
+                0.235, // angle_error std dev
+                0.865, // vel_x std dev
+                0.582, // vel_y std dev
+                1.164, // omega std dev
+                0.579 // voltage std dev
+            };
 
     public void init(String modelName) {
         try {
@@ -49,17 +53,26 @@ public class ShootAssist {
             isModelLoaded = true;
         } catch (Exception e) {
             isModelLoaded = false;
-            System.err.println("ShootAssist Error: Could not load TFLite model -> " + e.getMessage());
+            System.err.println(
+                    "ShootAssist Error: Could not load TFLite model -> " + e.getMessage());
         }
     }
 
     /**
      * Runs inference and returns the full confidence array from the model.
-     * @return A float array containing confidence values for index [0]=0 balls, [1]=1 ball, [2]=2 balls, [3]=3 balls.
+     *
+     * @return A float array containing confidence values for index [0]=0 balls, [1]=1 ball, [2]=2
+     *     balls, [3]=3 balls.
      */
-    public float[] predictProbabilities(double targetDist, double angleError, double velX, double velY, double omega, double voltage) {
+    public float[] predictProbabilities(
+            double targetDist,
+            double angleError,
+            double velX,
+            double velY,
+            double omega,
+            double voltage) {
         if (!isModelLoaded || tflite == null) {
-            return new float[]{0.0f, 0.0f, 0.0f, 0.0f};
+            return new float[] {0.0f, 0.0f, 0.0f, 0.0f};
         }
 
         // Apply standard scaler transformation
@@ -73,16 +86,26 @@ public class ShootAssist {
         // Run inference
         tflite.run(inputArray, outputArray);
 
-        // Return the copy of internal pre-allocated array to keep the original safe from external mutations
+        // Return the copy of internal pre-allocated array to keep the original safe from external
+        // mutations
         return outputArray[0].clone();
     }
 
     /**
      * Resolves the highest probability index, exactly mirroring Python's np.argmax().
-     * @return An integer representing the most likely outcome category (0, 1, 2, or 3 scored balls).
+     *
+     * @return An integer representing the most likely outcome category (0, 1, 2, or 3 scored
+     *     balls).
      */
-    public int predictBallCount(double targetDist, double angleError, double velX, double velY, double omega, double voltage) {
-        float[] probabilities = predictProbabilities(targetDist, angleError, velX, velY, omega, voltage);
+    public int predictBallCount(
+            double targetDist,
+            double angleError,
+            double velX,
+            double velY,
+            double omega,
+            double voltage) {
+        float[] probabilities =
+                predictProbabilities(targetDist, angleError, velX, velY, omega, voltage);
 
         int bestClass = 0;
         float maxProb = probabilities[0];
@@ -97,15 +120,27 @@ public class ShootAssist {
     }
 
     /**
-     * Calculates the statistical "expected value" of the shot.
-     * Useful for automated cross-field alignment optimization!
-     * @return A smooth calculated float from 0.0 to 3.0 representing the weighted average of expected balls.
+     * Calculates the statistical "expected value" of the shot. Useful for automated cross-field
+     * alignment optimization!
+     *
+     * @return A smooth calculated float from 0.0 to 3.0 representing the weighted average of
+     *     expected balls.
      */
-    public float predictExpectedBalls(double targetDist, double angleError, double velX, double velY, double omega, double voltage) {
-        float[] probabilities = predictProbabilities(targetDist, angleError, velX, velY, omega, voltage);
+    public float predictExpectedBalls(
+            double targetDist,
+            double angleError,
+            double velX,
+            double velY,
+            double omega,
+            double voltage) {
+        float[] probabilities =
+                predictProbabilities(targetDist, angleError, velX, velY, omega, voltage);
 
         // Expected value formula: E[X] = x_0*P(x_0) + x_1*P(x_1) + ...
-        return (0f * probabilities[0]) + (1f * probabilities[1]) + (2f * probabilities[2]) + (3f * probabilities[3]);
+        return (0f * probabilities[0])
+                + (1f * probabilities[1])
+                + (2f * probabilities[2])
+                + (3f * probabilities[3]);
     }
 
     public void close() {
@@ -123,12 +158,14 @@ public class ShootAssist {
         File modelFile = new File("/sdcard/FIRST/" + modelName);
 
         if (!modelFile.exists()) {
-            throw new IOException("Could not find TFLite model at: " + modelFile.getAbsolutePath() +
-                    ". Did you forget to run 'adb push'?");
+            throw new IOException(
+                    "Could not find TFLite model at: "
+                            + modelFile.getAbsolutePath()
+                            + ". Did you forget to run 'adb push'?");
         }
 
         try (FileInputStream inputStream = new FileInputStream(modelFile);
-             FileChannel fileChannel = inputStream.getChannel()) {
+                FileChannel fileChannel = inputStream.getChannel()) {
             return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, modelFile.length());
         }
     }
@@ -152,13 +189,14 @@ public class ShootAssist {
 
         try {
             // Clear previous outputs
-            for(int i=0; i<4; i++) outputArray[0][i] = -1.0f;
+            for (int i = 0; i < 4; i++) outputArray[0][i] = -1.0f;
 
             // Force native execution
             tflite.run(inputArray, outputArray);
 
             System.out.println("✅ Native execution successful!");
-            System.out.printf("Raw Softmax Probabilities: [0b: %.4f, 1b: %.4f, 2b: %.4f, 3b: %.4f]\n",
+            System.out.printf(
+                    "Raw Softmax Probabilities: [0b: %.4f, 1b: %.4f, 2b: %.4f, 3b: %.4f]\n",
                     outputArray[0][0], outputArray[0][1], outputArray[0][2], outputArray[0][3]);
 
         } catch (Exception e) {

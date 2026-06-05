@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Robot.Subsystems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.math.MathFunctions;
 import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -62,7 +61,6 @@ public class Shooter extends Subsystem {
     private double overrideAngleRad = 0.0;
     private double commandedServoPos = TURRET_SERVO_MIDPOINT;
     private boolean override = false;
-    private double overrideAngle = 0;
     public double desiredAngleRad = 0;
 
     private final ElapsedTime trackingTimer = new ElapsedTime();
@@ -109,11 +107,12 @@ public class Shooter extends Subsystem {
     }
 
     public boolean isAimed() {
-//        if (distance < 60) {
-//            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
-//        } else {
-//            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG + 2;
-//        }
+        //        if (distance < 60) {
+        //            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG;
+        //        } else {
+        //            return Math.abs(Math.toDegrees(turretErrorRad)) < TURRET_AIM_THRESHOLD_DEG +
+        // 2;
+        //        }
         return true;
     }
 
@@ -144,7 +143,11 @@ public class Shooter extends Subsystem {
             return 500.0; // Or whatever your target holding/stop velocity is
         }
 
-        double velocity = -0.0006780758 * Math.pow(distance, 3) + 0.1700239691 * Math.pow(distance, 2) + -5.9676194360 * distance + 1305.8793678170;
+        double velocity =
+                -0.0006780758 * Math.pow(distance, 3)
+                        + 0.1700239691 * Math.pow(distance, 2)
+                        + -5.9676194360 * distance
+                        + 1305.8793678170;
         return Math.max(Math.min(velocity, 2300.0), 500.0);
 
         // 2. Guard clause for long-range max velocity
@@ -220,81 +223,6 @@ public class Shooter extends Subsystem {
         return Math.atan2(virtualY - ry, virtualX - rx);
     }
 
-    private void mySOTM() {
-        Pose robotPose = Robot.follower.getPose();
-        Pose target = (Robot.alliance == Robot.Alliance.RED) ? redObeliskPose : blueObeliskPose;
-
-        // 2. Calculate the delta components
-        double deltaX = target.getX() - robotPose.getX();
-        double deltaY = target.getY() - robotPose.getY();
-
-        // 3. Instantiate the vector
-        // Option A: If your Vector class takes (X, Y) components
-        Vector robotToGoalVector = new Vector(deltaX, deltaY);
-
-        // constants
-        double g = 32.174 * 12;
-        double x = robotToGoalVector.getMagnitude() - uV.passThroughPointRadius;
-        double y = uV.scoreHeight;
-        double a = uV.scoreAngle;
-
-        // calculate initial launch components
-        double hoodAngle = MathFunctions.clamp(Math.atan(2 * y / x - Math.tan(a)), 0.2, 0.7);
-
-        double flywheelSpeed =
-                Math.sqrt(
-                        g
-                                * x
-                                * x
-                                / (2
-                                        * Math.pow(Math.cos(hoodAngle), 2)
-                                        * (x * Math.tan(hoodAngle) - y)));
-
-        // get robot velocity and convert it into parallel and perpendicular components
-        Vector robotVelocity = Robot.follower.getVelocity();
-
-        double coordinateTheta = robotVelocity.getTheta() - robotToGoalVector.getTheta();
-
-        double parallelComponent = -Math.cos(coordinateTheta) * robotVelocity.getMagnitude();
-        double perpendicularComponent = Math.sin(coordinateTheta) * robotVelocity.getMagnitude();
-
-        // velocity compensation variables
-        double vz = flywheelSpeed * Math.sin(hoodAngle);
-        double time = x / (flywheelSpeed * Math.cos(hoodAngle));
-        double ivr = x / time + parallelComponent;
-        double nvr = Math.sqrt(ivr * ivr + perpendicularComponent * perpendicularComponent);
-        double ndr = nvr * time;
-
-        // recalculate launch components
-        hoodAngle = MathFunctions.clamp(Math.atan(vz / nvr), uV.lobMin, uV.lobMax);
-
-        flywheelSpeed =
-                Math.sqrt(
-                        g
-                                * ndr
-                                * ndr
-                                / (2
-                                        * Math.pow(Math.cos(hoodAngle), 2)
-                                        * (ndr * Math.tan(hoodAngle) - y)));
-
-        // update turret
-        double turretVelCompOffset = Math.atan(perpendicularComponent / ivr);
-        double turretAngle =
-                Robot.follower.getHeading() - robotToGoalVector.getTheta() + turretVelCompOffset;
-
-        if (turretAngle > 180) {
-            turretAngle -= 360;
-        }
-
-        trackState = "ODOMETRY";
-        turretPivot.setPosition(servoPositionFromTurretAngle(turretAngle));
-
-        lobServo.setPosition(hoodAngle);
-
-        // Return the final vector calculations back to the robot controller loop
-
-    }
-
     // Turret Conversion
     public double getTargetFieldAngleRadStatic() {
         Pose pose = Robot.follower.getPose();
@@ -339,7 +267,12 @@ public class Shooter extends Subsystem {
             targetVelocity = computeVelocity(distance);
         }
 
-        desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
+        if (override) {
+            desiredAngleRad = overrideAngleRad;
+        } else {
+            desiredAngleRad = AngleUnit.normalizeRadians(targetAngleRad - heading);
+        }
+
         desiredAngleRad = Math.max(-Math.PI * 2 / 5, Math.min(desiredAngleRad, Math.PI * 2 / 5));
         double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
 
@@ -347,10 +280,8 @@ public class Shooter extends Subsystem {
 
         turretErrorRad = desiredAngleRad - turretAngleFromServoPosition(commandedServoPos);
 
-        if (!override) {
-            turretPivot.setPosition(servoPos);
-            commandedServoPos = servoPos;
-        }
+        turretPivot.setPosition(servoPos);
+        commandedServoPos = servoPos;
 
         turretServoPos = servoPos;
     }
@@ -372,42 +303,19 @@ public class Shooter extends Subsystem {
     public void goToAngle(double rad) {
         override = true;
 
-        double limitRad = Math.toRadians(1000.0);
-        if (rad > limitRad) {
-            rad = limitRad;
-        } else if (rad < -limitRad) {
-            rad = -limitRad;
-        }
-
-        overrideAngle = rad;
+        overrideAngleRad = AngleUnit.normalizeRadians(rad);
     }
 
     public void stopOverride() {
         override = false;
     }
 
-    public void lock() {
-        goToAngle(overrideAngle);
-    }
-
     // Update Loop
     @Override
     public void update() {
-        //        pidfController.kP = shootKp;
-        //        pidfController.kI = shootKi;
-        //        pidfController.kD = shootKd;
-        //        pidfController.kF = shootKf;
-
         if (!targetSelected) {
             targetGoal = Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
             targetSelected = true;
-        }
-
-        if (override) {
-            double pos = servoPositionFromTurretAngle(overrideAngleRad);
-            pos = Math.max(0.0, Math.min(1.0, pos));
-            turretPivot.setPosition(pos);
-            commandedServoPos = pos;
         }
 
         if (!shooting && trackingTimer.milliseconds() > 300) {
