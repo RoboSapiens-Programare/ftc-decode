@@ -10,14 +10,15 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto Blue Far - LFT", group = "Autonomous")
+@Autonomous(name = "Auto Red Far - LFT", group = "Autonomous")
 @Config
-public class AutoBlueFar extends OpMode {
+public class AutoRedFar extends OpMode {
     private int loopCount = 0;
     private boolean sniggerton = true;
     private int pathState; // Current autonomous path state (state machine)
@@ -59,21 +60,21 @@ public class AutoBlueFar extends OpMode {
 
     private final Pose[] LEAVE_POINTS = {
         // inside close shoot zone
-        new Pose(40.000, 130.000, Math.toRadians(180)),
-        new Pose(59.000, 105.000, Math.toRadians(180)),
-        new Pose(60.000, 130.000, Math.toRadians(180)),
+        new Pose(40.000, 130.000, Math.toRadians(180)).mirror(),
+        new Pose(59.000, 105.000, Math.toRadians(180)).mirror(),
+        new Pose(60.000, 130.000, Math.toRadians(180)).mirror(),
 
         // mid field
-        new Pose(20.000, 95.000, Math.toRadians(180)),
-        new Pose(20.000, 70.000, Math.toRadians(180)),
-        new Pose(35.000, 75.000, Math.toRadians(180)),
+        new Pose(20.000, 95.000, Math.toRadians(180)).mirror(),
+        new Pose(20.000, 70.000, Math.toRadians(180)).mirror(),
+        new Pose(35.000, 75.000, Math.toRadians(180)).mirror(),
 
         // far field
-        new Pose(48.000, 72.000, Math.toRadians(180)),
-        new Pose(25.000, 45.000, Math.toRadians(180)),
-        new Pose(53.000, 35.000, Math.toRadians(180)),
-        new Pose(35.000, 15.000, Math.toRadians(180)),
-        new Pose(52.000, 22.000, Math.toRadians(180)),
+        new Pose(48.000, 72.000, Math.toRadians(180)).mirror(),
+        new Pose(25.000, 45.000, Math.toRadians(180)).mirror(),
+        new Pose(53.000, 35.000, Math.toRadians(180)).mirror(),
+        new Pose(35.000, 15.000, Math.toRadians(180)).mirror(),
+        new Pose(52.000, 22.000, Math.toRadians(180)).mirror(),
     };
 
     public PathChain[][] gateChains = new PathChain[3][2];
@@ -83,13 +84,12 @@ public class AutoBlueFar extends OpMode {
         robot = new Robot(hardwareMap);
 
         robot.shooter.init();
-        robot.shooter.goToAngle(Math.toRadians(20));
-
-        Robot.alliance = Robot.Alliance.BLUE;
+        robot.shooter.goToAngle(Math.toRadians(-20));
+        Robot.alliance = Robot.Alliance.RED;
 
         // Determine starting heading: prefer geometric heading when a path exists, otherwise fall
         // back to explicit startPoint values
-        Robot.follower.setStartingPose(new Pose(53.000, 9.000, Math.toRadians(90.000)));
+        Robot.follower.setStartingPose(new Pose(53.000, 9.000, Math.toRadians(90.000)).mirror());
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -152,90 +152,90 @@ public class AutoBlueFar extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(53.000, 9.000),
-                                            new Pose(62.024, 18.636),
-                                            new Pose(12.000, 11.247)))
-                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+                                            new Pose(53.000, 9.000).mirror(),
+                                            new Pose(62.024, 18.636).mirror(),
+                                            new Pose(12.000, 11.247).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
                             .build();
 
             shootHuman =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(12.000, 11.247), new Pose(54.000, 17.999)))
-                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                                            new Pose(12.000, 11.247).mirror(), new Pose(54.000, 17.999).mirror()))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
                             .build();
 
             grabPPG =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(54.000, 17.999),
-                                            new Pose(47.561, 38.058),
-                                            new Pose(18.673, 36.325)))
-                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                                            new Pose(54.000, 17.999).mirror(),
+                                            new Pose(47.561, 38.058).mirror(),
+                                            new Pose(18.673, 36.325).mirror()))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
                             .build();
 
             shootPPG =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(18.673, 36.325), new Pose(54.000, 17.999)))
-                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                                            new Pose(18.673, 36.325).mirror(), new Pose(54.000, 17.999).mirror()))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
                             .build();
 
             grabGate =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(54.000, 17.999),
-                                            new Pose(9.000, 5.044),
-                                            new Pose(9.123, 29.115)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
+                                            new Pose(54.000, 17.999).mirror(),
+                                            new Pose(9.000, 5.044).mirror(),
+                                            new Pose(9.123, 29.115).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
                             .build();
 
             shootGate =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(9.123, 29.115), new Pose(54.000, 17.999)))
-                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+                                            new Pose(9.123, 29.115).mirror(), new Pose(54.000, 17.999).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
                             .build();
 
             grabGate2 =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(54.000, 17.999),
-                                            new Pose(62.701, 8.000),
-                                            new Pose(12.000, 11.247)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                                            new Pose(54.000, 17.999).mirror(),
+                                            new Pose(62.701, 8.000).mirror(),
+                                            new Pose(12.000, 11.247).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                             .build();
 
             shootGate2 =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(12.000, 11.247), new Pose(54.000, 17.999)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                                            new Pose(12.000, 11.247).mirror(), new Pose(54.000, 17.999).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                             .build();
 
             grabGate3 =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(54.000, 17.999),
-                                            new Pose(58.898, 30.440),
-                                            new Pose(9.000, 34.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                                            new Pose(54.000, 17.999).mirror(),
+                                            new Pose(58.898, 30.440).mirror(),
+                                            new Pose(9.000, 34.000).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                             .build();
 
             shootGate3 =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(9.000, 34.000), new Pose(54.000, 17.999)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                                            new Pose(9.000, 34.000).mirror(), new Pose(54.000, 17.999).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                             .build();
         }
     }
@@ -362,7 +362,7 @@ public class AutoBlueFar extends OpMode {
                 autoShoot();
                 if (shootState == ShootStates.COMPLETED) {
                     Robot.follower.followPath(paths.grabHuman, true);
-                    robot.shooter.goToAngle(Math.toRadians(-72));
+                    robot.shooter.goToAngle(Math.toRadians(172));
                     setPathState(1);
                 }
 

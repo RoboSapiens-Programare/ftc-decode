@@ -63,6 +63,9 @@ public class Shooter extends Subsystem {
     private boolean override = false;
     public double desiredAngleRad = 0;
 
+    public double trackOffset = 0;
+    public double velocityOffset = 0;
+
     private final ElapsedTime trackingTimer = new ElapsedTime();
 
     // PID Controllers
@@ -89,15 +92,18 @@ public class Shooter extends Subsystem {
     }
 
     public void openGate() {
+
         gate.setPosition(uV.gateOpen);
     }
 
     public void closeGate() {
+
         gate.setPosition(uV.gateClosed);
     }
 
     // Aiming
     public boolean velocityReached() {
+        //        return true;
         double actual = -turretMotorLeft.getVelocity();
         if (distance < 80) {
             return Math.abs(actual - targetVelocity) < 160;
@@ -127,7 +133,7 @@ public class Shooter extends Subsystem {
                 -0.0000526853 * distance * distance * distance
                         + 0.0101482 * distance * distance
                         - 0.646392 * distance
-                        + 13.95284;
+                        + 13.75284;
         //        if (lob <= uV.lobMin) return uV.lobMin;
         //        return Math.min(lob, uV.lobMax);
         return Math.max(Math.min(lob, 1), 0.2);
@@ -147,7 +153,10 @@ public class Shooter extends Subsystem {
                 -0.0006780758 * Math.pow(distance, 3)
                         + 0.1700239691 * Math.pow(distance, 2)
                         + -5.9676194360 * distance
-                        + 1305.8793678170;
+                        + 1335.8793678170;
+
+        velocity += velocityOffset;
+
         return Math.max(Math.min(velocity, 2300.0), 500.0);
 
         // 2. Guard clause for long-range max velocity
@@ -179,7 +188,7 @@ public class Shooter extends Subsystem {
         double dy = goalY - ry;
         distance = Math.hypot(dx, dy);
 
-        targetVelocity = computeVelocity(distance);
+        if (uV.USE_VELOCITY_REGRESSION) targetVelocity = computeVelocity(distance);
 
         // Calculate actual projectile horizontal velocity component
         double vel =
@@ -264,7 +273,7 @@ public class Shooter extends Subsystem {
             targetAngleRad =
                     Math.atan2(targetGoal.getY() - pose.getY(), targetGoal.getX() - pose.getX());
             targetLob = computeLob(distance);
-            targetVelocity = computeVelocity(distance);
+            if (uV.USE_VELOCITY_REGRESSION) targetVelocity = computeVelocity(distance);
         }
 
         if (override) {
@@ -275,6 +284,8 @@ public class Shooter extends Subsystem {
 
         desiredAngleRad = Math.max(-Math.PI * 2 / 5, Math.min(desiredAngleRad, Math.PI * 2 / 5));
         double servoPos = servoPositionFromTurretAngle(desiredAngleRad);
+
+        servoPos += trackOffset;
 
         servoPos = Math.max(0, Math.min(1, servoPos));
 

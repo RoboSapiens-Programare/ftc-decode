@@ -6,7 +6,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 // import com.seattlesolvers.solverslib.photon.PhotonCore;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -26,6 +25,7 @@ public class TeleOpul extends OpMode {
     private static final long FOLLOWER_SETTLE_MS = 300;
     private static final double TRIGGER_THRESHOLD = 0.1;
     private static final double STICK_THRESHOLD = 0.1;
+    private boolean lastD1Trigger = false;
 
     private Robot robot;
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -107,6 +107,7 @@ public class TeleOpul extends OpMode {
         handlePoseReset();
         handleOverrideButtons();
         handleDrive();
+        handleVelocityChange();
 
         updateTelemetry();
 
@@ -129,6 +130,8 @@ public class TeleOpul extends OpMode {
         state = newState;
         stateTimer.reset();
         overrideCancelled = false;
+
+        robot.intake.rest();
 
         robot.shooter.shooting = newState == State.OUTTAKE;
         if (newState == State.OUTTAKE) {
@@ -157,22 +160,30 @@ public class TeleOpul extends OpMode {
             robot.intake.rest();
         }
 
-        if (gamepad1.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
-            //            isAimingChassis = true;
+        if (gamepad2.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+            lastD1Trigger = gamepad1.right_trigger > TRIGGER_THRESHOLD;
             changeState(State.OUTTAKE);
         }
     }
 
     private void handleOuttake() {
-        boolean fireMain =
-                gamepad1.right_trigger > TRIGGER_THRESHOLD
-                        && robot.shooter.velocityReached()
-                        && robot.shooter.isAimed();
-        boolean fireSecondary =
-                gamepad2.right_trigger > TRIGGER_THRESHOLD && robot.shooter.velocityReached();
+        if (gamepad2.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+            robot.intake.rest();
+            Robot.follower.breakFollowing();
+            Robot.follower.startTeleOpDrive(true);
+            changeState(State.INTAKE);
+        }
 
-        if (fireMain || fireSecondary) {
+        if (lastD1Trigger) {
+            lastD1Trigger = gamepad1.right_trigger > TRIGGER_THRESHOLD;
+            return;
+        }
+        boolean fireMain = gamepad1.right_trigger > TRIGGER_THRESHOLD && robot.shooter.velocityReached() && robot.shooter.isAimed();
+
+        if (fireMain) {
             robot.intake.shoot();
+        } else {
+            robot.intake.rest();
         }
 
         if (uV.NN_LOGGING_ENABLE) {
@@ -218,53 +229,26 @@ public class TeleOpul extends OpMode {
                     .addData("NN Target Prediction", predictedBalls);
 
             // --- ENHANCED HAPTIC RUMBLE PATTERNS ---
-            switch (predictedBalls) {
-                case 3:
-                    // 3 Balls (Perfect): Sharp, rapid triple-click burst (In-Sync, Crisp)
-                    gamepad1.runRumbleEffect(
-                            new Gamepad.RumbleEffect.Builder()
-                                    .addStep(1.0, 1.0, 70) // Click 1
-                                    .addStep(0.0, 0.0, 40) // Gap
-                                    .addStep(1.0, 1.0, 70) // Click 2
-                                    .addStep(0.0, 0.0, 40) // Gap
-                                    .addStep(1.0, 1.0, 90) // Click 3 (Slightly longer accent)
-                                    .build());
-                    break;
-
-                case 2:
-                    // 2 Balls (Good Likelihood): Clean, authoritative double-pulse
-                    gamepad1.runRumbleEffect(
-                            new Gamepad.RumbleEffect.Builder()
-                                    .addStep(0.9, 0.9, 80) // Click 1
-                                    .addStep(0.0, 0.0, 50) // Gap
-                                    .addStep(0.9, 0.9, 80) // Click 2
-                                    .build());
-                    break;
-
-                case 1:
-                    // 1 Ball (Sub-optimal/Risky): Rough, low-frequency warning buzz (Gritty feel)
-                    gamepad1.runRumbleEffect(
-                            new Gamepad.RumbleEffect.Builder()
-                                    .addStep(
-                                            0.6, 0.1,
-                                            180) // Heavy offset balance creates a "grating"
-                                    // sensation
-                                    .build());
-                    break;
-
-                case 0:
-                default:
-                    // 0 Balls (Deadzone): Completely clean cut-off. Immediate stop.
-                    gamepad1.stopRumble();
-                    break;
+            if (predictedBalls == 0) {
+                gamepad1.rumbleBlips(2);
+                gamepad2.rumbleBlips(2);
             }
         }
+    }
 
-        if (gamepad1.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
-            robot.intake.rest();
-            Robot.follower.breakFollowing();
-            Robot.follower.startTeleOpDrive(true);
-            changeState(State.INTAKE);
+    private void handleVelocityChange() {
+        if (uV.USE_VELOCITY_REGRESSION) {
+            return;
+        }
+
+        if (gamepad1.dpad_up && inputTimer.milliseconds() > 200) {
+            Shooter.targetVelocity += 50;
+            inputTimer.reset();
+        }
+
+        if (gamepad1.dpad_down && inputTimer.milliseconds() > 200) {
+            Shooter.targetVelocity -= 50;
+            inputTimer.reset();
         }
     }
 
@@ -290,6 +274,28 @@ public class TeleOpul extends OpMode {
             robot.shooter.stopOverride();
             inputTimer.reset();
         }
+
+        if (gamepad2.dpad_up && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+            robot.shooter.velocityOffset += 10;
+            inputTimer.reset();
+        }
+
+        if (gamepad2.dpad_down && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+            robot.shooter.velocityOffset -= 10;
+            inputTimer.reset();
+        }
+
+        if (gamepad2.dpad_left && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+            robot.shooter.trackOffset += 0.02;
+            inputTimer.reset();
+        }
+
+        if (gamepad2.dpad_right && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+            robot.shooter.trackOffset -= 0.02;
+            inputTimer.reset();
+        }
+
+
     }
 
     private void handleDrive() {

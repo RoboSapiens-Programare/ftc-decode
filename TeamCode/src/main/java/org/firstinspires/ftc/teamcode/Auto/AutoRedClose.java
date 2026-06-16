@@ -15,18 +15,18 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto Blue Far - LFT", group = "Autonomous")
+@Autonomous(name = "Auto Red Close - LFT", group = "Autonomous")
 @Config
-public class AutoBlueFar extends OpMode {
+public class AutoRedClose extends OpMode {
     private int loopCount = 0;
-    private boolean sniggerton = true;
+    private boolean sinigermiguelphonk = true;
     private int pathState; // Current autonomous path state (state machine)
     long lastTime = System.nanoTime();
     private double averagedFrequency = 50.0; // Seed it with an expected baseline (e.g., 50-60Hz)
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private final Telemetry dashboardTelemetry = dashboard.getTelemetry();
     private ElapsedTime pathTimer; // Timer for path state machine
-    private static Paths paths; // Paths defined in the Paths class
+    private Paths paths; // Paths defined in the Paths class
     private Robot robot;
 
     private enum ShootStates {
@@ -56,47 +56,41 @@ public class AutoBlueFar extends OpMode {
 
     private final ElapsedTime stabilizationTimer = new ElapsedTime();
     private final ElapsedTime minimumShootTimer = new ElapsedTime();
+    private final ElapsedTime gateTimer = new ElapsedTime();
 
     private final Pose[] LEAVE_POINTS = {
-        // inside close shoot zone
-        new Pose(40.000, 130.000, Math.toRadians(180)),
-        new Pose(59.000, 105.000, Math.toRadians(180)),
-        new Pose(60.000, 130.000, Math.toRadians(180)),
+            // inside close shoot zone
+            new Pose(40.000, 130.000, Math.toRadians(180)).mirror(),
+            new Pose(59.000, 105.000, Math.toRadians(180)).mirror(),
+            new Pose(60.000, 130.000, Math.toRadians(180)).mirror(),
 
-        // mid field
-        new Pose(20.000, 95.000, Math.toRadians(180)),
-        new Pose(20.000, 70.000, Math.toRadians(180)),
-        new Pose(35.000, 75.000, Math.toRadians(180)),
+            // mid field
+            new Pose(20.000, 95.000, Math.toRadians(180)).mirror(),
+            new Pose(20.000, 70.000, Math.toRadians(180)).mirror(),
+            new Pose(35.000, 75.000, Math.toRadians(180)).mirror(),
 
-        // far field
-        new Pose(48.000, 72.000, Math.toRadians(180)),
-        new Pose(25.000, 45.000, Math.toRadians(180)),
-        new Pose(53.000, 35.000, Math.toRadians(180)),
-        new Pose(35.000, 15.000, Math.toRadians(180)),
-        new Pose(52.000, 22.000, Math.toRadians(180)),
+            // far field
+            new Pose(48.000, 72.000, Math.toRadians(180)).mirror(),
+            new Pose(25.000, 45.000, Math.toRadians(180)).mirror(),
+            new Pose(53.000, 35.000, Math.toRadians(180)).mirror(),
+            new Pose(35.000, 15.000, Math.toRadians(180)).mirror(),
+            new Pose(52.000, 22.000, Math.toRadians(180)).mirror(),
     };
-
-    public PathChain[][] gateChains = new PathChain[3][2];
 
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
 
         robot.shooter.init();
-        robot.shooter.goToAngle(Math.toRadians(20));
 
-        Robot.alliance = Robot.Alliance.BLUE;
+        Robot.alliance = Robot.Alliance.RED;
 
         // Determine starting heading: prefer geometric heading when a path exists, otherwise fall
         // back to explicit startPoint values
-        Robot.follower.setStartingPose(new Pose(53.000, 9.000, Math.toRadians(90.000)));
+        Robot.follower.setStartingPose(new Pose(32.000, 131.000, Math.toRadians(90)).mirror());
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
-
-        gateChains[0] = new PathChain[] {paths.grabGate, paths.shootGate};
-        gateChains[1] = new PathChain[] {paths.grabGate2, paths.shootGate2};
-        gateChains[2] = new PathChain[] {paths.grabGate3, paths.shootGate3};
     }
 
     @Override
@@ -121,7 +115,6 @@ public class AutoBlueFar extends OpMode {
     @Override
     public void stop() {
         Robot.transitionPose = Robot.follower.getPose();
-        robot.shooter.stopOverride();
     }
 
     /* ============================================================= *
@@ -136,106 +129,97 @@ public class AutoBlueFar extends OpMode {
 
     public static class Paths {
 
-        public PathChain grabHuman;
-        public PathChain shootHuman;
-        public PathChain grabPPG;
-        public PathChain shootPPG;
+        public PathChain shootPreload;
+        public PathChain grabGPP;
+        public PathChain shootGPP;
+        public PathChain grabPGP;
+        public PathChain openGateAlliance;
+        public PathChain shootPGP;
+        public PathChain openGate;
         public PathChain grabGate;
         public PathChain shootGate;
-        public PathChain grabGate2;
-        public PathChain shootGate2;
-        public PathChain grabGate3;
-        public PathChain shootGate3;
 
         public Paths(Follower follower) {
-            grabHuman =
-                    follower.pathBuilder()
-                            .addPath(
-                                    new BezierCurve(
-                                            new Pose(53.000, 9.000),
-                                            new Pose(62.024, 18.636),
-                                            new Pose(12.000, 11.247)))
-                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
-                            .build();
-
-            shootHuman =
+            shootPreload =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(12.000, 11.247), new Pose(54.000, 17.999)))
-                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                                            new Pose(32.000, 131.000).mirror(), new Pose(54.850, 84.000).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
                             .build();
 
-            grabPPG =
-                    follower.pathBuilder()
-                            .addPath(
-                                    new BezierCurve(
-                                            new Pose(54.000, 17.999),
-                                            new Pose(47.561, 38.058),
-                                            new Pose(18.673, 36.325)))
-                            .setConstantHeadingInterpolation(Math.toRadians(180))
-                            .build();
-
-            shootPPG =
+            grabGPP =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(18.673, 36.325), new Pose(54.000, 17.999)))
-                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                                            new Pose(54.850, 84.000).mirror(), new Pose(18.000, 80.000).mirror()))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .build();
+
+            shootGPP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(18.000, 80.000).mirror(), new Pose(56.850, 88.000).mirror()))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .build();
+
+            grabPGP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(54.850, 84.000).mirror(),
+                                            new Pose(54.850, 57.519).mirror(),
+                                            new Pose(12.000, 58.000).mirror()))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .build();
+
+            openGateAlliance =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(12.000, 58.000).mirror(), new Pose(26.000, 58.000).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(-90))
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(26.000, 58.000).mirror(), new Pose(12.000, 69.000).mirror()))
+                            .setConstantHeadingInterpolation(Math.toRadians(-90))
+                            .build();
+
+            shootPGP =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierLine(
+                                            new Pose(12.000, 69.000).mirror(), new Pose(57.850, 88.000).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(0))
+                            .build();
+
+            openGate =
+                    follower.pathBuilder()
+                            .addPath(
+                                    new BezierCurve(
+                                            new Pose(55.850, 84.000).mirror(),
+                                            new Pose(56, 60).mirror(),
+                                            new Pose(19.5, 64).mirror()))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
                             .build();
 
             grabGate =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(54.000, 17.999),
-                                            new Pose(9.000, 5.044),
-                                            new Pose(9.123, 29.115)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
+                                            new Pose(19.5, 64).mirror(), new Pose(15, 58).mirror(), new Pose(13, 56).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(180-135))
                             .build();
 
             shootGate =
                     follower.pathBuilder()
                             .addPath(
-                                    new BezierLine(
-                                            new Pose(9.123, 29.115), new Pose(54.000, 17.999)))
-                            .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
-                            .build();
-
-            grabGate2 =
-                    follower.pathBuilder()
-                            .addPath(
                                     new BezierCurve(
-                                            new Pose(54.000, 17.999),
-                                            new Pose(62.701, 8.000),
-                                            new Pose(12.000, 11.247)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-                            .build();
-
-            shootGate2 =
-                    follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(12.000, 11.247), new Pose(54.000, 17.999)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-                            .build();
-
-            grabGate3 =
-                    follower.pathBuilder()
-                            .addPath(
-                                    new BezierCurve(
-                                            new Pose(54.000, 17.999),
-                                            new Pose(58.898, 30.440),
-                                            new Pose(9.000, 34.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-                            .build();
-
-            shootGate3 =
-                    follower.pathBuilder()
-                            .addPath(
-                                    new BezierLine(
-                                            new Pose(9.000, 34.000), new Pose(54.000, 17.999)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                                            new Pose(13, 56).mirror(),
+                                            new Pose(30, 45).mirror(),
+                                            new Pose(57.850, 88.000).mirror()))
+                            .setLinearHeadingInterpolation(Math.toRadians(180-135), Math.toRadians(0))
                             .build();
         }
     }
@@ -255,9 +239,9 @@ public class AutoBlueFar extends OpMode {
                 }
                 break;
             case SHOOTING:
-                if (sniggerton) {
+                if (sinigermiguelphonk) {
                     stabilizationTimer.reset();
-                    sniggerton = false;
+                    sinigermiguelphonk = false;
                 }
 
                 if (Robot.follower.isBusy()) {
@@ -289,18 +273,19 @@ public class AutoBlueFar extends OpMode {
         switch (intakeState) {
             case INACTIVE:
                 intakeState = IntakeStates.PULLING;
-                intakeTimeoutReset = false;
+
+                intakeTimeout.reset();
+                intakeTimeoutReset = true;
                 break;
             case PULLING:
                 robot.intake.pullBallsHard();
-                if (!Robot.follower.isBusy() && !intakeTimeoutReset) {
-                    intakeTimeoutReset = true;
-                    intakeTimeout.reset();
-                }
 
                 if (robot.intake.isFull()
                         || (intakeTimeout.milliseconds() > uV.INTAKE_TIMEOUT_MS
-                                && intakeTimeoutReset)) intakeState = IntakeStates.COMPLETED;
+                        && intakeTimeoutReset)) {
+                    intakeState = IntakeStates.COMPLETED;
+                    intakeTimeoutReset = false;
+                }
                 break;
             case COMPLETED:
                 break;
@@ -339,7 +324,7 @@ public class AutoBlueFar extends OpMode {
     }
 
     private void autoPark() {
-        if (emergencyTimer.seconds() >= uV.AUTOPARK_TIMEOUT_MS && !timeRanOut) {
+        if (emergencyTimer.milliseconds() >= uV.AUTOPARK_TIMEOUT_MS && !timeRanOut) {
             // DO NOT autopark if going for score (would win 9 points instead of 6)
             timeRanOut = true;
 
@@ -359,83 +344,103 @@ public class AutoBlueFar extends OpMode {
     public int autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                autoShoot();
-                if (shootState == ShootStates.COMPLETED) {
-                    Robot.follower.followPath(paths.grabHuman, true);
-                    robot.shooter.goToAngle(Math.toRadians(-72));
-                    setPathState(1);
-                }
+                Robot.follower.followPath(paths.shootPreload, true);
+                setPathState(1);
 
                 break;
             case 1:
-                autoIntake();
-                if (intakeState == IntakeStates.COMPLETED) {
+                autoShoot();
+                if (shootState == ShootStates.COMPLETED) {
                     setPathState(2);
                 }
 
                 break;
             case 2:
-                Robot.follower.followPath(paths.shootHuman, true);
+                Robot.follower.followPath(paths.grabGPP, true);
                 setPathState(3);
                 break;
             case 3:
-                autoShoot();
+                autoIntake();
 
-                if (shootState == ShootStates.COMPLETED) {
+                if (intakeState == IntakeStates.COMPLETED) {
                     setPathState(4);
                 }
                 break;
             case 4:
-                Robot.follower.followPath(paths.grabPPG, true);
+                Robot.follower.followPath(paths.shootGPP, true);
                 setPathState(5);
                 break;
             case 5:
-                autoIntake();
-                if (intakeState == IntakeStates.COMPLETED) {
+                autoShoot();
+                if (shootState == ShootStates.COMPLETED) {
                     setPathState(6);
                 }
                 break;
             case 6:
-                Robot.follower.followPath(paths.shootPPG, true);
+                Robot.follower.followPath(paths.grabPGP, true);
                 setPathState(7);
                 break;
             case 7:
-                autoShoot();
-
-                if (shootState == ShootStates.COMPLETED) {
-                    setPathState(8);
-                }
-                break;
-            case 8: // begin gate cycle
-                ++gateCycleCounter;
-
-                Robot.follower.followPath(gateChains[(gateCycleCounter - 1) % 3][0], true);
-                setPathState(9);
-                break;
-            case 9:
                 autoIntake();
 
                 if (intakeState == IntakeStates.COMPLETED) {
-                    setPathState(10);
+                    Robot.follower.followPath(paths.openGateAlliance);
+                    setPathState(8);
+                    gateTimer.reset();
                 }
                 break;
-            case 10:
-                Robot.follower.followPath(gateChains[(gateCycleCounter - 1) % 3][1], true);
-                setPathState(11);
+            case 8:
+                if (gateTimer.milliseconds() > 4000 || !Robot.follower.isBusy()) {
+                    setPathState(9);
+                }
+            case 9:
+                Robot.follower.followPath(paths.shootPGP, true);
+                setPathState(10);
                 break;
-            case 11:
+            case 10:
                 autoShoot();
 
                 if (shootState == ShootStates.COMPLETED) {
-                    if (gateCycleCounter >= MAX_GATE_CYCLES) {
-                        // exit
-                        setPathState(13);
-                    } else {
-                        setPathState(8);
-                    }
+                    setPathState(11);
+                    gateTimer.reset();
+                }
+                break;
+
+            case 11: // BEGIN GATE CYCLING
+                if (!Robot.follower.isBusy()) {
+                    Robot.follower.followPath(paths.openGate, true);
+                    setPathState(12);
+                }
+                break;
+            case 12:
+                if (!Robot.follower.isBusy()) {
+                    setPathState(13);
                 }
                 break;
             case 13:
+                ++gateCycleCounter;
+                Robot.follower.followPath(paths.grabGate, true);
+                setPathState(14);
+                break;
+            case 14:
+                autoIntake();
+
+                if (intakeState == IntakeStates.COMPLETED) {
+                    setPathState(15);
+                }
+                break;
+            case 15:
+                Robot.follower.followPath(paths.shootGate, true);
+                setPathState(16);
+                break;
+            case 16:
+                autoShoot();
+                if (shootState == ShootStates.COMPLETED) {
+                    if (gateCycleCounter >= MAX_GATE_CYCLES) setPathState(17);
+                    else setPathState(11);
+                }
+                break;
+            case 17:
                 requestOpModeStop();
                 pathState = -1;
                 break;
@@ -444,7 +449,7 @@ public class AutoBlueFar extends OpMode {
     }
 
     public void setPathState(int pState) {
-        sniggerton = true;
+        sinigermiguelphonk = true;
         shootState = ShootStates.INACTIVE;
         intakeState = IntakeStates.INACTIVE;
         pathState = pState;
@@ -485,7 +490,7 @@ public class AutoBlueFar extends OpMode {
         //        dashboardTelemetry.addData("Follower busy", Robot.follower.isBusy());
         dashboardTelemetry.addData("Distance (in)", robot.shooter.distance);
         dashboardTelemetry.addData("Flywheel RPM", -robot.shooter.turretMotorLeft.getVelocity());
-        //        dashboardTelemetry.addData("Track State", robot.shooter.trackState);
+        dashboardTelemetry.addData("Timer", emergencyTimer.seconds());
         //        dashboardTelemetry.addData("Turret Output", robot.shooter.turretOutput);
         //        dashboardTelemetry.addData("Turret Error",
         // Math.toDegrees(robot.shooter.turretErrorRad));
