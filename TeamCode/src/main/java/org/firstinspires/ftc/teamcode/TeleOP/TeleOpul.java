@@ -137,11 +137,15 @@ public class TeleOpul extends OpMode {
         if (newState == State.OUTTAKE) {
             robot.shooter.resetShooterPID();
             robot.shooter.openGate();
+            gamepad2.setLedColor(0xff, 0x00, 0x00, 0);
 
         } else {
 
             robot.shooter.stopOverride();
             robot.shooter.closeGate();
+
+            gamepad2.setLedColor(0x00
+                    , 0xff, 0x00, 0);
         }
     }
 
@@ -255,12 +259,16 @@ public class TeleOpul extends OpMode {
     private void handlePoseReset() {
         Pose homingPose = new Pose(72, 134, Math.toRadians(90));
 
-        if (gamepad1.circle) {
+        if (gamepad2.touchpad) {
             Robot.follower.breakFollowing();
             Robot.follower.setPose(homingPose);
             Robot.follower.startTeleOpDrive(true);
             robot.shooter.reset();
-            gamepad1.setLedColor(0xff, 0xff, 0x00, 100);
+            gamepad2.setLedColor(0xff, 0xff, 0x00, 100);
+            gamepad1.rumbleBlips(3);
+            gamepad2.rumbleBlips(3);
+            robot.shooter.trackOffset = 0;
+            robot.shooter.velocityOffset = 0;
         }
     }
 

@@ -7,9 +7,9 @@ import com.bylazar.configurables.annotations.Configurable;
 @Configurable
 public class uV {
     // Gate positions
-    public static double gateOpen = 0.4;
-//    public static double gateMid = 0.55;
-    public static double gateClosed = 0.9;
+    public static double gateOpen = 0.33;
+    public static double gateMid = 0.55;
+    public static double gateClosed = 0.33-0.035;
 
     // Transfer
     public static double rollerOneP = 1;

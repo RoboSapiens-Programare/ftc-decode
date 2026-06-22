@@ -38,6 +38,9 @@ public class Shooter extends Subsystem {
     public static double targetVelocity = 1300;
     public static double targetLob = 0;
 
+    public ElapsedTime timerGate = new ElapsedTime();
+
+
     // Hardware & State
     public final CachingDcMotorEx turretMotorLeft;
     public final CachingDcMotorEx turretMotorRight;
@@ -92,13 +95,15 @@ public class Shooter extends Subsystem {
     }
 
     public void openGate() {
-
-        gate.setPosition(uV.gateOpen);
+            gate.setPosition(uV.gateOpen);
     }
 
     public void closeGate() {
+            gate.setPosition(uV.gateClosed);
+    }
 
-        gate.setPosition(uV.gateClosed);
+    public void midGate() {
+        gate.setPosition(uV.gateMid);
     }
 
     // Aiming
@@ -307,6 +312,7 @@ public class Shooter extends Subsystem {
     @Override
     public void init() {
         turretPivot.setPosition(0.5);
+        openGate();
 
         targetSelected = false;
     }

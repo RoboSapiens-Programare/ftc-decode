@@ -1,0 +1,272 @@
+{
+  "version": "2.2.0",
+  "header": {
+    "info": "Created with Turtle Tracer",
+    "copyright": "Copyright 2026 Matthew Allen. Licensed under the Modified Apache License, Version 2.0.",
+    "link": "https://github.com/Mallen220/TurtleTracer"
+  },
+  "startPoint": {
+    "x": 32.5,
+    "y": 132.5987106017192,
+    "heading": "linear",
+    "startDeg": 90,
+    "endDeg": 138,
+    "locked": false
+  },
+  "lines": [
+    {
+      "id": "line-g3cbedhxyrw",
+      "name": "",
+      "endPoint": {
+        "x": 54.85,
+        "y": 84,
+        "heading": "linear",
+        "startDeg": 90,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#7699C8",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    },
+    {
+      "id": "mq2nlq8o-rd1pch",
+      "name": "",
+      "endPoint": {
+        "x": 17,
+        "y": 80.58237822349571,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#C89DD9",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mq2nq65s-b5rv5h",
+      "name": "",
+      "endPoint": {
+        "x": 54.85,
+        "y": 84,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#BDA9DD",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mq2nqipi-487ow9",
+      "name": "",
+      "endPoint": {
+        "x": 9,
+        "y": 56,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 54.85,
+          "y": 57.519
+        }
+      ],
+      "color": "#B5B8D7",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mq2nrmfn-maga8a",
+      "name": "",
+      "endPoint": {
+        "x": 11,
+        "y": 69,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 25.5,
+          "y": 62.930515759312335
+        }
+      ],
+      "color": "#f91a1a",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mq2nu8j8-7xjl36",
+      "name": "",
+      "endPoint": {
+        "x": 55.85,
+        "y": 84,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [],
+      "color": "#9DC9D7",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mq2nuqb0-81mi08",
+      "name": "",
+      "endPoint": {
+        "x": 20,
+        "y": 70,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 55.85,
+          "y": 62.34957020057307
+        }
+      ],
+      "color": "#9D5999",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mq2nwv2i-gsr6dd",
+      "name": "",
+      "endPoint": {
+        "x": 13.10295128939828,
+        "y": 56,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 138
+      },
+      "controlPoints": [
+        {
+          "x": 17,
+          "y": 51.19412607449857
+        }
+      ],
+      "color": "#878DD7",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "line-g3cbedhxyrw"
+    },
+    {
+      "kind": "path",
+      "lineId": "mq2nlq8o-rd1pch"
+    },
+    {
+      "kind": "path",
+      "lineId": "mq2nq65s-b5rv5h"
+    },
+    {
+      "kind": "path",
+      "lineId": "mq2nqipi-487ow9"
+    },
+    {
+      "kind": "path",
+      "lineId": "mq2nrmfn-maga8a"
+    },
+    {
+      "kind": "path",
+      "lineId": "mq2nu8j8-7xjl36"
+    },
+    {
+      "kind": "path",
+      "lineId": "mq2nuqb0-81mi08"
+    },
+    {
+      "kind": "path",
+      "lineId": "mq2nwv2i-gsr6dd"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "triangle-1",
+      "name": "Red Goal",
+      "vertices": [
+        {
+          "x": 143,
+          "y": 69.5
+        },
+        {
+          "x": 143,
+          "y": 143
+        },
+        {
+          "x": 118.5,
+          "y": 143
+        },
+        {
+          "x": 136.5,
+          "y": 118.5
+        },
+        {
+          "x": 136.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#dc2626",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    },
+    {
+      "id": "triangle-2",
+      "name": "Blue Goal",
+      "vertices": [
+        {
+          "x": 7.5,
+          "y": 118.5
+        },
+        {
+          "x": 25.5,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 69.5
+        },
+        {
+          "x": 7.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#0b08d9",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    }
+  ],
+  "extraData": {}
+}
