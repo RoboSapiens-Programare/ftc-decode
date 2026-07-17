@@ -24,7 +24,6 @@ public class TeleOpul extends OpMode {
     private static final long INPUT_COOLDOWN_LONG_MS = 400;
     private static final long FOLLOWER_SETTLE_MS = 300;
     private static final double TRIGGER_THRESHOLD = 0.1;
-    private static final double STICK_THRESHOLD = 0.1;
     private boolean lastD1Trigger = false;
 
     private Robot robot;
@@ -50,6 +49,9 @@ public class TeleOpul extends OpMode {
     private final NNLogging logger = new NNLogging();
     private final ShootAssist shootAssist = new ShootAssist();
     private boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
+
+    private static Pose human = new Pose(134.208331, -100.413674, -0.003040);
+    private static Pose gate = new Pose(129.351124, 76.794895, -0.019427);
 
     @Override
     public void init() {
@@ -88,6 +90,11 @@ public class TeleOpul extends OpMode {
     public void start() {
         Robot.follower.setStartingPose(Robot.transitionPose);
         Robot.follower.startTeleOpDrive(true);
+
+        if (Robot.alliance == Robot.Alliance.BLUE) {
+            human = human.mirror();
+            gate = gate.mirror();
+        }
     }
 
     @Override
@@ -264,20 +271,20 @@ public class TeleOpul extends OpMode {
     }
 
     private void handlePoseReset() {
-        Pose homingPose = new Pose(72, 134, Math.toRadians(90));
 
-        if (gamepad2.touchpad) {
-            Robot.follower.breakFollowing();
-            Robot.follower.setPose(homingPose);
+        boolean rb = gamepad2.right_bumper;
+
+        if (rb || gamepad2.left_bumper) {
+            if (rb) Robot.follower.setPose(human);
+            else Robot.follower.setPose(gate);
+
             Robot.follower.startTeleOpDrive(true);
             robot.shooter.reset();
-            gamepad2.setLedColor(0xff, 0xff, 0x00, 100);
-            gamepad1.rumbleBlips(3);
-            gamepad2.rumbleBlips(3);
             robot.shooter.trackOffset = 0;
             robot.shooter.velocityOffset = 0;
         }
     }
+
 
     private void handleOverrideButtons() {
         if (gamepad1.right_bumper && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
