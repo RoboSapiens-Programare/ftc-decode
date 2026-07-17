@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Auto.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @Autonomous(name = "Double Motor test", group = "1. Auto Tests")
+@Disabled
 public class DualMotorTest extends OpMode {
     private DcMotorEx motor;
     private DcMotorEx motor2;

@@ -40,7 +40,6 @@ public class Shooter extends Subsystem {
 
     public ElapsedTime timerGate = new ElapsedTime();
 
-
     // Hardware & State
     public final CachingDcMotorEx turretMotorLeft;
     public final CachingDcMotorEx turretMotorRight;
@@ -77,6 +76,7 @@ public class Shooter extends Subsystem {
 
     private final Pose blueObeliskPose = new Pose(12, 134);
     private final Pose redObeliskPose = new Pose(133, 134);
+    private Pose purple0obeliskPose = new Pose(72, -135);
 
     public Shooter(HardwareMap hwMap) {
         lobServo = new CachingServo(hwMap.get(Servo.class, "lobServo"));
@@ -95,11 +95,11 @@ public class Shooter extends Subsystem {
     }
 
     public void openGate() {
-            gate.setPosition(uV.gateOpen);
+        gate.setPosition(uV.gateOpen);
     }
 
     public void closeGate() {
-            gate.setPosition(uV.gateClosed);
+        gate.setPosition(uV.gateClosed);
     }
 
     public void midGate() {
@@ -141,7 +141,7 @@ public class Shooter extends Subsystem {
                         + 13.75284;
         //        if (lob <= uV.lobMin) return uV.lobMin;
         //        return Math.min(lob, uV.lobMax);
-        return Math.max(Math.min(lob, 1), 0.2);
+        return Math.max(Math.min(lob, 0.9), 0.2);
     }
 
     private double lobToAngle(double lobPos) {
@@ -332,6 +332,9 @@ public class Shooter extends Subsystem {
     public void update() {
         if (!targetSelected) {
             targetGoal = Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
+            purple0obeliskPose =
+                    purple0obeliskPose.withX(
+                            72 + 6.8 * (Robot.alliance == Robot.Alliance.RED ? 1 : -1));
             targetSelected = true;
         }
 
@@ -357,6 +360,16 @@ public class Shooter extends Subsystem {
 
             turretMotorRight.setPower(-0.2);
             turretMotorLeft.setPower(-0.2);
+        }
+    }
+
+    public void togglePurpleObelisk() {
+        if (targetGoal == purple0obeliskPose) {
+            targetGoal = Robot.alliance == Robot.Alliance.RED ? redObeliskPose : blueObeliskPose;
+
+        } else {
+            // aim a bit to the side
+            targetGoal = purple0obeliskPose;
         }
     }
 }

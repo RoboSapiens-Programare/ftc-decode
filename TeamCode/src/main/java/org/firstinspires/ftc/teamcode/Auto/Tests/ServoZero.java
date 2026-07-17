@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.Auto.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous(name = "servo 0", group = "1. Auto Tests")
+@Disabled
 public class ServoZero extends OpMode {
     private Servo servo;
 

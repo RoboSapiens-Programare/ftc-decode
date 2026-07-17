@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.Auto.Tests;
 
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp(name = "drive train test")
+@Disabled
 public class DriveTrainTest extends OpMode {
 
     private Robot robot;

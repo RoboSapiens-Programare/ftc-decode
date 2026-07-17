@@ -5,10 +5,12 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
 @Autonomous(name = "Go To Zero", group = "Autonomous")
+@Disabled
 @Config
 public class GoToZero extends OpMode {
     private int loopCount = 0;
@@ -47,7 +49,8 @@ public class GoToZero extends OpMode {
                                 .addPath(
                                         new BezierLine(
                                                 Robot.follower.getPose(),
-                                                new Pose(50, Robot.follower.getPose().getY())))
+                                                new Pose(50, Robot.follower.getPose().getY())
+                                                        .mirror()))
                                 .setConstantHeadingInterpolation(Robot.follower.getHeading())
                                 .build();
 
@@ -66,7 +69,9 @@ public class GoToZero extends OpMode {
                         Robot.follower
                                 .pathBuilder()
                                 .addPath(
-                                        new BezierLine(Robot.follower.getPose(), new Pose(32, 115)))
+                                        new BezierLine(
+                                                Robot.follower.getPose(),
+                                                new Pose(29, 115).mirror()))
                                 .setLinearHeadingInterpolation(
                                         Robot.follower.getHeading(), Math.PI / 2)
                                 .build();
@@ -82,7 +87,8 @@ public class GoToZero extends OpMode {
                                     .pathBuilder()
                                     .addPath(
                                             new BezierLine(
-                                                    Robot.follower.getPose(), new Pose(32, 132)))
+                                                    Robot.follower.getPose(),
+                                                    new Pose(29, 126).mirror()))
                                     .setConstantHeadingInterpolation(Math.PI / 2)
                                     .build();
 

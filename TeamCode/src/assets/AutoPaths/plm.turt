@@ -1,0 +1,240 @@
+{
+  "startPoint": {
+    "x": 59.34670487106017,
+    "y": 119.7865329512894,
+    "heading": "linear",
+    "startDeg": 36,
+    "endDeg": 180,
+    "locked": false
+  },
+  "lines": [
+    {
+      "id": "line-2sb7c9mb8kz",
+      "name": "shootPreload",
+      "endPoint": {
+        "x": 53.222063037249285,
+        "y": 90.79942693409741,
+        "heading": "linear",
+        "startDeg": 36,
+        "endDeg": 144
+      },
+      "controlPoints": [],
+      "color": "#7585A9",
+      "eventMarkers": [],
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "hidden": false
+    },
+    {
+      "id": "mrnhvjs0-c39oki",
+      "name": "grabFirst",
+      "endPoint": {
+        "x": 18.57091690544413,
+        "y": 83.95200573065904,
+        "heading": "linear",
+        "startDeg": 144,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 51.907593123209175,
+          "y": 81.69555873925503
+        }
+      ],
+      "color": "#689ACA",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mrnhwv27-90p8fu",
+      "name": "shootFirst",
+      "endPoint": {
+        "x": 53.222063037249285,
+        "y": 90.79942693409741,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 144
+      },
+      "controlPoints": [],
+      "color": "#857699",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mrnhx11v-us6saa",
+      "name": "grabSecond",
+      "endPoint": {
+        "x": 18.57091690544413,
+        "y": 60.19770773638969,
+        "heading": "linear",
+        "startDeg": 144,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 61.05779656160458,
+          "y": 52.42367908309455
+        }
+      ],
+      "color": "#57C6A9",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mrnhxcob-ljb6bg",
+      "name": "shootSecond",
+      "endPoint": {
+        "x": 56.6067335243553,
+        "y": 90.79942693409741,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 144
+      },
+      "controlPoints": [],
+      "color": "#5D6B75",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mrnhxiwi-cvutq2",
+      "name": "grabThird",
+      "endPoint": {
+        "x": 18.57091690544413,
+        "y": 36,
+        "heading": "linear",
+        "startDeg": 144,
+        "endDeg": 180
+      },
+      "controlPoints": [
+        {
+          "x": 68.37249283667623,
+          "y": 27.537965616045838
+        }
+      ],
+      "color": "#6677DD",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "id": "mrnhxwpe-hvy4rx",
+      "name": "shootThird",
+      "endPoint": {
+        "x": 56.6067335243553,
+        "y": 90.79942693409741,
+        "heading": "linear",
+        "startDeg": 180,
+        "endDeg": 144
+      },
+      "controlPoints": [],
+      "color": "#889A56",
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "shapes": [
+    {
+      "id": "triangle-1",
+      "name": "Red Goal",
+      "vertices": [
+        {
+          "x": 143,
+          "y": 69.5
+        },
+        {
+          "x": 143,
+          "y": 143
+        },
+        {
+          "x": 118.5,
+          "y": 143
+        },
+        {
+          "x": 136.5,
+          "y": 118.5
+        },
+        {
+          "x": 136.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#dc2626",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    },
+    {
+      "id": "triangle-2",
+      "name": "Blue Goal",
+      "vertices": [
+        {
+          "x": 7.5,
+          "y": 118.5
+        },
+        {
+          "x": 25.5,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 143
+        },
+        {
+          "x": 1.25,
+          "y": 69.5
+        },
+        {
+          "x": 7.5,
+          "y": 69.5
+        }
+      ],
+      "color": "#0b08d9",
+      "fillColor": "#fca5a5",
+      "type": "obstacle"
+    }
+  ],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "line-2sb7c9mb8kz"
+    },
+    {
+      "kind": "path",
+      "lineId": "mrnhvjs0-c39oki"
+    },
+    {
+      "kind": "path",
+      "lineId": "mrnhwv27-90p8fu"
+    },
+    {
+      "kind": "path",
+      "lineId": "mrnhx11v-us6saa"
+    },
+    {
+      "kind": "path",
+      "lineId": "mrnhxcob-ljb6bg"
+    },
+    {
+      "kind": "path",
+      "lineId": "mrnhxiwi-cvutq2"
+    },
+    {
+      "kind": "path",
+      "lineId": "mrnhxwpe-hvy4rx"
+    }
+  ],
+  "timestamp": "2026-07-16T13:57:04.984Z"
+}

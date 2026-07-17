@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto Blue Far - LFT", group = "Autonomous")
+@Autonomous(name = "Auto Blue Far", group = "Autonomous - Blue")
 @Config
 public class AutoBlueFar extends OpMode {
     private int loopCount = 0;

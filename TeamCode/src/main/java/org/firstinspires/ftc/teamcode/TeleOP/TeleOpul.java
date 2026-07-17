@@ -104,6 +104,11 @@ public class TeleOpul extends OpMode {
                 break;
         }
 
+        if (gamepad2.right_trigger > 0.1 && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+            robot.shooter.togglePurpleObelisk();
+            inputTimer.reset();
+        }
+
         handlePoseReset();
         handleOverrideButtons();
         handleDrive();
@@ -144,8 +149,7 @@ public class TeleOpul extends OpMode {
             robot.shooter.stopOverride();
             robot.shooter.closeGate();
 
-            gamepad2.setLedColor(0x00
-                    , 0xff, 0x00, 0);
+            gamepad2.setLedColor(0x00, 0xff, 0x00, 0);
         }
     }
 
@@ -164,14 +168,14 @@ public class TeleOpul extends OpMode {
             robot.intake.rest();
         }
 
-        if (gamepad2.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+        if (gamepad1.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
             lastD1Trigger = gamepad1.right_trigger > TRIGGER_THRESHOLD;
             changeState(State.OUTTAKE);
         }
     }
 
     private void handleOuttake() {
-        if (gamepad2.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+        if (gamepad1.cross && stateTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
             robot.intake.rest();
             Robot.follower.breakFollowing();
             Robot.follower.startTeleOpDrive(true);
@@ -182,7 +186,10 @@ public class TeleOpul extends OpMode {
             lastD1Trigger = gamepad1.right_trigger > TRIGGER_THRESHOLD;
             return;
         }
-        boolean fireMain = gamepad1.right_trigger > TRIGGER_THRESHOLD && robot.shooter.velocityReached() && robot.shooter.isAimed();
+        boolean fireMain =
+                gamepad1.right_trigger > TRIGGER_THRESHOLD
+                        && robot.shooter.velocityReached()
+                        && robot.shooter.isAimed();
 
         if (fireMain) {
             robot.intake.shoot();
@@ -302,8 +309,6 @@ public class TeleOpul extends OpMode {
             robot.shooter.trackOffset -= 0.02;
             inputTimer.reset();
         }
-
-
     }
 
     private void handleDrive() {

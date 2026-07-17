@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto Blue Close - LFT", group = "Autonomous")
+@Autonomous(name = "Auto Blue Close", group = "Autonomous - Blue")
 @Config
 public class AutoBlueClose extends OpMode {
     private int loopCount = 0;
@@ -87,7 +87,7 @@ public class AutoBlueClose extends OpMode {
 
         // Determine starting heading: prefer geometric heading when a path exists, otherwise fall
         // back to explicit startPoint values
-        Robot.follower.setStartingPose(new Pose(32.000, 131.000, Math.toRadians(90)));
+        Robot.follower.setStartingPose(new Pose(29.000, 130.000, Math.toRadians(90)));
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -144,7 +144,7 @@ public class AutoBlueClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(32.000, 131.000), new Pose(54.850, 84.000)))
+                                            new Pose(29.000, 130.000), new Pose(54.850, 84.000)))
                             .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
                             .build();
 

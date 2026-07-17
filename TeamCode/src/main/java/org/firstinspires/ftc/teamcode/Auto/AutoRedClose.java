@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.uV;
 
-@Autonomous(name = "Auto Red Close - LFT", group = "Autonomous")
+@Autonomous(name = "Auto Red Close", group = "Autonomous - Red")
 @Config
 public class AutoRedClose extends OpMode {
     private int loopCount = 0;
@@ -59,22 +59,22 @@ public class AutoRedClose extends OpMode {
     private final ElapsedTime gateTimer = new ElapsedTime();
 
     private final Pose[] LEAVE_POINTS = {
-            // inside close shoot zone
-            new Pose(40.000, 130.000, Math.toRadians(180)).mirror(),
-            new Pose(59.000, 105.000, Math.toRadians(180)).mirror(),
-            new Pose(60.000, 130.000, Math.toRadians(180)).mirror(),
+        // inside close shoot zone
+        new Pose(40.000, 130.000, Math.toRadians(180)).mirror(),
+        new Pose(59.000, 105.000, Math.toRadians(180)).mirror(),
+        new Pose(60.000, 130.000, Math.toRadians(180)).mirror(),
 
-            // mid field
-            new Pose(20.000, 95.000, Math.toRadians(180)).mirror(),
-            new Pose(20.000, 70.000, Math.toRadians(180)).mirror(),
-            new Pose(35.000, 75.000, Math.toRadians(180)).mirror(),
+        // mid field
+        new Pose(20.000, 95.000, Math.toRadians(180)).mirror(),
+        new Pose(20.000, 70.000, Math.toRadians(180)).mirror(),
+        new Pose(35.000, 75.000, Math.toRadians(180)).mirror(),
 
-            // far field
-            new Pose(48.000, 72.000, Math.toRadians(180)).mirror(),
-            new Pose(25.000, 45.000, Math.toRadians(180)).mirror(),
-            new Pose(53.000, 35.000, Math.toRadians(180)).mirror(),
-            new Pose(35.000, 15.000, Math.toRadians(180)).mirror(),
-            new Pose(52.000, 22.000, Math.toRadians(180)).mirror(),
+        // far field
+        new Pose(48.000, 72.000, Math.toRadians(180)).mirror(),
+        new Pose(25.000, 45.000, Math.toRadians(180)).mirror(),
+        new Pose(53.000, 35.000, Math.toRadians(180)).mirror(),
+        new Pose(35.000, 15.000, Math.toRadians(180)).mirror(),
+        new Pose(52.000, 22.000, Math.toRadians(180)).mirror(),
     };
 
     @Override
@@ -87,7 +87,7 @@ public class AutoRedClose extends OpMode {
 
         // Determine starting heading: prefer geometric heading when a path exists, otherwise fall
         // back to explicit startPoint values
-        Robot.follower.setStartingPose(new Pose(32.000, 131.000, Math.toRadians(90)).mirror());
+        Robot.follower.setStartingPose(new Pose(29.000, 126.000, Math.toRadians(90)).mirror());
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -144,7 +144,8 @@ public class AutoRedClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(32.000, 131.000).mirror(), new Pose(54.850, 84.000).mirror()))
+                                            new Pose(29.000, 126.000).mirror(),
+                                            new Pose(54.850, 84.000).mirror()))
                             .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
                             .build();
 
@@ -152,7 +153,8 @@ public class AutoRedClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(54.850, 84.000).mirror(), new Pose(18.000, 80.000).mirror()))
+                                            new Pose(54.850, 84.000).mirror(),
+                                            new Pose(18.000, 77.000).mirror()))
                             .setConstantHeadingInterpolation(Math.toRadians(0))
                             .build();
 
@@ -160,7 +162,8 @@ public class AutoRedClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(18.000, 80.000).mirror(), new Pose(56.850, 88.000).mirror()))
+                                            new Pose(18.000, 77.000).mirror(),
+                                            new Pose(56.850, 88.000).mirror()))
                             .setConstantHeadingInterpolation(Math.toRadians(0))
                             .build();
 
@@ -170,7 +173,7 @@ public class AutoRedClose extends OpMode {
                                     new BezierCurve(
                                             new Pose(54.850, 84.000).mirror(),
                                             new Pose(54.850, 57.519).mirror(),
-                                            new Pose(12.000, 58.000).mirror()))
+                                            new Pose(12.000, 52.000).mirror()))
                             .setConstantHeadingInterpolation(Math.toRadians(0))
                             .build();
 
@@ -178,11 +181,13 @@ public class AutoRedClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(12.000, 58.000).mirror(), new Pose(26.000, 58.000).mirror()))
+                                            new Pose(12.000, 52.000).mirror(),
+                                            new Pose(32.000, 58.000).mirror()))
                             .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(-90))
                             .addPath(
                                     new BezierLine(
-                                            new Pose(26.000, 58.000).mirror(), new Pose(12.000, 69.000).mirror()))
+                                            new Pose(32.000, 58.000).mirror(),
+                                            new Pose(16.000, 69.000).mirror()))
                             .setConstantHeadingInterpolation(Math.toRadians(-90))
                             .build();
 
@@ -190,7 +195,8 @@ public class AutoRedClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(12.000, 69.000).mirror(), new Pose(57.850, 88.000).mirror()))
+                                            new Pose(16.000, 69.000).mirror(),
+                                            new Pose(57.850, 88.000).mirror()))
                             .setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(0))
                             .build();
 
@@ -208,18 +214,22 @@ public class AutoRedClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(19.5, 64).mirror(), new Pose(15, 58).mirror(), new Pose(13, 56).mirror()))
-                            .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(180-135))
+                                            new Pose(55.850, 84.000).mirror(),
+                                            new Pose(15, 56).mirror(),
+                                            new Pose(10, 56).mirror()))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(0), Math.toRadians(180 - 140))
                             .build();
 
             shootGate =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(13, 56).mirror(),
+                                            new Pose(10, 56).mirror(),
                                             new Pose(30, 45).mirror(),
                                             new Pose(57.850, 88.000).mirror()))
-                            .setLinearHeadingInterpolation(Math.toRadians(180-135), Math.toRadians(0))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(180 - 140), Math.toRadians(0))
                             .build();
         }
     }
@@ -282,7 +292,7 @@ public class AutoRedClose extends OpMode {
 
                 if (robot.intake.isFull()
                         || (intakeTimeout.milliseconds() > uV.INTAKE_TIMEOUT_MS
-                        && intakeTimeoutReset)) {
+                                && intakeTimeoutReset)) {
                     intakeState = IntakeStates.COMPLETED;
                     intakeTimeoutReset = false;
                 }
@@ -401,7 +411,7 @@ public class AutoRedClose extends OpMode {
                 autoShoot();
 
                 if (shootState == ShootStates.COMPLETED) {
-                    setPathState(11);
+                    setPathState(13);
                     gateTimer.reset();
                 }
                 break;
@@ -437,7 +447,7 @@ public class AutoRedClose extends OpMode {
                 autoShoot();
                 if (shootState == ShootStates.COMPLETED) {
                     if (gateCycleCounter >= MAX_GATE_CYCLES) setPathState(17);
-                    else setPathState(11);
+                    else setPathState(13);
                 }
                 break;
             case 17:

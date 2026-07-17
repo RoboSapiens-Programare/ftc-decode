@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
-import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -20,18 +20,25 @@ public class Constants {
     public static FollowerConstants followerConstants =
             new FollowerConstants()
                     .mass(13.7)
-                    .forwardZeroPowerAcceleration(-43.5)
-                    .lateralZeroPowerAcceleration(-65.3)
+                    //                    .forwardZeroPowerAcceleration(-43.5)
+                    //                    .lateralZeroPowerAcceleration(-65.3)
                     .headingPIDFCoefficients(new PIDFCoefficients(1.6, 0.04, 0.07, 0.02))
-                    .translationalPIDFCoefficients(new PIDFCoefficients(0.16, 0.0002, 0.01, 0.0031))
-                    .secondaryTranslationalPIDFCoefficients(
-                            new PIDFCoefficients(0.6, 0, 0.05, 0.04))
-                    .drivePIDFCoefficients(
-                            new FilteredPIDFCoefficients(0.006, 0.0008, 0.0002, 0.6, 0.05))
-                    .secondaryDrivePIDFCoefficients(
-                            new FilteredPIDFCoefficients(0.02, 0.005, 0.009, 0.1, 0.04))
-                    .useSecondaryTranslationalPIDF(true)
-                    .useSecondaryDrivePIDF(true);
+                    //                    .translationalPIDFCoefficients(new PIDFCoefficients(0.16,
+                    // 0.0002, 0.01, 0.0031))
+                    //                    .secondaryTranslationalPIDFCoefficients(
+                    //                            new PIDFCoefficients(0.6, 0, 0.05, 0.04))
+                    //                    .drivePIDFCoefficients(
+                    //                            new FilteredPIDFCoefficients(0.006, 0.0008,
+                    // 0.0002, 0.6, 0.05))
+                    //                    .secondaryDrivePIDFCoefficients(
+                    //                            new FilteredPIDFCoefficients(0.02, 0.005, 0.009,
+                    // 0.1, 0.04))
+                    //                    .useSecondaryTranslationalPIDF(true)
+                    //                    .useSecondaryDrivePIDF(true);
+                    .centripetalScaling(0)
+                    .predictiveBrakingCoefficients(
+                            new PredictiveBrakingCoefficients(
+                                    0.05, 0.09069001943296531, 0.0022904119894404116));
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {

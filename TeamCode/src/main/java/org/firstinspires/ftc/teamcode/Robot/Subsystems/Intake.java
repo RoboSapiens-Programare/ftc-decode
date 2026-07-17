@@ -96,6 +96,11 @@ public class Intake extends Subsystem {
         }
     }
 
+    public void reverse() {
+        rollerOne.setPower(-uV.rollerOneP / 2);
+        rollerTwo.setPower(uV.rollerTwoP / 3);
+    }
+
     public void spitBalls() {
         rollerOne.setPower(-uV.rollerOneP);
         rollerTwo.setPower(-uV.rollerTwoP);
