@@ -59,22 +59,22 @@ public class AutoBlueClose extends OpMode {
     private final ElapsedTime gateTimer = new ElapsedTime();
 
     private final Pose[] LEAVE_POINTS = {
-        // inside close shoot zone
-        new Pose(40.000, 130.000, Math.toRadians(180)),
-        new Pose(59.000, 105.000, Math.toRadians(180)),
-        new Pose(60.000, 130.000, Math.toRadians(180)),
+            // inside close shoot zone
+            new Pose(40.000, 130.000, Math.toRadians(180)),
+            new Pose(59.000, 105.000, Math.toRadians(180)),
+            new Pose(60.000, 130.000, Math.toRadians(180)),
 
-        // mid field
-        new Pose(20.000, 95.000, Math.toRadians(180)),
-        new Pose(20.000, 70.000, Math.toRadians(180)),
-        new Pose(35.000, 75.000, Math.toRadians(180)),
+            // mid field
+            new Pose(20.000, 95.000, Math.toRadians(180)),
+            new Pose(20.000, 70.000, Math.toRadians(180)),
+            new Pose(35.000, 75.000, Math.toRadians(180)),
 
-        // far field
-        new Pose(48.000, 72.000, Math.toRadians(180)),
-        new Pose(25.000, 45.000, Math.toRadians(180)),
-        new Pose(53.000, 35.000, Math.toRadians(180)),
-        new Pose(35.000, 15.000, Math.toRadians(180)),
-        new Pose(52.000, 22.000, Math.toRadians(180)),
+            // far field
+            new Pose(48.000, 72.000, Math.toRadians(180)),
+            new Pose(25.000, 45.000, Math.toRadians(180)),
+            new Pose(53.000, 35.000, Math.toRadians(180)),
+            new Pose(35.000, 15.000, Math.toRadians(180)),
+            new Pose(52.000, 22.000, Math.toRadians(180)),
     };
 
     @Override
@@ -87,7 +87,7 @@ public class AutoBlueClose extends OpMode {
 
         // Determine starting heading: prefer geometric heading when a path exists, otherwise fall
         // back to explicit startPoint values
-        Robot.follower.setStartingPose(new Pose(29.000, 130.000, Math.toRadians(90)));
+        Robot.follower.setStartingPose(new Pose(29.000, 126.000, Math.toRadians(90)));
 
         pathTimer = new ElapsedTime();
         paths = new Paths(Robot.follower); // Build paths
@@ -144,7 +144,8 @@ public class AutoBlueClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(29.000, 130.000), new Pose(54.850, 84.000)))
+                                            new Pose(29.000, 126.000),
+                                            new Pose(54.850, 84.000)))
                             .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
                             .build();
 
@@ -152,7 +153,8 @@ public class AutoBlueClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(54.850, 84.000), new Pose(18.000, 80.000)))
+                                            new Pose(54.850, 84.000),
+                                            new Pose(15.000, 74.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -160,7 +162,8 @@ public class AutoBlueClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(18.000, 80.000), new Pose(56.850, 88.000)))
+                                            new Pose(15.000, 74.000),
+                                            new Pose(56.850, 88.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -170,7 +173,7 @@ public class AutoBlueClose extends OpMode {
                                     new BezierCurve(
                                             new Pose(54.850, 84.000),
                                             new Pose(54.850, 57.519),
-                                            new Pose(12.000, 58.000)))
+                                            new Pose(12.000, 52.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
 
@@ -178,11 +181,13 @@ public class AutoBlueClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(12.000, 58.000), new Pose(26.000, 58.000)))
+                                            new Pose(12.000, 52.000),
+                                            new Pose(32.000, 58.000)))
                             .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
                             .addPath(
                                     new BezierLine(
-                                            new Pose(26.000, 58.000), new Pose(12.000, 69.000)))
+                                            new Pose(32.000, 58.000),
+                                            new Pose(16.000, 69.000)))
                             .setConstantHeadingInterpolation(Math.toRadians(270))
                             .build();
 
@@ -190,36 +195,32 @@ public class AutoBlueClose extends OpMode {
                     follower.pathBuilder()
                             .addPath(
                                     new BezierLine(
-                                            new Pose(12.000, 69.000), new Pose(57.850, 88.000)))
+                                            new Pose(16.000, 69.000),
+                                            new Pose(57.850, 88.000)))
                             .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
                             .build();
 
-            openGate =
-                    follower.pathBuilder()
-                            .addPath(
-                                    new BezierCurve(
-                                            new Pose(55.850, 84.000),
-                                            new Pose(56, 60),
-                                            new Pose(19.5, 64)))
-                            .setConstantHeadingInterpolation(Math.toRadians(180))
-                            .build();
 
             grabGate =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(19.5, 64), new Pose(15, 58), new Pose(13, 56)))
-                            .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
+                                            new Pose(55.850, 84.000),
+                                            new Pose(24, 50),
+                                            new Pose(7.185096, 54.227391)))
+                            .setLinearHeadingInterpolation(
+                                    Math.toRadians(180), 2.498739)
                             .build();
 
             shootGate =
                     follower.pathBuilder()
                             .addPath(
                                     new BezierCurve(
-                                            new Pose(13, 56),
+                                            new Pose(7.185096, 54.227391),
                                             new Pose(30, 45),
                                             new Pose(57.850, 88.000)))
-                            .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
+                            .setLinearHeadingInterpolation(
+                                    2.498739, Math.toRadians(180))
                             .build();
         }
     }
@@ -282,7 +283,7 @@ public class AutoBlueClose extends OpMode {
 
                 if (robot.intake.isFull()
                         || (intakeTimeout.milliseconds() > uV.INTAKE_TIMEOUT_MS
-                                && intakeTimeoutReset)) {
+                        && intakeTimeoutReset)) {
                     intakeState = IntakeStates.COMPLETED;
                     intakeTimeoutReset = false;
                 }
@@ -401,22 +402,12 @@ public class AutoBlueClose extends OpMode {
                 autoShoot();
 
                 if (shootState == ShootStates.COMPLETED) {
-                    setPathState(11);
+                    setPathState(13);
                     gateTimer.reset();
                 }
                 break;
 
-            case 11: // BEGIN GATE CYCLING
-                if (!Robot.follower.isBusy()) {
-                    Robot.follower.followPath(paths.openGate, true);
-                    setPathState(12);
-                }
-                break;
-            case 12:
-                if (!Robot.follower.isBusy()) {
-                    setPathState(13);
-                }
-                break;
+            // GATE CYCLES
             case 13:
                 ++gateCycleCounter;
                 Robot.follower.followPath(paths.grabGate, true);
@@ -425,22 +416,31 @@ public class AutoBlueClose extends OpMode {
             case 14:
                 autoIntake();
 
-                if (intakeState == IntakeStates.COMPLETED) {
+                if (!Robot.follower.isBusy() || Robot.follower.isRobotStuck()) {
+                    gateTimer.reset();
                     setPathState(15);
                 }
                 break;
             case 15:
-                Robot.follower.followPath(paths.shootGate, true);
-                setPathState(16);
+                autoIntake();
+
+                if (intakeState == IntakeStates.COMPLETED && gateTimer.milliseconds() > uV.GATE_PICKUP_WAIT) {
+                   setPathState(16);
+                }
                 break;
             case 16:
+                Robot.follower.followPath(paths.shootGate, true);
+                setPathState(17);
+                break;
+            case 17:
                 autoShoot();
                 if (shootState == ShootStates.COMPLETED) {
                     if (gateCycleCounter >= MAX_GATE_CYCLES) setPathState(17);
-                    else setPathState(11);
+                    else setPathState(13);
                 }
                 break;
-            case 17:
+
+            case 200:
                 requestOpModeStop();
                 pathState = -1;
                 break;

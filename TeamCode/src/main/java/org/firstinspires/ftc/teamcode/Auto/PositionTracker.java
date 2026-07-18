@@ -28,7 +28,7 @@ public class PositionTracker extends OpMode {
 
         // Determine starting heading: prefer geometric heading when a path exists, otherwise fall
         // back to explicit startPoint values
-        Robot.follower.setStartingPose(new Pose(84, -115, -Math.PI / 2 - 0.601));
+        Robot.follower.setStartingPose(new Pose(29.000, 126.000, Math.toRadians(90)));
     }
 
     @Override

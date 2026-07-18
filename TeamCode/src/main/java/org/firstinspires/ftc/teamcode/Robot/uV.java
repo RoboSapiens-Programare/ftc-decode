@@ -18,7 +18,7 @@ public class uV {
     public static double INTAKE_TIMEOUT_MS = 1800;
     public static double AUTOPARK_TIMEOUT_MS = 29_000;
     public static double STABILIZATION_TIMEOUT_MS = 100;
-    public static double GATE_PICKUP_WAIT = 350;
+    public static double GATE_PICKUP_WAIT = 3000;
     public static double MINIMUM_SHOOT_TIMEOUT_MS = 500;
 
     public static boolean NN_LOGGING_ENABLE = false;

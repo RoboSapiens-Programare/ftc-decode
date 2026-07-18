@@ -32,6 +32,7 @@ public class TeleOpul extends OpMode {
     private final ElapsedTime stateTimer = new ElapsedTime();
     private final ElapsedTime followerIdleTimer = new ElapsedTime();
     private final ElapsedTime inputTimer = new ElapsedTime();
+    private final ElapsedTime reverseTimer = new ElapsedTime();
     private double averagedFrequency = 50.0; // Seed it with an expected baseline (e.g., 50-60Hz)
 
     private int loopCount = 0;
@@ -50,8 +51,8 @@ public class TeleOpul extends OpMode {
     private final ShootAssist shootAssist = new ShootAssist();
     private boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
 
-    private static Pose human = new Pose(134.208331, -100.413674, -0.003040);
-    private static Pose gate = new Pose(129.351124, 76.794895, -0.019427);
+    private Pose human = new Pose(134.208331, -100.413674, -0.003040);
+    private Pose gate = new Pose(129.351124, 76.794895, -0.019427);
 
     @Override
     public void init() {
@@ -91,7 +92,7 @@ public class TeleOpul extends OpMode {
         Robot.follower.setStartingPose(Robot.transitionPose);
         Robot.follower.startTeleOpDrive(true);
 
-        if (Robot.alliance == Robot.Alliance.BLUE) {
+        if (Robot.alliance == Robot.Alliance.RED) {
             human = human.mirror();
             gate = gate.mirror();
         }
@@ -160,10 +161,23 @@ public class TeleOpul extends OpMode {
         }
     }
 
+    private boolean lastLeftBumper = false;
+
     // State Handlers
     private void handleIntake() {
         robot.shooter.shooting = false;
         robot.shooter.closeGate();
+
+        if (gamepad1.left_bumper && !lastLeftBumper) {
+            reverseTimer.reset();
+            robot.intake.reverse();
+        }
+
+        lastLeftBumper = gamepad1.left_bumper;
+
+        if (reverseTimer.milliseconds() < 50) {
+            return;
+        }
 
         if (gamepad1.right_trigger > TRIGGER_THRESHOLD
                 && !(gamepad1.left_trigger > TRIGGER_THRESHOLD)) {
@@ -287,12 +301,12 @@ public class TeleOpul extends OpMode {
 
 
     private void handleOverrideButtons() {
-        if (gamepad1.right_bumper && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+        if (gamepad1.dpad_right && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
             robot.shooter.goToAngle(0);
             inputTimer.reset();
         }
 
-        if (gamepad1.left_bumper && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
+        if (gamepad1.dpad_left && inputTimer.milliseconds() > INPUT_COOLDOWN_LONG_MS) {
             robot.shooter.stopOverride();
             inputTimer.reset();
         }
@@ -415,6 +429,13 @@ public class TeleOpul extends OpMode {
         dashboardTelemetry.addData("X", Robot.follower.getPose().getX());
         dashboardTelemetry.addData("Y", Robot.follower.getPose().getY());
         dashboardTelemetry.addData("Heading", Robot.follower.getPose().getHeading());
+        dashboardTelemetry.addData(
+                "Pose",
+                String.format(
+                        "new Pose(%f, %f, %f)",
+                        Robot.follower.getPose().getX(),
+                        Robot.follower.getPose().getY(),
+                        Robot.follower.getPose().getHeading()));
 
         dashboardTelemetry.addData("Total Balls Scored Captured", logger.getTotalBallsScored());
         dashboardTelemetry.update();

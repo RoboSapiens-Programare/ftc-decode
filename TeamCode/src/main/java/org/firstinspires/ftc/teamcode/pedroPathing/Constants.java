@@ -38,9 +38,8 @@ public class Constants {
                     .centripetalScaling(0)
                     .predictiveBrakingCoefficients(
                             new PredictiveBrakingCoefficients(
-                                    0.05, 0.09069001943296531, 0.0022904119894404116));
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
-
+                                    0.2, 0.09069001943296531, 0.0022904119894404116));
+    public static PathConstraints pathConstraints = new PathConstraints(0.98, 2, 1, Math.toRadians(5), 100, 1.25, 10, 1);
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)

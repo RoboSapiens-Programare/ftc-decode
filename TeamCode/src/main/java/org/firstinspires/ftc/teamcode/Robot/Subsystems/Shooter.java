@@ -158,7 +158,7 @@ public class Shooter extends Subsystem {
                 -0.0006780758 * Math.pow(distance, 3)
                         + 0.1700239691 * Math.pow(distance, 2)
                         + -5.9676194360 * distance
-                        + 1335.8793678170;
+                        + 1345.8793678170;
 
         velocity += velocityOffset;
 

@@ -121,7 +121,7 @@ public class PulapreAutoBlue extends OpMode {
     public static class Paths {
 
         public final Pose startPose = new Pose(84, -115, -Math.PI / 2 - 0.601).mirror();
-        public final Pose shootPose = new Pose(86.575572, -82.335349, -Math.toRadians(36)).mirror();
+        public final Pose shootPose = new Pose(90, -82.335349, -Math.toRadians(36)).mirror();
 
         public final Pose grabFirstPose = new Pose(102.774101, -82.335349, 0.012239).mirror();
         public final Pose grabFirstEndPose = new Pose(127.774101, -82.335349, 0.012239).mirror();
@@ -134,7 +134,7 @@ public class PulapreAutoBlue extends OpMode {
 
         public final Pose grabHumanPose = new Pose(137.069169, -136.480140, -1.542359).mirror();
         public final Pose shootPose2 = new Pose(100.189295, -96.559203, -Math.PI / 2).mirror();
-        public final Pose leavePose = new Pose(115.189295, -96.559203, -Math.PI / 2);
+        public final Pose leavePose = new Pose(125.189295, -96.559203, -Math.PI / 2).mirror();
 
         public PathChain shootPreload;
         public PathChain grabFirst;
@@ -415,10 +415,12 @@ public class PulapreAutoBlue extends OpMode {
                 Robot.follower.followPath(paths.shootSecond, true);
                 setPathState(9);
                 break;
+
+            // HUMAN
             case 9:
-                if (pathTimer.milliseconds() > 950 && pathTimer.milliseconds() < 1010) {
+                if (pathTimer.milliseconds() > 400 && pathTimer.milliseconds() < 450) {
                     robot.intake.reverse();
-                } else if (pathTimer.milliseconds() > 1010 && pathTimer.milliseconds() < 1060) {
+                } else if (pathTimer.milliseconds() > 450 && pathTimer.milliseconds() < 500) {
                     robot.intake.rest();
                 }
 
@@ -428,7 +430,6 @@ public class PulapreAutoBlue extends OpMode {
                 }
                 break;
 
-            // HUMAN
             case 14:
                 if (++cycleCounter >= MAX_CYCLES) {
                     setPathState(17);
@@ -454,7 +455,9 @@ public class PulapreAutoBlue extends OpMode {
 
             case 17:
                 Robot.follower.followPath(paths.leave, true);
+                setPathState(18);
                 break;
+                
             case 18:
                 if (!Robot.follower.isBusy()) {
                     setPathState(200);
